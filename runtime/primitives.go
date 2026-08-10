@@ -209,11 +209,13 @@ func MergeElicitResult(args json.RawMessage, content map[string]any, fields []El
 	return out
 }
 
-// RunElicitation performs an elicitation request on the server session,
-// building a JSON schema from the given fields. Returns the result and any
-// error. If the user declines (action != "accept"), the caller should handle
-// accordingly.
-func RunElicitation(ctx context.Context, session *mcp.ServerSession, message string, fields []ElicitField) (*mcp.ElicitResult, error) {
+// ElicitRequestID is the input-request ID under which generated tool handlers
+// attach their confirmation elicitation to a CallToolResult, and under which
+// the client echoes the answer back in CallToolParams.InputResponses.
+const ElicitRequestID = "elicitation"
+
+// ElicitSchema builds the JSON Schema an elicitation form is rendered from.
+func ElicitSchema(fields []ElicitField) *jsonschema.Schema {
 	props := make(map[string]*jsonschema.Schema, len(fields))
 	var required []string
 	for _, f := range fields {
@@ -228,12 +230,46 @@ func RunElicitation(ctx context.Context, session *mcp.ServerSession, message str
 			required = append(required, f.Name)
 		}
 	}
-	return session.Elicit(ctx, &mcp.ElicitParams{
-		Message: message,
-		RequestedSchema: &jsonschema.Schema{
-			Type:       "object",
-			Properties: props,
-			Required:   required,
+	return &jsonschema.Schema{
+		Type:       "object",
+		Properties: props,
+		Required:   required,
+	}
+}
+
+// RunElicitation advances the multi round-trip elicitation handshake
+// (SEP-2322) for one tool call, building a form from the given fields.
+//
+// Protocol version 2026-07-28 forbids a server from issuing an elicitation
+// request while it is serving a request. A handler instead returns a result
+// carrying an InputRequests map; the client fulfills it and retries the same
+// tool call with the answers in Params.InputResponses, so the handler runs
+// twice. Clients on older protocol versions never see this: the go-sdk's
+// server middleware performs the round trip on their behalf and reinvokes the
+// handler, so a handler only needs the one code path.
+//
+// When err is nil, exactly one of the first two results is non-nil:
+//   - result: the client answered. Inspect result.Action; anything other than
+//     "accept" means the user declined.
+//   - pending: no answer yet. Return it from the handler unchanged to ask the
+//     client for input.
+func RunElicitation(req *mcp.CallToolRequest, message string, fields []ElicitField) (result *mcp.ElicitResult, pending *mcp.CallToolResult, err error) {
+	if req == nil || req.Params == nil {
+		return nil, nil, fmt.Errorf("elicitation %q: no tool call request", message)
+	}
+	if resp, ok := req.Params.InputResponses[ElicitRequestID]; ok {
+		res, ok := resp.(*mcp.ElicitResult)
+		if !ok {
+			return nil, nil, fmt.Errorf("elicitation %q: input response is %T, want *mcp.ElicitResult", message, resp)
+		}
+		return res, nil, nil
+	}
+	return nil, &mcp.CallToolResult{
+		InputRequests: mcp.InputRequestMap{
+			ElicitRequestID: &mcp.ElicitParams{
+				Message:         message,
+				RequestedSchema: ElicitSchema(fields),
+			},
 		},
-	})
+	}, nil
 }
