@@ -113,17 +113,33 @@ if err != nil {
 
 ## Elicitation
 
-Run confirmation dialogs before tool execution:
+Run confirmation dialogs before tool execution. Elicitation is a multi
+round-trip request ([SEP-2322]): protocol version `2026-07-28` forbids the
+server from asking the client anything while it is serving a request, so the
+first pass returns a pending result carrying the question and the client
+retries the tool call with the answer. The handler body therefore runs twice.
 
 ```go
 fields := []runtime.ElicitField{
     {Name: "confirm", Description: "Confirm action", Required: true, Type: "string", EnumValues: []string{"yes", "no"}},
 }
-result, err := runtime.RunElicitation(ctx, session, "Are you sure?", fields)
-if err != nil || result.Action != "accept" {
+result, pending, err := runtime.RunElicitation(req, "Are you sure?", fields)
+if err != nil {
     return nil, err
 }
+if pending != nil {
+    return pending, nil // ask the client; it will retry this call with the answer
+}
+if result.Action != "accept" {
+    return runtime.TextResult("Action cancelled by user."), nil
+}
 ```
+
+Clients that negotiated an older protocol version still work unchanged — the
+go-sdk's server middleware performs the round trip on their behalf and
+reinvokes the handler.
+
+[SEP-2322]: https://modelcontextprotocol.io/seps/2322-multi-round-trip-requests
 
 ## Links
 
