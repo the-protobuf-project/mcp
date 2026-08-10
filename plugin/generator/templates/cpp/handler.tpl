@@ -56,7 +56,7 @@ impl ServerHandler for {{ $svcName }}McpHandler {
         Ok(ListToolsResult::with_all_items(Self::tools()))
     }
 
-    async fn call_tool(&self, request: CallToolRequestParams, _: RequestContext<RoleServer>) -> std::result::Result<CallToolResult, McpError> {
+    async fn call_tool(&self, request: CallToolRequestParams, _: RequestContext<RoleServer>) -> std::result::Result<CallToolResponse, McpError> {
         let args = request.arguments.map_or_else(|| Value::Object(Default::default()), Value::Object);
         let _args_json = serde_json::to_string(&args)
             .map_err(|e| McpError::internal_error(format!("serialize args: {e}"), None))?;
@@ -64,7 +64,7 @@ impl ServerHandler for {{ $svcName }}McpHandler {
         {{- range $methName, $info := $methods }}
             "{{ $info.ToolName }}" => {
                 let result_json = self.inner.{{ $info.CppMethodName }}(&_args_json);
-                Ok(CallToolResult::success(vec![ContentBlock::text(result_json)]))
+                Ok(CallToolResult::success(vec![ContentBlock::text(result_json)]).into())
             }
         {{- end }}
             _ => Err(McpError::internal_error(format!("unknown tool: {}", request.name), None)),

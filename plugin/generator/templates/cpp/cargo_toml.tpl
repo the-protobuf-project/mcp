@@ -16,7 +16,7 @@ path = "lib.rs"
 [dependencies]
 axum = "0.8"
 cxx = "1"
-rmcp = { version = "2.1", features = ["server", "transport-io", "transport-streamable-http-server"] }
+rmcp = { version = "3.1", features = ["server", "transport-io", "transport-streamable-http-server"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 
