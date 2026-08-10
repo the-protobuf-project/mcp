@@ -199,7 +199,7 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
         Ok(ListToolsResult::with_all_items(Self::tools()))
     }
 
-    async fn call_tool(&self, request: CallToolRequestParams, context: RequestContext<RoleServer>) -> std::result::Result<CallToolResult, McpError> {
+    async fn call_tool(&self, request: CallToolRequestParams, context: RequestContext<RoleServer>) -> std::result::Result<CallToolResponse, McpError> {
         let args = request.arguments.map_or_else(|| Value::Object(Default::default()), Value::Object);
         match request.name.as_ref() {
         {{- range $methName, $info := $methods }}
@@ -224,7 +224,7 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
                     };
                     match context.peer.create_elicitation(params).await {
                         Ok(result) if result.action != ElicitationAction::Accept => {
-                            return Ok(CallToolResult::success(vec![ContentBlock::text("Action cancelled by user.")]));
+                            return Ok(CallToolResult::success(vec![ContentBlock::text("Action cancelled by user.")]).into());
                         }
                         _ => {} // proceed (including errors — graceful degradation)
                     }
@@ -233,7 +233,7 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
                 let result = self.inner.{{ $info.RsMethodName }}(args).await?;
                 let text = serde_json::to_string(&result)
                     .map_err(|e| McpError::internal_error(format!("serialize response: {e}"), None))?;
-                Ok(CallToolResult::success(vec![ContentBlock::text(text)]))
+                Ok(CallToolResult::success(vec![ContentBlock::text(text)]).into())
             }
         {{- end }}
         {{- end }}
@@ -246,7 +246,7 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
         Ok(ListPromptsResult::with_all_items(Self::prompts()))
     }
 
-    async fn get_prompt(&self, request: GetPromptRequestParams, _: RequestContext<RoleServer>) -> std::result::Result<GetPromptResult, McpError> {
+    async fn get_prompt(&self, request: GetPromptRequestParams, _: RequestContext<RoleServer>) -> std::result::Result<GetPromptResponse, McpError> {
         for p in Self::prompts() {
             if p.name == request.name {
                 let arg_str: String = request.arguments.as_ref()
@@ -258,7 +258,7 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
                 if let Some(ref d) = p.description {
                     result = result.with_description(d.clone());
                 }
-                return Ok(result);
+                return Ok(result.into());
             }
         }
         Err(McpError::invalid_params(format!("unknown prompt: {}", request.name), None))
@@ -296,17 +296,17 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
         Ok(ListResourceTemplatesResult::with_all_items(Self::resource_templates()))
     }
 
-    async fn read_resource(&self, request: ReadResourceRequestParams, _: RequestContext<RoleServer>) -> std::result::Result<ReadResourceResult, McpError> {
+    async fn read_resource(&self, request: ReadResourceRequestParams, _: RequestContext<RoleServer>) -> std::result::Result<ReadResourceResponse, McpError> {
 {{- if and $svcOpts $svcOpts.App }}
         let app_uri = app_resource_uri("{{ $svcName }}");
         if request.uri == app_uri {
             let html = default_app_html("{{ $svcOpts.App.Name | rsEscape }}", "{{ $svcOpts.App.Version }}", "{{ $svcOpts.App.Description | rsEscape }}");
             return Ok(ReadResourceResult::new(vec![
                 ResourceContents::text(html, request.uri).with_mime_type("text/html")
-            ]));
+            ]).into());
         }
 {{- end }}
-        Ok(ReadResourceResult::new(vec![ResourceContents::text("{}", request.uri)]))
+        Ok(ReadResourceResult::new(vec![ResourceContents::text("{}", request.uri)]).into())
     }
 {{- end }}
 }
