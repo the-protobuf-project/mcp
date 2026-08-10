@@ -37,9 +37,21 @@
 //
 // # Elicitation
 //
-// Run confirmation dialogs before tool execution:
+// Run confirmation dialogs before tool execution. Elicitation is a multi
+// round-trip request (SEP-2322): the first call returns a pending result that
+// asks the client for input, and the client retries the tool call with the
+// answer, so the handler body runs twice.
 //
-//	result, err := runtime.RunElicitation(ctx, session, "Are you sure?", []runtime.ElicitField{
+//	result, pending, err := runtime.RunElicitation(req, "Are you sure?", []runtime.ElicitField{
 //	    {Name: "confirm", Required: true, Type: "string", EnumValues: []string{"yes", "no"}},
 //	})
+//	if err != nil {
+//	    return nil, err
+//	}
+//	if pending != nil {
+//	    return pending, nil
+//	}
+//	if result.Action != "accept" {
+//	    return runtime.TextResult("Action cancelled by user."), nil
+//	}
 package runtime

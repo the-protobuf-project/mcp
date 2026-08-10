@@ -105,9 +105,16 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 					return nil, hookErr
 				}
 			}
-			elicitResult, elicitErr := runtime.RunElicitation(ctx, req.Session, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+			// Elicitation is a multi round-trip request (SEP-2322): the first
+			// pass returns a pending result asking the client for input, and
+			// the client retries the call with the answer, so this handler
+			// body runs twice.
+			elicitResult, elicitPending, elicitErr := runtime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
+			}
+			if elicitPending != nil {
+				return elicitPending, nil
 			}
 			if elicitResult.Action != "accept" {
 				return runtime.TextResult("Action cancelled by user."), nil
@@ -184,9 +191,16 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 					return nil, hookErr
 				}
 			}
-			elicitResult, elicitErr := runtime.RunElicitation(ctx, req.Session, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+			// Elicitation is a multi round-trip request (SEP-2322): the first
+			// pass returns a pending result asking the client for input, and
+			// the client retries the call with the answer, so this handler
+			// body runs twice.
+			elicitResult, elicitPending, elicitErr := runtime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
+			}
+			if elicitPending != nil {
+				return elicitPending, nil
 			}
 			if elicitResult.Action != "accept" {
 				return runtime.TextResult("Action cancelled by user."), nil
@@ -358,9 +372,16 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 					return nil, hookErr
 				}
 			}
-			elicitResult, elicitErr := runtime.RunElicitation(ctx, req.Session, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+			// Elicitation is a multi round-trip request (SEP-2322): the first
+			// pass returns a pending result asking the client for input, and
+			// the client retries the call with the answer, so this handler
+			// body runs twice.
+			elicitResult, elicitPending, elicitErr := runtime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
+			}
+			if elicitPending != nil {
+				return elicitPending, nil
 			}
 			if elicitResult.Action != "accept" {
 				return runtime.TextResult("Action cancelled by user."), nil
