@@ -57,7 +57,7 @@ type Target struct {
 func (Target) Name() string { return "mcp" }
 
 // Languages lists the languages this target can emit.
-func (Target) Languages() []string { return []string{LangGo, LangPython, LangRust, LangCpp} }
+func (Target) Languages() []string { return []string{LangGo, LangRust, LangCpp} }
 
 // Generate renders m for a single language.
 func (t Target) Generate(ctx factory.Ctx, m *Model, lang string) error {
@@ -68,10 +68,6 @@ func (t Target) Generate(ctx factory.Ctx, m *Model, lang string) error {
 	case LangGo:
 		for _, f := range m.Files {
 			NewFileGenerator(f, ctx.Plugin).Generate(t.PackageSuffix)
-		}
-	case LangPython:
-		for _, f := range m.Files {
-			NewPythonFileGenerator(f, ctx.Plugin).Generate()
 		}
 	case LangRust:
 		for _, f := range m.Files {

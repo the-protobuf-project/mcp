@@ -172,7 +172,7 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 			if svcOpt == nil {
 				svcOpt = &MCPServiceOpts{}
 			}
-			svcOpt.Resources = apiResources
+			svcOpt.Resources = mergeResources(svcOpt.Resources, apiResources)
 		}
 		serviceOpts[svcName] = svcOpt
 	}

@@ -7,12 +7,13 @@ go_library(
         "factory.go",
         "generator.go",
         "helpers.go",
+        "options_compat.go",
+        "options_enums.go",
         "options_extract.go",
         "options_google.go",
         "options_schema.go",
         "options_types.go",
         "progress_stream.go",
-        "python.go",
         "rust.go",
         "schema.go",
         "schema_wkt.go",
@@ -23,12 +24,13 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//plugin/generator/templates",
-        "@build_buf_gen_go_the_protobuf_project_mcp_protocolbuffers_go//mcp/protobuf",
+        "//protobuf/mcppb",
         "@build_buf_gen_go_bufbuild_protovalidate_protocolbuffers_go//buf/validate",
         "@com_github_the_protobuf_project_protokit//factory",
         "@com_github_the_protobuf_project_protokit//naming",
         "@org_golang_google_genproto_googleapis_api//annotations",
         "@org_golang_google_protobuf//compiler/protogen",
+        "@org_golang_google_protobuf//encoding/protowire",
         "@org_golang_google_protobuf//proto",
         "@org_golang_google_protobuf//reflect/protoreflect",
         "@org_golang_google_protobuf//types/pluginpb",
@@ -37,10 +39,15 @@ go_library(
 
 go_test(
     name = "generator_test",
-    srcs = ["factory_test.go"],
+    srcs = [
+        "factory_test.go",
+        "options_enums_test.go",
+    ],
     embed = [":generator"],
     deps = [
+        "//protobuf/mcppb",
         "@com_github_the_protobuf_project_protokit//factory",
         "@org_golang_google_protobuf//compiler/protogen",
+        "@org_golang_google_protobuf//reflect/protoreflect",
     ],
 )

@@ -1,0 +1,16 @@
+# Generates Go types for the MCP annotations into protobuf/mcppb, so the plugin
+# reads options from this repository's own schema rather than the last published
+# BSR snapshot. Without this the plugin can only see fields that already shipped,
+# and a local .proto edit stays invisible to `go build` until after `buf push`.
+#
+# This output is for the *plugin* only. Generated user code and runtime-go still
+# consume the published module (see examples/buf.gen.yaml), so nothing here
+# changes what downstream consumers import.
+version: v2
+inputs:
+  - directory: .
+plugins:
+  - local: protoc-gen-go
+    out: ..
+    opt:
+      - module=github.com/the-protobuf-project/mcp

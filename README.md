@@ -4,8 +4,8 @@
 <p align="center">
   <strong>One schema, every surface.</strong> mcp is a spec-first
   <code>protoc</code> plugin that generates fully compliant Model Context Protocol
-  servers straight from your <code>.proto</code> files — for Go, Python, Rust, and
-  C++ — so the definitions that already describe your APIs expose them to AI clients
+  servers straight from your <code>.proto</code> files — for Go, Rust, and C++ —
+  so the definitions that already describe your APIs expose them to AI clients
   too.
 </p>
 
@@ -21,7 +21,6 @@
   <a href="https://pkg.go.dev/github.com/the-protobuf-project/mcp"><img src="https://pkg.go.dev/badge/github.com/the-protobuf-project/mcp.svg" alt="Go Reference"></a>
   <a href="https://buf.build/the-protobuf-project/mcp"><img src="https://img.shields.io/badge/BSR-the--protobuf--project%2Fmcp-blue" alt="Buf Schema Registry"></a>
   <img src="https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white" alt="Go">
-  <img src="https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Rust-1.93%2B-000000?logo=rust&logoColor=white" alt="Rust">
   <img src="https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white" alt="C++">
 </p>
@@ -46,8 +45,8 @@ version `2026-07-28` and delegates to your service implementation — in-process
 or forwarded to a remote gRPC server. Your API stays strongly typed, and the
 proto remains the single source of truth.
 
-Generated code builds on the official MCP SDKs — Go `go-sdk` v1.7+, Python `mcp`
-1.27+, and Rust `rmcp` 3.1+ (which also backs the C++ bridge).
+Generated code builds on the official MCP SDKs — Go `go-sdk` v1.7+ and Rust
+`rmcp` 3.1+ (which also backs the C++ bridge).
 
 This repository ships the plugin and the annotation `.proto` files. The Go
 runtime the generated code links against lives in
@@ -57,7 +56,7 @@ Open-sourced by **The Protobuf Project**.
 
 ## Features
 
-- **Multi-language** — Generate MCP server code for Go, Python, Rust, and C++ from a single `.proto` file
+- **Multi-language** — Generate MCP server code for Go, Rust, and C++ from a single `.proto` file
 - **Tools** — Every unary RPC becomes an MCP tool with a JSON Schema derived from the protobuf request message
 - **Prompts** — Attach prompt templates to RPCs with schema-validated arguments via `(mcp.v1.prompt)`
 - **Field descriptions** — Add `(mcp.v1.field) = { description: "..." }` to message fields for schema descriptions
@@ -70,9 +69,8 @@ Open-sourced by **The Protobuf Project**.
 - **Published Protos** — Import the MCP annotations from [`buf.build/the-protobuf-project/mcp`](https://buf.build/the-protobuf-project/mcp) and generate the types in your own client
 
 | Language   | Generated File                     | Example                              |
-| ---------- | ---------------------------------- | ------------------------------------ |
+| ---------- | ---------------------------------- |
 | **Go**     | `*_service.pb.mcp.go`              | [`examples/go`](examples/go)         |
-| **Python** | `*_service_pb2_mcp.py`             | [`examples/python`](examples/python) |
 | **Rust**   | `*_service.mcp.rs`                 | [`examples/rust`](examples/rust)     |
 | **C++**    | `*_service.mcp.h/cc` + Rust bridge | [`examples/cpp`](examples/cpp)       |
 
@@ -81,15 +79,12 @@ Open-sourced by **The Protobuf Project**.
 ```mermaid
 graph LR
     Proto[".proto + MCP annotations"] -->|buf generate| GenGo["Go MCP stubs"]
-    Proto -->|buf generate| GenPy["Python MCP stubs"]
     Proto -->|buf generate| GenRs["Rust MCP stubs"]
     Proto -->|buf generate| GenCpp["C++ MCP bridge"]
     GenGo --> GoSrv["Go Server"]
-    GenPy --> PySrv["Python Server"]
     GenRs --> RsSrv["Rust Server"]
     GenCpp --> CppSrv["C++ Server"]
     GoSrv -->|stdio / SSE / streamable-http| Client["MCP Client / LLM"]
-    PySrv -->|stdio / SSE / streamable-http| Client
     RsSrv -->|stdio / SSE / streamable-http| Client
     CppSrv -->|stdio / streamable-http| Client
 ```
@@ -223,13 +218,6 @@ plugins:
     out: generated/go
     opt: [lang=go, module=example/generated/go]
 
-  # --- Python ---
-  - remote: buf.build/protocolbuffers/python
-    out: generated/python
-  - local: protoc-gen-mcp
-    out: generated/python
-    opt: [lang=python, paths=source_relative]
-
   # --- Rust ---
   - remote: buf.build/community/neoeinstein-prost
     out: generated/rust
@@ -253,10 +241,6 @@ buf generate
 # Go
 cd examples/go/stdio && go run .
 npx @modelcontextprotocol/inspector -- go run .
-
-# Python
-cd examples/python
-npx @modelcontextprotocol/inspector -- uv run python stdio/main.py
 
 # Rust
 cd examples/rust && cargo build --bin stdio
@@ -338,7 +322,7 @@ rpc Authenticate(AuthRequest) returns (AuthResponse) {
 
 The mode is inferred when unset — form if `schema` is set, URL if `url` is set.
 
-Elicitation is supported in Go, Python, and Rust with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation. The C++ generator does not emit elicitation handlers.
+Elicitation is supported in Go and Rust with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation. The C++ generator does not emit elicitation handlers.
 
 ### Field: `mcp.v1.field`
 
@@ -433,6 +417,33 @@ service TodoService {
 Set `uri` for a fixed resource, or `pattern` for a URI template — the two are a
 oneof, so exactly one applies.
 
+### Media types
+
+`mime_type` is the field that tells an MCP client how to present a resource —
+the same bytes are prose, a table, an image, or a download depending only on it:
+
+```protobuf
+resources: [
+  {uri: "gallery://docs/overview.md"   id: "overview"  mime_type: "text/markdown"},
+  {uri: "gallery://docs/report.html"   id: "report"    mime_type: "text/html"},
+  {uri: "gallery://data/downloads.csv" id: "downloads" mime_type: "text/csv"},
+  {uri: "gallery://images/logo.png"    id: "logo"      mime_type: "image/png"},
+  {uri: "gallery://docs/spec.pdf"      id: "spec"      mime_type: "application/pdf"}
+]
+```
+
+It is a **free-form IANA media type string, not an enum** — the registry is
+open-ended and grows without this schema changing, per
+[AIP-143](https://google.aip.dev/143). Any registered type works, including ones
+nothing here enumerates.
+
+The value also decides how a read returns content: `text/*` and
+`application/json` come back as text, everything else as base64-encoded bytes.
+
+[`examples/mime`](examples/mime) is a runnable gallery serving one asset per
+media type, alongside the MCP App UI resource, resource icons with light/dark
+themes, and audience/priority annotations.
+
 ## Project Structure
 
 ```
@@ -445,12 +456,11 @@ mcp/
 │   └── mcp/v1/                # MCP annotation .proto source files
 ├── plugin/
 │   ├── cmd/protoc-gen-mcp/    # Plugin binary (go install target)
-│   └── generator/             # Code generation (Go, Python, Rust, C++)
-│       └── templates/         # go.tpl, python.tpl, rust.tpl, cpp/*.tpl
+│   └── generator/             # Code generation (Go, Rust, C++)
+│       └── templates/         # go.tpl, rust.tpl, cpp/*.tpl
 ├── examples/                  # Separate Go module (replaces the root module)
 │   ├── proto/                 # TodoService + CounterService definitions
 │   ├── go/                    # Go examples (http, stdio, sse, grpc-gateway, counter)
-│   ├── python/                # Python examples (http, stdio, sse)
 │   ├── rust/                  # Rust examples (http, stdio, sse)
 │   └── cpp/                   # C++ example (Make, gRPC + MCP via Rust bridge)
 └── .github/workflows/         # CI + release pipelines
@@ -463,25 +473,25 @@ module, and the Go runtime comes from
 ## Plugin Options
 
 | Option           | Values                        | Description                                              |
-| ---------------- | ----------------------------- | -------------------------------------------------------- |
-| `lang`           | `go`, `python`, `rust`, `cpp` | Target language for generated code                       |
+| ---------------- | ----------------------------- |
+| `lang`           | `go`, `rust`, `cpp`           | Target language for generated code                       |
 | `module`         | Go module path                | Go module prefix for output path resolution              |
 | `package_suffix` | any string (Go only)          | Sub-package suffix for generated `.pb.mcp.go` files      |
-| `paths`          | `source_relative`             | Place output relative to the proto source (Python, Rust) |
+| `paths`          | `source_relative`             | Place output relative to the proto source (Rust)         |
 
 ## Generated Code
 
 For each proto service, the plugin generates:
 
-| Feature             | Go                                                  | Python                                 | Rust                              | C++                              |
-| ------------------- | --------------------------------------------------- | -------------------------------------- | --------------------------------- | -------------------------------- |
-| **Tools** (per RPC) | `s.AddTool(...)`                                    | `@server.call_tool()`                  | `ServerHandler::call_tool()`      | `TodoServiceMcpImpl` (cxx FFI)   |
-| **Prompts**         | `s.AddPrompt(...)`                                  | `@server.get_prompt()`                 | `ServerHandler::get_prompt()`     | —                                |
-| **Resources**       | `s.AddResource(...)` / `s.AddResourceTemplate(...)` | `@server.list_resources()`             | `ServerHandler::list_resources()` | —                                |
-| **Elicitation**     | `mcp.RunElicitation(...)`                           | `session.elicit(...)`                  | `peer.create_elicitation(...)`    | —                                |
-| **Serve function**  | `ServeTodoServiceMCP()`                             | `serve_todo_service_mcp()`             | `serve_todo_service_mcp()`        | `start_*_mcp_http` / `_stdio`    |
-| **gRPC forwarding** | `ForwardToTodoServiceMCPClient()`                   | `forward_to_todo_service_mcp_client()` | —                                 | In-process (C++ gRPC server)     |
-| **Interface/trait** | `TodoServiceMCPServer`                              | `TodoServiceMCPServer` (Protocol)      | `TodoServiceMcpServer` (trait)    | `TodoServiceMcpImpl` (C++ class) |
+| Feature             | Go                                                  | Rust                              | C++                              |
+| ------------------- | --------------------------------------------------- | --------------------------------- | -------------------------------- |
+| **Tools** (per RPC) | `s.AddTool(...)`                                    | `ServerHandler::call_tool()`      | `TodoServiceMcpImpl` (cxx FFI)   |
+| **Prompts**         | `s.AddPrompt(...)`                                  | `ServerHandler::get_prompt()`     | —                                |
+| **Resources**       | `s.AddResource(...)` / `s.AddResourceTemplate(...)` | `ServerHandler::list_resources()` | —                                |
+| **Elicitation**     | `mcp.RunElicitation(...)`                           | `peer.create_elicitation(...)`    | —                                |
+| **Serve function**  | `ServeTodoServiceMCP()`                             | `serve_todo_service_mcp()`        | `start_*_mcp_http` / `_stdio`    |
+| **gRPC forwarding** | `ForwardToTodoServiceMCPClient()`                   | —                                 | In-process (C++ gRPC server)     |
+| **Interface/trait** | `TodoServiceMCPServer`                              | `TodoServiceMcpServer` (trait)    | `TodoServiceMcpImpl` (C++ class) |
 
 ### JSON Schema derivation
 
@@ -499,7 +509,7 @@ The tool's `inputSchema` is derived from the protobuf request message:
 ### Supported transports
 
 | Transport       | Value             | Protocol                      | Use Case                            |
-| --------------- | ----------------- | ----------------------------- | ----------------------------------- |
+| --------------- | ----------------- | ----------------------------------- |
 | stdio           | `stdio`           | stdin/stdout pipes            | Local tools, IDE integrations       |
 | SSE (legacy)    | `sse`             | HTTP + Server-Sent Events     | Browser clients, legacy MCP clients |
 | Streamable HTTP | `streamable-http` | HTTP + bidirectional JSON-RPC | Production deployments, modern SDKs |
@@ -510,14 +520,13 @@ Run multiple transports concurrently with comma-separated values:
 
 ```bash
 MCP_TRANSPORT=stdio,streamable-http go run .
-MCP_TRANSPORT=stdio,streamable-http uv run python http/main.py
 MCP_TRANSPORT=stdio,streamable-http cargo run --bin http
 ```
 
 ### Environment variables
 
 | Variable        | Default     | Description                                        |
-| --------------- | ----------- | -------------------------------------------------- |
+| --------------- | ----------- |
 | `MCP_TRANSPORT` | per-example | Comma-separated: `stdio`, `sse`, `streamable-http` |
 | `MCP_HOST`      | `0.0.0.0`   | Bind address for HTTP transports                   |
 | `MCP_PORT`      | `8082`      | Listen port for HTTP transports                    |
@@ -547,14 +556,6 @@ cfg := &mcp.MCPServerConfig{
 todopbv1.ServeTodoServiceMCP(ctx, server, cfg)
 ```
 
-### Python configuration
-
-```python
-from todo.v1.todo_service_pb2_mcp import serve_todo_service_mcp
-
-serve_todo_service_mcp(impl, transport="streamable-http", host="0.0.0.0", port=8082)
-```
-
 ### Rust configuration
 
 ```rust
@@ -572,14 +573,13 @@ serve_todo_service_mcp(server, config).await?;
 The [`examples/`](examples/) directory contains **TodoService** (CRUD, prompts, elicitation) and **CounterService** (progress streaming) implementations:
 
 | Service            | Proto                 | Description                                      |
-| ------------------ | --------------------- | ------------------------------------------------ |
+| ------------------ | --------------------- |
 | **TodoService**    | `proto/todo/v1/`      | CRUD, prompts, elicitation, resources            |
 | **CounterService** | `proto/counter/v1/`   | Server-streaming with MCP progress notifications |
 
 | Language | Directory                             | Transports                     | Test                                    |
-| -------- | ------------------------------------- | ------------------------------ | --------------------------------------- |
+| -------- | ------------------------------------- | --------------------------------------- |
 | Go       | [`examples/go/`](examples/go)         | http, stdio, sse, grpc-gateway, counter | `go test ./examples/go/...`      |
-| Python   | [`examples/python/`](examples/python) | http, stdio, sse               | `uv run python -m pytest smoke_test.py` |
 | Rust     | [`examples/rust/`](examples/rust)     | http, stdio, sse               | `cargo check`                           |
 | C++      | [`examples/cpp/`](examples/cpp)       | streamable-http, stdio         | `make`                                  |
 

@@ -1,12 +1,12 @@
 package generator
 
 import (
-	mcppb "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
+	mcppb "github.com/the-protobuf-project/mcp/protobuf/mcppb"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )
 
-// ExtractServiceOptions reads the mcp.service extension from a service descriptor.
+// ExtractServiceOptions reads the mcp.v1.service extension from a service descriptor.
 func ExtractServiceOptions(svc *protogen.Service) *MCPServiceOpts {
 	opts := svc.Desc.Options()
 	if opts == nil {
@@ -17,17 +17,60 @@ func ExtractServiceOptions(svc *protogen.Service) *MCPServiceOpts {
 		return nil
 	}
 	result := &MCPServiceOpts{}
-	if ext.App != nil {
+	if app := ext.GetApp(); app != nil {
 		result.App = &MCPAppOpts{
-			Name:        ext.App.GetName(),
-			Version:     ext.App.GetVersion(),
-			Description: ext.App.GetDescription(),
+			Name:        app.GetDisplayName(),
+			Version:     app.GetVersion(),
+			Description: app.GetDescription(),
 		}
+	}
+	for _, res := range ext.GetResources() {
+		result.Resources = append(result.Resources, convertResource(res))
 	}
 	return result
 }
 
-// ExtractMethodOptions reads mcp.tool, mcp.prompt, and mcp.elicitation
+// convertResource maps a declared MCPResource onto the template view. The
+// uri/pattern oneof decides whether this registers a concrete resource or a
+// resource template.
+func convertResource(res *mcppb.MCPResource) MCPResourceOpts {
+	out := MCPResourceOpts{
+		URI:         res.GetUri(),
+		URITemplate: res.GetPattern(),
+		Name:        res.GetId(),
+		Title:       res.GetTitle(),
+		Description: res.GetDescription(),
+		MimeType:    res.GetMimeType(),
+	}
+	if res.Size != nil {
+		out.Size = res.GetSize()
+		out.HasSize = true
+	}
+	if ann := res.GetAnnotations(); ann != nil {
+		converted := &MCPAnnotationsOpts{
+			LastModified: ann.GetLastModified(),
+		}
+		for _, role := range ann.GetAudience() {
+			converted.Audience = append(converted.Audience, roleName(role))
+		}
+		if ann.Priority != nil {
+			converted.Priority = ann.GetPriority()
+			converted.HasPriority = true
+		}
+		out.Annotations = converted
+	}
+	for _, icon := range res.GetIcons() {
+		out.Icons = append(out.Icons, MCPIconOpts{
+			Src:      icon.GetSrc(),
+			MimeType: icon.GetMimeType(),
+			Sizes:    icon.GetSizes(),
+			Theme:    iconTheme(icon.GetTheme()),
+		})
+	}
+	return out
+}
+
+// ExtractMethodOptions reads mcp.v1.tool, mcp.v1.prompt, and mcp.v1.elicitation
 // extensions from a method descriptor and merges them into a single MCPMethodOpts.
 func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	opts := meth.Desc.Options()
@@ -38,31 +81,37 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	result := &MCPMethodOpts{}
 	hasAnything := false
 
-	// mcp.tool — name/description overrides
+	// mcp.v1.tool — name/description overrides and the progress declaration
 	toolExt, ok := proto.GetExtension(opts, mcppb.E_Tool).(*mcppb.MCPToolOptions)
 	if ok && toolExt != nil {
-		result.ToolName = toolExt.GetName()
+		result.ToolName = toolExt.GetId()
 		result.ToolDescription = toolExt.GetDescription()
+		result.Progress = toolExt.GetProgress()
 		hasAnything = true
 	}
 
-	// mcp.prompt — per-RPC prompt template with schema reference
+	// mcp.v1.prompt — per-RPC prompt template with schema reference
 	promptExt, ok := proto.GetExtension(opts, mcppb.E_Prompt).(*mcppb.MCPPrompt)
 	if ok && promptExt != nil {
 		result.Prompt = &MCPPromptOpts{
-			Name:        promptExt.GetName(),
+			Name:        promptExt.GetId(),
 			Description: promptExt.GetDescription(),
 			Schema:      promptExt.GetSchema(),
+			Role:        roleName(promptExt.GetRole()),
 		}
 		hasAnything = true
 	}
 
-	// mcp.elicitation — confirmation dialog with schema reference
+	// mcp.v1.elicitation — form- or URL-mode user input before the tool runs
 	elicitExt, ok := proto.GetExtension(opts, mcppb.E_Elicitation).(*mcppb.MCPElicitation)
 	if ok && elicitExt != nil {
 		result.Elicitation = &MCPElicitationOpts{
-			Message: elicitExt.GetMessage(),
-			Schema:  elicitExt.GetSchema(),
+			Message:       elicitExt.GetMessage(),
+			Schema:        elicitExt.GetSchema(),
+			Mode:          elicitationMode(elicitExt.GetMode(), elicitExt.GetUrl()),
+			URL:           elicitExt.GetUrl(),
+			ElicitationID: elicitExt.GetElicitationId(),
+			Required:      elicitExt.GetRequired(),
 		}
 		hasAnything = true
 	}

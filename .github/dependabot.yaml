@@ -38,17 +38,6 @@ updates:
       - "rust"
       - "cpp"
 
-  - package-ecosystem: "pip"
-    directory: "/examples/python"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "python"
-      - "examples"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

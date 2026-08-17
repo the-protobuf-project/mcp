@@ -55,6 +55,13 @@ fmt:
 buf-lint:
     cd protobuf && buf lint
 
+# Regenerate the Go types the plugin reads MCP options through. Run this after
+# editing anything under protobuf/mcp/v1, or the plugin keeps compiling against
+# the previous shape of the schema.
+proto-gen-go:
+    cd protobuf && buf generate
+    gofmt -w protobuf/mcppb
+
 # Run all Go tests
 test:
     go test ./...
@@ -72,10 +79,6 @@ test-cover:
     go test -coverprofile=coverage.out ./...
     go tool cover -func=coverage.out
 
-# Run Python smoke test
-test-python:
-    cd examples/python && uv run python -m pytest smoke_test.py -v
-
 # Run Rust check
 test-rust:
     cd examples/rust && cargo check --all-targets
@@ -84,8 +87,8 @@ test-rust:
 test-cpp:
     cd examples/cpp && make
 
-# Run all tests (Go + Python + Rust + C++)
-test-all: test test-python test-rust test-cpp
+# Run all tests (Go + Rust + C++)
+test-all: test test-rust test-cpp
 
 # Generate C++ proto stubs with local protoc (matches system libprotobuf)
 generate-cpp:
@@ -106,13 +109,32 @@ build-cpp-bazel:
 build-cpp:
     cd examples/cpp && make
 
-# Rebuild the plugin and regenerate all example proto code
-generate: install
-    cd examples && buf generate
+# Rebuild the plugin and regenerate all example proto code.
+#
+# buf resolves `local: protoc-gen-mcp` off PATH, where a released build — the
+# Homebrew tap installs one — shadows the one just built and silently generates
+# against the old templates. Every recipe that generates therefore puts ./bin
+# first, so what runs is always what this working tree compiles.
+generate: proto-gen-go build
+    cd examples && PATH="{{justfile_directory()}}/bin:$PATH" buf generate
     # generated Go lives in the examples module, so it is formatted from there
     cd examples && go fmt ./proto/generated/go/...
     go fmt ./plugin/...
     just generate-cpp
+    just generate-mime
+
+# Regenerate the examples/mime gallery for Go and Rust.
+#
+# Separate from `generate` because the gallery resolves the MCP annotations from
+# protobuf/ rather than the published module, so it cannot share a buf image
+# with the other examples: both schemas claim extension numbers 51000-51006.
+generate-mime: build
+    PATH="{{justfile_directory()}}/bin:$PATH" buf generate
+
+# Validate the gallery in both languages.
+check-mime: generate-mime
+    cd examples/mime && go test ./...
+    cd examples/mime/rust && cargo test
 
 # Run all checks (fmt, vet, lint, test, build)
 check: fmt-check vet lint test build
@@ -132,14 +154,6 @@ buf-push:
 # Push proto module with a specific label (e.g. a release tag)
 buf-push-label label:
     cd protobuf && buf push --label {{label}}
-
-# Build the Python proto package (sdist + wheel)
-build-pypi:
-    cd protobuf/python && python -m build
-
-# Publish Python proto library to PyPI
-publish-pypi: build-pypi
-    cd protobuf/python && twine upload dist/*
 
 # Dry-run publish Rust proto library to crates.io
 publish-crates-dry:

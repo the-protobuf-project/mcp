@@ -33,7 +33,7 @@ graph LR
 ```mermaid
 graph TB
     subgraph Clients
-        GC["gRPC Client<br/><i>grpcurl, Go, Python, …</i>"]
+        GC["gRPC Client<br/><i>grpcurl, Go, Rust, …</i>"]
         MC["MCP Client<br/><i>Claude, Cursor, …</i>"]
     end
 

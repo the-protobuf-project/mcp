@@ -76,26 +76,6 @@ jobs:
       - name: Bazel test
         run: bazel test //... --repo_env=ANDROID_HOME= --test_output=errors
 
-  python:
-    name: Check (Python)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v7
-      - name: Install & verify imports
-        working-directory: examples/python
-        run: |
-          uv sync
-          uv run python -c "
-          import sys, os
-          sys.path.insert(0, os.path.join('..', 'proto', 'generated', 'python'))
-          from todo.v1.todo_service_pb2_mcp import register_todo_service_mcp_handler
-          print('Python generated code imports OK')
-          "
-      - name: Run smoke test
-        working-directory: examples/python
-        run: uv run python -m pytest smoke_test.py -v
-
   rust:
     name: Check (Rust)
     runs-on: blacksmith-4vcpu-ubuntu-2404

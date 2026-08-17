@@ -1,0 +1,30 @@
+# Go types for the MCP annotations, generated from protobuf/mcp/v1 by
+# `just proto-gen-go` (see protobuf/buf.gen.yaml). The plugin reads options
+# through these rather than the published BSR snapshot, so a schema change is
+# visible to the build immediately instead of only after `buf push`.
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mcppb",
+    srcs = [
+        "annotations.pb.go",
+        "app.pb.go",
+        "elicitation.pb.go",
+        "enum.pb.go",
+        "field.pb.go",
+        "field_type.pb.go",
+        "mime_type.pb.go",
+        "progress.pb.go",
+        "prompt.pb.go",
+        "resource.pb.go",
+        "service_options.pb.go",
+    ],
+    importpath = "github.com/the-protobuf-project/mcp/protobuf/mcppb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//runtime/protoimpl",
+        "@org_golang_google_protobuf//types/descriptorpb",
+        "@org_golang_google_protobuf//types/known/structpb",
+    ],
+)

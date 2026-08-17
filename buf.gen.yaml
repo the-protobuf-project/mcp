@@ -1,0 +1,32 @@
+# Generates the examples/mime gallery for Go and Rust against this repository's
+# own schema (see examples/mime/README.md for why it is not in the examples
+# workspace).
+#
+# The input is the whole workspace so mcp/v1/*.proto resolves; `paths` narrows
+# what is emitted to the gallery itself. Go reaches the annotation types through
+# protobuf/mcppb and Rust's prost drops options entirely, so neither generates
+# the annotation types here.
+version: v2
+inputs:
+  - directory: .
+    paths:
+      - examples/mime/proto/gallery
+plugins:
+  # --- Go ---
+  - local: protoc-gen-go
+    out: examples/mime/gen/go
+    opt: [paths=source_relative]
+  - local: protoc-gen-go-grpc
+    out: examples/mime/gen/go
+    opt: [paths=source_relative]
+  - local: protoc-gen-mcp
+    out: examples/mime/gen/go
+    opt: [lang=go, paths=source_relative]
+  # --- Rust ---
+  - remote: buf.build/community/neoeinstein-prost
+    out: examples/mime/gen/rust
+  - remote: buf.build/community/neoeinstein-tonic
+    out: examples/mime/gen/rust
+  - local: protoc-gen-mcp
+    out: examples/mime/gen/rust
+    opt: [lang=rust, paths=source_relative]

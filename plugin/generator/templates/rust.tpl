@@ -58,7 +58,7 @@ impl<T: {{ $svcName }}McpServer> Clone for {{ $svcName }}McpHandler<T> {
 impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
     pub fn new(svc: T) -> Self { Self { inner: Arc::new(svc) } }
 
-    fn tools() -> Vec<Tool> {
+    pub fn tools() -> Vec<Tool> {
 {{- if and $svcOpts $svcOpts.App }}
         let app_uri = app_resource_uri("{{ $svcName }}");
 {{- end }}
@@ -75,7 +75,7 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         ]
     }
 
-    fn all_tools() -> Vec<Tool> {
+    pub fn all_tools() -> Vec<Tool> {
 {{- if and $svcOpts $svcOpts.App }}
         let app_uri = app_resource_uri("{{ $svcName }}");
 {{- end }}
@@ -101,7 +101,7 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
 {{- end }}
 {{- if $hasPrompts }}
 
-    fn prompts() -> Vec<Prompt> {
+    pub fn prompts() -> Vec<Prompt> {
         vec![
         {{- range $methName, $info := $methods }}
         {{- if and $info.MethodOpts $info.MethodOpts.Prompt }}
@@ -121,7 +121,7 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
 {{- end }}
 {{- if $hasPromptCompletions }}
 
-    fn completion_map() -> std::collections::HashMap<String, Vec<String>> {
+    pub fn completion_map() -> std::collections::HashMap<String, Vec<String>> {
         let mut m: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
 {{- range $methName, $info := $methods }}
 {{- if and $info.MethodOpts $info.MethodOpts.Prompt }}
@@ -141,12 +141,19 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
 {{- end }}
 {{- if $hasResources }}
 
-    fn resources() -> Vec<Resource> {
+    pub fn resources() -> Vec<Resource> {
         vec![
         {{- range $svcOpts.Resources }}
         {{- if .URI }}
             serde_json::from_value(json!({
                 "uri": "{{ .URI }}", "name": "{{ .Name }}",
+                {{- if .Title }}
+                "title": "{{ .Title | rsEscape }}",
+                {{- end }}
+                {{- if .HasSize }}
+                "size": {{ .Size }},
+                {{- end }}
+                {{- template "rsResourceExtras" . }}
                 "description": "{{ .Description | rsEscape }}", "mimeType": "{{ .MimeType }}"
             })).expect("generated resource must be valid"),
         {{- end }}
@@ -161,12 +168,16 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         ]
     }
 
-    fn resource_templates() -> Vec<ResourceTemplate> {
+    pub fn resource_templates() -> Vec<ResourceTemplate> {
         vec![
         {{- range $svcOpts.Resources }}
         {{- if .URITemplate }}
             serde_json::from_value(json!({
                 "uriTemplate": "{{ .URITemplate }}", "name": "{{ .Name }}",
+                {{- if .Title }}
+                "title": "{{ .Title | rsEscape }}",
+                {{- end }}
+                {{- template "rsResourceExtras" . }}
                 "description": "{{ .Description | rsEscape }}", "mimeType": "{{ .MimeType }}"
             })).expect("generated resource template must be valid"),
         {{- end }}
@@ -199,7 +210,13 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
         Ok(ListToolsResult::with_all_items(Self::tools()))
     }
 
-    async fn call_tool(&self, request: CallToolRequestParams, context: RequestContext<RoleServer>) -> std::result::Result<CallToolResponse, McpError> {
+{{- /* context is only read to raise an elicitation, so bind it as unused when
+       no method on this service declares one — generated code must not warn. */}}
+{{- $usesContext := false }}
+{{- range $methName, $info := $methods }}
+{{- if and $info.MethodOpts $info.MethodOpts.Elicitation }}{{ $usesContext = true }}{{ end }}
+{{- end }}
+    async fn call_tool(&self, request: CallToolRequestParams, {{ if $usesContext }}context{{ else }}_context{{ end }}: RequestContext<RoleServer>) -> std::result::Result<CallToolResponse, McpError> {
         let args = request.arguments.map_or_else(|| Value::Object(Default::default()), Value::Object);
         match request.name.as_ref() {
         {{- range $methName, $info := $methods }}
@@ -369,4 +386,27 @@ pub async fn serve_{{ $svcName | snakeCase }}_mcp<T: {{ $svcName }}McpServer>(
     }
     Ok(())
 }
+{{- end }}
+
+{{- define "rsResourceExtras" }}
+{{- with .Annotations }}
+                "annotations": {
+                    {{- if .Audience }}
+                    "audience": [{{ range $i, $a := .Audience }}{{ if $i }}, {{ end }}"{{ $a }}"{{ end }}],
+                    {{- end }}
+                    {{- if .LastModified }}
+                    "lastModified": "{{ .LastModified }}",
+                    {{- end }}
+                    {{- if .HasPriority }}
+                    "priority": {{ .Priority }}
+                    {{- end }}
+                },
+{{- end }}
+{{- if .Icons }}
+                "icons": [
+                    {{- range .Icons }}
+                    {"src": "{{ .Src }}"{{ if .MimeType }}, "mimeType": "{{ .MimeType }}"{{ end }}{{ if .Sizes }}, "sizes": [{{ range $j, $s := .Sizes }}{{ if $j }}, {{ end }}"{{ $s }}"{{ end }}]{{ end }}{{ if .Theme }}, "theme": "{{ .Theme }}"{{ end }}},
+                    {{- end }}
+                ],
+{{- end }}
 {{- end }}

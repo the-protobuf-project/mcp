@@ -10,10 +10,9 @@ import (
 
 // Supported languages for code generation.
 const (
-	LangGo     = "go"
-	LangPython = "python"
-	LangRust   = "rust"
-	LangCpp    = "cpp"
+	LangGo   = "go"
+	LangRust = "rust"
+	LangCpp  = "cpp"
 )
 
 // escapeQuotes escapes double quotes for embedding in a quoted string literal.
@@ -50,13 +49,6 @@ var (
 		"safeRawString": safeRawString,
 	}
 
-	pythonFuncMap = template.FuncMap{
-		"snakeCase":    toSnakeCase,
-		"pyString":     pyStringLiteral,
-		"lower":        strings.ToLower,
-		"escapeQuotes": escapeQuotes,
-	}
-
 	rustFuncMap = template.FuncMap{
 		"snakeCase":          toSnakeCase,
 		"screamingSnakeCase": toScreamingSnakeCase,
@@ -82,10 +74,9 @@ var (
 // without a FuncMap, and text/template rejects a template referencing an unknown
 // function at parse time, so the funcs above must be registered first.
 var (
-	goTemplate     = mustParseTemplate("gen", "go.tpl", goFuncMap)
-	pythonTemplate = mustParseTemplate("pygen", "python.tpl", pythonFuncMap)
-	rustTemplate   = mustParseTemplate("rsgen", "rust.tpl", rustFuncMap)
-	cppTemplates   = mustParseGlob("cpp/*.tpl", cppFuncMap)
+	goTemplate   = mustParseTemplate("gen", "go.tpl", goFuncMap)
+	rustTemplate = mustParseTemplate("rsgen", "rust.tpl", rustFuncMap)
+	cppTemplates = mustParseGlob("cpp/*.tpl", cppFuncMap)
 )
 
 // mustParseTemplate parses a single embedded template. It panics on failure, so

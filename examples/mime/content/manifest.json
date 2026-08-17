@@ -1,0 +1,12 @@
+{
+  "gallery": "asset-gallery",
+  "version": "1.0.0",
+  "assets": [
+    {"id": "overview", "mimeType": "text/markdown"},
+    {"id": "report", "mimeType": "text/html"},
+    {"id": "manifest", "mimeType": "application/json"},
+    {"id": "downloads", "mimeType": "text/csv"},
+    {"id": "logo", "mimeType": "image/png"},
+    {"id": "spec", "mimeType": "application/pdf"}
+  ]
+}

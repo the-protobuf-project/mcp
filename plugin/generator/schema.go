@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	mcppb "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
+	mcppb "github.com/the-protobuf-project/mcp/protobuf/mcppb"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -185,8 +185,21 @@ func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any
 	if opts.Deprecated {
 		schema["deprecated"] = true
 	}
-	if opts.Format != "" {
-		schema["format"] = opts.Format
+	format := fieldFormatKeyword(opts.GetFormat())
+	if format == "" {
+		format = legacyFieldFormat(opts)
+	}
+	if format != "" {
+		schema["format"] = format
+	}
+	// An explicit type overrides the one inferred from the proto field, for
+	// fields whose wire type does not match their intended schema type (e.g. an
+	// int64 that should appear as "string" in JSON). Replacing the type makes
+	// any inferred numeric bounds meaningless, so drop them with it.
+	if typ := fieldTypeKeyword(opts.GetType()); typ != "" && schema["type"] != typ {
+		schema["type"] = typ
+		delete(schema, "minimum")
+		delete(schema, "maximum")
 	}
 }
 

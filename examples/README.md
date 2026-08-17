@@ -1,6 +1,6 @@
 # Examples
 
-End-to-end examples demonstrating how to expose gRPC services as MCP servers in Go, Python, and Rust using `protoc-gen-mcp`.
+End-to-end examples demonstrating how to expose gRPC services as MCP servers in Go, Rust, and C++ using `protoc-gen-mcp`.
 
 ## Overview
 
@@ -99,7 +99,6 @@ buf generate
 
 This produces:
 - `proto/generated/go/` — Go pb + gRPC + MCP files
-- `proto/generated/python/` — Python pb + gRPC + MCP files
 - `proto/generated/rust/` — Rust pb + gRPC + MCP files
 
 ## Generated MCP Tools
@@ -125,7 +124,6 @@ This produces:
 | Language | Directory | Details |
 | -------- | ----------------------- | ---------------------------------- |
 | Go | [`go/`](go/) | TodoService (http, stdio, sse, grpc-gateway) + CounterService (counter) |
-| Python | [`python/`](python/) | TodoService — `FastMCP` / low-level `Server` |
 | Rust | [`rust/`](rust/) | TodoService — `rmcp` SDK with `ServerHandler` |
 
 Each has its own README with setup and run instructions.

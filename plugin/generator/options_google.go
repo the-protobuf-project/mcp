@@ -61,3 +61,27 @@ func ExtractGoogleAPIResources(svc *protogen.Service) []MCPResourceOpts {
 	}
 	return resources
 }
+
+// mergeResources appends auto-detected resources to the ones declared on the
+// service, skipping any whose URI or URI template a declaration already covers.
+// Declarations carry metadata (title, size, annotations, icons) that detection
+// cannot infer, so they must not be displaced by a same-URI detection.
+func mergeResources(declared, detected []MCPResourceOpts) []MCPResourceOpts {
+	claimed := make(map[string]bool, len(declared)*2)
+	for _, res := range declared {
+		if res.URI != "" {
+			claimed[res.URI] = true
+		}
+		if res.URITemplate != "" {
+			claimed[res.URITemplate] = true
+		}
+	}
+	out := declared
+	for _, res := range detected {
+		if (res.URI != "" && claimed[res.URI]) || (res.URITemplate != "" && claimed[res.URITemplate]) {
+			continue
+		}
+		out = append(out, res)
+	}
+	return out
+}

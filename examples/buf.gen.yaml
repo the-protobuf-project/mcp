@@ -33,17 +33,6 @@ plugins:
     opt:
       - lang=go
       - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
-  # --- Python ---
-  # Pin to match the protobuf runtime available on PyPI (see proto/buf.gen.yaml).
-  - remote: buf.build/protocolbuffers/python:v34.1
-    out: proto/generated/python
-  - remote: buf.build/grpc/python
-    out: proto/generated/python
-  - local: protoc-gen-mcp
-    out: proto/generated/python
-    opt:
-      - lang=python
-      - paths=source_relative
   # --- Rust ---
   - remote: buf.build/community/neoeinstein-prost
     out: proto/generated/rust

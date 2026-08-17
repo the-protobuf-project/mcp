@@ -205,22 +205,28 @@ func (g *FileGenerator) buildParams() TplParams {
 		serviceBasePaths[svcName] = "/" + strings.ToLower(strings.ReplaceAll(string(svc.Desc.FullName()), ".", "/")) + "/mcp"
 
 		// Extract explicit MCP service options + auto-detect google.api.resource.
+		// Resources declared on the service win over an auto-detected resource
+		// with the same URI, so an author can annotate a response message and
+		// still override the generated title, icons, or annotations by hand.
 		svcOpt := ExtractServiceOptions(svc)
 		apiResources := ExtractGoogleAPIResources(svc)
 		if len(apiResources) > 0 {
 			if svcOpt == nil {
 				svcOpt = &MCPServiceOpts{}
 			}
-			svcOpt.Resources = apiResources
+			svcOpt.Resources = mergeResources(svcOpt.Resources, apiResources)
 		}
 		serviceOpts[svcName] = svcOpt
 	}
 
+	// Third-party imports go out as one sorted block. gofmt sorts within a block
+	// but never across blocks, so grouping the fixed imports separately from the
+	// per-file ones would emit unsorted output whenever a resolved proto package
+	// sorts before google.golang.org — which any github.com path does.
 	var extraImports []string
 	for importPath, alias := range extraImportMap {
 		extraImports = append(extraImports, alias+" "+`"`+string(importPath)+`"`)
 	}
-	sort.Strings(extraImports)
 
 	hasStreamProgress := false
 	hasAnyMethods := false
@@ -229,15 +235,19 @@ func (g *FileGenerator) buildParams() TplParams {
 			hasAnyMethods = true
 		}
 		for _, info := range methods {
-			if info.StreamProgress != nil {
-				hasStreamProgress = true
-				break
+			if info.StreamProgress == nil {
+				continue
 			}
-		}
-		if hasStreamProgress {
-			break
+			hasStreamProgress = true
 		}
 	}
+	if hasAnyMethods {
+		extraImports = append(extraImports,
+			`"google.golang.org/grpc"`,
+			`"google.golang.org/protobuf/encoding/protojson"`,
+		)
+	}
+	sort.Strings(extraImports)
 
 	return TplParams{
 		Version:           PluginVersion,
