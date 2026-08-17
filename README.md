@@ -1,48 +1,59 @@
-# mcp
+<!-- markdownlint-disable MD041 -->
+<h1 align="center">MCP</h1>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f624e503-8b62-4954-b496-ec1d4fbaf0ef" width="314" height="314" />
+  <strong>One schema, every surface.</strong> mcp is a spec-first
+  <code>protoc</code> plugin that generates fully compliant Model Context Protocol
+  servers straight from your <code>.proto</code> files — for Go, Python, Rust, and
+  C++ — so the definitions that already describe your APIs expose them to AI clients
+  too.
 </p>
 
 <p align="center">
-  <strong>gRPC ↔ MCP Bridge</strong> — Generate MCP servers directly from protobufs<br>
-  enabling seamless AI-native interfaces for existing services
+  <strong>This release brings full support for protocol version <code>2026-07-28</code>.</strong>
 </p>
 
 <p align="center">
-  <a href="https://go.dev/">
-    <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go" />
-  </a>
-  <a href="https://pkg.go.dev/github.com/the-protobuf-project/mcp">
-    <img src="https://pkg.go.dev/badge/github.com/the-protobuf-project/mcp.svg" />
-  </a>
-  <a href="https://buf.build/the-protobuf-project/mcp">
-    <img src="https://img.shields.io/badge/BSR-buf.build%2Fthe-protobuf-project%2Fmcp-blue" />
-  </a>
+  <a href="https://github.com/the-protobuf-project/mcp/actions/workflows/ci.yaml"><img src="https://github.com/the-protobuf-project/mcp/actions/workflows/ci.yaml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/the-protobuf-project/mcp/actions/workflows/release.yaml"><img src="https://github.com/the-protobuf-project/mcp/actions/workflows/release.yaml/badge.svg" alt="Release"></a>
+  <a href="https://modelcontextprotocol.io/specification"><img src="https://img.shields.io/badge/MCP%20spec-2026--07--28-6E56CF" alt="MCP spec 2026-07-28"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a>
+  <a href="https://pkg.go.dev/github.com/the-protobuf-project/mcp"><img src="https://pkg.go.dev/badge/github.com/the-protobuf-project/mcp.svg" alt="Go Reference"></a>
+  <a href="https://buf.build/the-protobuf-project/mcp"><img src="https://img.shields.io/badge/BSR-the--protobuf--project%2Fmcp-blue" alt="Buf Schema Registry"></a>
+  <img src="https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Rust-1.93%2B-000000?logo=rust&logoColor=white" alt="Rust">
+  <img src="https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white" alt="C++">
 </p>
 
 ## Overview
 
-**mcp** is a `protoc` plugin that automatically converts your gRPC services
-into MCP-compatible servers. The Go runtime the generated code links against
-lives in [runtime-go](https://github.com/the-protobuf-project/runtime-go).
+Annotate your `.proto` files with MCP options and `protoc-gen-mcp` generates a
+[Model Context Protocol](https://modelcontextprotocol.io/) server for each
+service — no hand-written glue, and no second schema to keep in sync.
 
-**gRPC → MCP proxy generator following the [MCP Specification](https://modelcontextprotocol.io/specification).**
+The definitions you already maintain become:
 
-Instead of rewriting APIs for AI systems, you can expose your existing
-gRPC infrastructure as:
+- **Tools** → callable functions for agents
+- **Prompts** → structured interaction templates
+- **Resources** → retrievable context/data
+- **Elicitation** → dynamic input flows
+- **Progress** → incremental updates for long-running calls
 
-- **Tools** → callable functions for agents  
-- **Prompts** → structured interaction templates  
-- **Resources** → retrievable context/data  
-- **Elicitation** → dynamic input flows  
+The generated server implements the
+[MCP specification](https://modelcontextprotocol.io/specification) at protocol
+version `2026-07-28` and delegates to your service implementation — in-process,
+or forwarded to a remote gRPC server. Your API stays strongly typed, and the
+proto remains the single source of truth.
 
-Built with a **spec-first approach**, it ensures full compliance with the
-Model Context Protocol while keeping your system strongly typed and scalable.
+Generated code builds on the official MCP SDKs — Go `go-sdk` v1.7+, Python `mcp`
+1.27+, and Rust `rmcp` 3.1+ (which also backs the C++ bridge).
 
-Open-sourced by **The Protobuf Project**, this project bridges traditional backend systems with AI-native platforms.
+This repository ships the plugin and the annotation `.proto` files. The Go
+runtime the generated code links against lives in
+[runtime-go](https://github.com/the-protobuf-project/runtime-go).
 
-A `protoc` plugin and runtime that turns any gRPC service into a fully spec-compliant [Model Context Protocol](https://modelcontextprotocol.io/) server — tools, prompts, resources, and elicitation — in Go, Python, Rust, and C++.
+Open-sourced by **The Protobuf Project**.
 
 ## Features
 
@@ -55,7 +66,7 @@ A `protoc` plugin and runtime that turns any gRPC service into a fully spec-comp
 - **Resources** — Auto-detect MCP resources from `google.api.resource` annotations
 - **Elicitation** — Generate confirmation dialogs before tool execution via `(mcp.elicitation)`
 - **Transports** — stdio, SSE, and streamable-http — run multiple concurrently in a single process
-- **gRPC Gateway** — Forward MCP tool calls to a remote gRPC server (Go)
+- **gRPC forwarding** — Forward MCP tool calls to a remote gRPC server instead of an in-process impl (Go)
 - **Published Protos** — Import the MCP annotations from [`buf.build/the-protobuf-project/mcp`](https://buf.build/the-protobuf-project/mcp) and generate the types in your own client
 
 | Language   | Generated File                     | Example                              |
@@ -310,7 +321,7 @@ rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty) {
 }
 ```
 
-Elicitation is supported in all three languages with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation.
+Elicitation is supported in Go, Python, and Rust with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation. The C++ generator does not emit elicitation handlers.
 
 ### Field: `mcp.field`
 
@@ -377,7 +388,7 @@ rpc CreateTodo(CreateTodoRequest) returns (stream CreateTodoStreamChunk);
 
 The plugin auto-generates tool handlers that send MCP `notifications/progress` for each progress chunk and return the final result. Progress is supported when using `ForwardTo*MCPClient` (gRPC forwarding). Clients request progress by including `progressToken` in `params._meta`.
 
-**Progress and timeouts**: Long-running requests that send progress must not time out. The gateway uses `ReadTimeout: 0` and `WriteTimeout: 0` by default so streaming progress is never interrupted. If you set `WriteTimeout` in `MCPServerConfig`, use `0` or a very high value for progress-enabled tools. MCP clients (e.g. Inspector) may have their own timeout; enable timeout reset on progress when available (`MCP_REQUEST_TIMEOUT_RESET_ON_PROGRESS`). If you see **"MCP error -32001: Maximum total timeout exceeded"**, the client has a hard cap on total request time (Inspector default: 60s). Increase it, e.g. `MCP_REQUEST_MAX_TOTAL_TIMEOUT=300000` (5 min, in ms).
+**Progress and timeouts**: Long-running requests that send progress must not time out. The generated HTTP server uses `ReadTimeout: 0` and `WriteTimeout: 0` by default so streaming progress is never interrupted. If you set `WriteTimeout` in `MCPServerConfig`, use `0` or a very high value for progress-enabled tools. MCP clients (e.g. Inspector) may have their own timeout; enable timeout reset on progress when available (`MCP_REQUEST_TIMEOUT_RESET_ON_PROGRESS`). If you see **"MCP error -32001: Maximum total timeout exceeded"**, the client has a hard cap on total request time (Inspector default: 60s). Increase it, e.g. `MCP_REQUEST_MAX_TOTAL_TIMEOUT=300000` (5 min, in ms).
 
 ### Resources
 
@@ -387,24 +398,28 @@ Resources are auto-detected from `google.api.resource` annotations on proto mess
 
 ```
 mcp/
-├── go.mod                          # Single Go module
-├── go.work                         # Workspace (root + examples)
-├── proto/                          # Publishable buf module (BSR)
-│   └── mcp/protobuf/              # MCP annotation .proto source files
-├── protobuf/                      # Pre-compiled Go proto types
-│   └── mcppb/                     # Go (.pb.go) — see [protobuf/README.md](protobuf/README.md)
+├── go.mod                     # Root Go module (plugin)
+├── go.work                    # Workspace (root + examples)
+├── MODULE.bazel               # Bazel module (also published to the BCR)
+├── Justfile                   # Common dev tasks
+├── proto/                     # Publishable buf module (BSR)
+│   └── mcp/protobuf/          # MCP annotation .proto source files
 ├── plugin/
-│   ├── cmd/protoc-gen-mcp/        # Plugin binary (go install target)
-│   └── generator/                 # Code generation (Go, Python, Rust, C++)
-│       └── templates/             # go.tpl, python.tpl, rust.tpl, cpp/*.tpl
-├── examples/                      # Separate module with replace directive
-│   ├── proto/                     # TodoService + CounterService definitions
-│   ├── go/                        # Go examples (http, stdio, sse, grpc-gateway, counter)
-│   ├── python/                    # Python examples (http, stdio, sse)
-│   ├── rust/                      # Rust examples (http, stdio, sse)
-│   └── cpp/                       # C++ example (Make, gRPC + MCP via Rust bridge)
-└── .github/workflows/             # CI + release pipelines
+│   ├── cmd/protoc-gen-mcp/    # Plugin binary (go install target)
+│   └── generator/             # Code generation (Go, Python, Rust, C++)
+│       └── templates/         # go.tpl, python.tpl, rust.tpl, cpp/*.tpl
+├── examples/                  # Separate Go module (replaces the root module)
+│   ├── proto/                 # TodoService + CounterService definitions
+│   ├── go/                    # Go examples (http, stdio, sse, grpc-gateway, counter)
+│   ├── python/                # Python examples (http, stdio, sse)
+│   ├── rust/                  # Rust examples (http, stdio, sse)
+│   └── cpp/                   # C++ example (Make, gRPC + MCP via Rust bridge)
+└── .github/workflows/         # CI + release pipelines
 ```
+
+No language bindings are generated here: the annotation types come from the BSR
+module, and the Go runtime comes from
+[runtime-go](https://github.com/the-protobuf-project/runtime-go).
 
 ## Plugin Options
 
@@ -517,10 +532,10 @@ serve_todo_service_mcp(server, config).await?;
 
 The [`examples/`](examples/) directory contains **TodoService** (CRUD, prompts, elicitation) and **CounterService** (progress streaming) implementations:
 
-| Service        | Proto                    | Description                                      |
-| -------------- | ------------------------ | ------------------------------------------------ |
-| **TodoService** | `proto/todo/v1/`         | CRUD, prompts, elicitation, resources            |
-| **CounterService** | `proto/counter/v1/`  | Server-streaming with MCP progress notifications |
+| Service            | Proto                 | Description                                      |
+| ------------------ | --------------------- | ------------------------------------------------ |
+| **TodoService**    | `proto/todo/v1/`      | CRUD, prompts, elicitation, resources            |
+| **CounterService** | `proto/counter/v1/`   | Server-streaming with MCP progress notifications |
 
 | Language | Directory                             | Transports                     | Test                                    |
 | -------- | ------------------------------------- | ------------------------------ | --------------------------------------- |
