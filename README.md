@@ -62,7 +62,7 @@ Open-sourced by **The Protobuf Project**.
 - **Prompts** — Attach prompt templates to RPCs with schema-validated arguments via `(mcp.v1.prompt)`
 - **Field descriptions** — Add `(mcp.v1.field) = { description: "..." }` to message fields for schema descriptions
 - **Enum descriptions** — Add `(mcp.v1.enum)` and `(mcp.v1.enum_value)` for enum-level and per-value descriptions in the schema
-- **Progress** — Use gRPC server streaming with `mcp.MCPProgress` for MCP progress notifications on long-running tools
+- **Progress** — Use gRPC server streaming with `mcp.v1.MCPProgress` for MCP progress notifications on long-running tools
 - **Resources** — Auto-detect MCP resources from `google.api.resource` annotations
 - **Elicitation** — Generate confirmation dialogs before tool execution via `(mcp.v1.elicitation)`
 - **Transports** — stdio, SSE, and streamable-http — run multiple concurrently in a single process
@@ -169,7 +169,7 @@ import "mcp/v1/annotations.proto";
 service TodoService {
   option (mcp.v1.service) = {
     app: {
-      name: "Todo App"
+      display_name: "Todo App"
       version: "1.0.0"
       description: "A simple todo management application"
     }
@@ -190,7 +190,7 @@ service TodoService {
       description: "Retrieves a todo by resource name."
     };
     option (mcp.v1.prompt) = {
-      name: "summarize_todos"
+      id: "summarize_todos"
       description: "Summarize all pending todo items for a user"
       schema: "todo.v1.SummarizeTodosArgs"
     };
@@ -271,47 +271,47 @@ MCP_TRANSPORT=stdio npx @modelcontextprotocol/inspector -- ./server
 
 All annotations are imported from `mcp/v1/annotations.proto` ([BSR](https://buf.build/the-protobuf-project/mcp)).
 
-### Service-level: `mcp.service`
+### Service-level: `mcp.v1.service`
 
 Defines app metadata for the MCP server:
 
 ```protobuf
 option (mcp.v1.service) = {
-  app: { name: "My App" version: "1.0.0" description: "..." }
+  app: { display_name: "My App" version: "1.0.0" description: "..." }
 };
 ```
 
-### Tool: `mcp.tool`
+### Tool: `mcp.v1.tool`
 
 Override auto-generated tool name or description:
 
 ```protobuf
 rpc CreateItem(CreateItemRequest) returns (Item) {
   option (mcp.v1.tool) = {
-    name: "custom_tool_name"
+    id: "custom_tool_name"
     description: "Custom description for LLMs."
   };
 }
 ```
 
-### Prompt: `mcp.prompt`
+### Prompt: `mcp.v1.prompt`
 
 Attach a prompt template to an RPC. The `schema` references a proto message whose fields become prompt arguments:
 
 ```protobuf
 rpc GetItem(GetItemRequest) returns (Item) {
   option (mcp.v1.prompt) = {
-    name: "summarize_items"
+    id: "summarize_items"
     description: "Summarize all items"
     schema: "mypackage.SummarizeItemsArgs"
   };
 }
 ```
 
-### Elicitation: `mcp.elicitation`
+### Elicitation: `mcp.v1.elicitation`
 
-Request user input before executing a tool. In **form mode**, `schema` carries an
-empty instance of a proto message whose fields become the form:
+Request user input before executing a tool. In **form mode**, `schema` is the
+fully-qualified name of a proto message whose fields become the form:
 
 ```protobuf
 rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty) {
@@ -340,7 +340,7 @@ The mode is inferred when unset — form if `schema` is set, URL if `url` is set
 
 Elicitation is supported in Go, Python, and Rust with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation. The C++ generator does not emit elicitation handlers.
 
-### Field: `mcp.field`
+### Field: `mcp.v1.field`
 
 Add JSON Schema metadata to a message field for the MCP tool inputSchema:
 
@@ -364,7 +364,7 @@ message User {
 - **deprecated** — Mark the field as deprecated in the schema
 - **format** — JSON Schema format override (e.g. `uri`, `email`, `uuid`)
 
-### Enum: `mcp.enum` and `mcp.enum_value`
+### Enum: `mcp.v1.enum` and `mcp.v1.enum_value`
 
 Add descriptions to enum types and individual enum values for the MCP tool inputSchema:
 
@@ -388,14 +388,14 @@ For enum fields, enum descriptions take precedence over `(mcp.v1.field)` descrip
 
 ### Progress (server streaming)
 
-For long-running operations, use gRPC server streaming with `mcp.MCPProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
+For long-running operations, use gRPC server streaming with `mcp.v1.MCPProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
 
 ```protobuf
 import "mcp/v1/progress.proto";
 
 message CreateTodoStreamChunk {
   oneof payload {
-    mcp.MCPProgress progress = 1;
+    mcp.v1.MCPProgress progress = 1;
     Todo result = 2;
   }
 }
@@ -411,7 +411,7 @@ The plugin auto-generates tool handlers that send MCP `notifications/progress` f
 
 Resources are auto-detected from `google.api.resource` annotations on proto
 messages — no additional MCP annotation is needed. They can also be declared
-explicitly on the service via `mcp.service.resources`:
+explicitly on the service via `mcp.v1.service.resources`:
 
 ```protobuf
 service TodoService {
@@ -419,10 +419,10 @@ service TodoService {
     resources: [
       {
         pattern: "todo://users/{user}/todos/{todo}"
-        name: "Todo"
+        id: "Todo"
         title: "Todo item"
         description: "A single todo item belonging to a user."
-        mime_type: MCP_MIME_TYPE_APPLICATION_JSON
+        mime_type: "application/json"
         annotations: { audience: [MCP_ROLE_USER, MCP_ROLE_ASSISTANT] priority: 0.8 }
       }
     ]

@@ -36,7 +36,7 @@ Configure MCP app metadata on your gRPC service:
 service MyService {
   option (mcp.v1.service) = {
     app: {
-      name: "My App"
+      display_name: "My App"
       version: "1.0.0"
       description: "A brief description of your application"
     }
@@ -64,7 +64,7 @@ whose fields define the prompt arguments:
 ```protobuf
 rpc GetItem(GetItemRequest) returns (Item) {
   option (mcp.v1.prompt) = {
-    name: "summarize_items"
+    id: "summarize_items"
     description: "Summarize all items for a user"
     schema: "mypackage.SummarizeItemsArgs"
   };
@@ -73,8 +73,8 @@ rpc GetItem(GetItemRequest) returns (Item) {
 
 ### Elicitation options
 
-Collect user input before an RPC executes. In **form mode**, `schema` holds an
-empty instance of the proto message whose fields define the form:
+Collect user input before an RPC executes. In **form mode**, `schema` is the
+fully-qualified name of the proto message whose fields define the form:
 
 ```protobuf
 rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty) {
@@ -135,7 +135,7 @@ enum Priority {
 
 There are two ways to expose MCP resources.
 
-**1. Declare them on the service** with `mcp.service.resources`:
+**1. Declare them on the service** with `mcp.v1.service.resources`:
 
 ```protobuf
 service TodoService {
@@ -143,10 +143,10 @@ service TodoService {
     resources: [
       {
         pattern: "todo://users/{user}/todos/{todo}"
-        name: "Todo"
+        id: "Todo"
         title: "Todo item"
         description: "A single todo item belonging to a user."
-        mime_type: MCP_MIME_TYPE_APPLICATION_JSON
+        mime_type: "application/json"
         size: 2048
         annotations: {
           audience: [MCP_ROLE_USER, MCP_ROLE_ASSISTANT]
@@ -213,7 +213,7 @@ methods, and streaming RPCs are skipped. A pattern with no `{placeholder}` is
 registered as a fixed resource rather than a template.
 
 Both forms produce the same registration, so use `google.api.resource` when your
-protos already follow AIP-123 resource naming, and `mcp.service.resources` when
+protos already follow AIP-123 resource naming, and `mcp.v1.service.resources` when
 you need MCP-specific metadata such as `title`, `annotations`, or `icons`.
 
 ### Progress (server streaming)
@@ -225,7 +225,7 @@ import "mcp/v1/progress.proto";
 
 message CreateItemStreamChunk {
   oneof payload {
-    mcp.MCPProgress progress = 1;
+    mcp.v1.MCPProgress progress = 1;
     Item result = 2;
   }
 }
@@ -247,7 +247,12 @@ rpc CreateItem(CreateItemRequest) returns (stream CreateItemStreamChunk);
 | `mcp/v1/enum.proto`             | `MCPEnumOptions`, `MCPEnumValueOptions`                    |
 | `mcp/v1/progress.proto`         | `MCPProgress` for server-streaming progress                |
 | `mcp/v1/field_type.proto`       | `MCPFieldType` enum                                        |
-| `mcp/v1/mime_type.proto`        | `MCPMimeType` enum                                         |
+| `mcp/v1/mime_type.proto`        | `MCPMimeType` enum (unreferenced — see note below)          |
+
+> **Note:** `MCPMimeType` is no longer referenced by any message. `MCPResource.mime_type`
+> is a plain `string` so that resources can carry any IANA media type, per
+> [AIP-143](https://google.aip.dev/143). The enum is retained for now because removing
+> it from the published module is a separate breaking change.
 
 ## License
 
