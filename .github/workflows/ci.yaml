@@ -117,6 +117,7 @@ jobs:
           # resolves when the linter runs from here.
           working-directory: protobuf
           paths: mcp/v1/*.proto
-          # Resolve `google/api/*` from the googleapis dep in buf.yaml; nothing
-          # is vendored, so without this the protos do not compile.
+          # Resolve imports through the deps in buf.yaml. Today these protos only
+          # import well-known types, which the linter bundles, but nothing here is
+          # vendored — the first `google/api/*` import would fail to compile without it.
           buf: true

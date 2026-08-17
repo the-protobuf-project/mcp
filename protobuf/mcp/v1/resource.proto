@@ -27,22 +27,12 @@ message MCPAnnotations {
   optional double priority = 3;
 }
 
-// MCPIconTheme indicates the background context an icon is designed for.
-enum MCPIconTheme {
-  MCP_ICON_THEME_UNSPECIFIED = 0;
-
-  // The icon is designed for display on a light background.
-  MCP_ICON_THEME_LIGHT = 1;
-
-  // The icon is designed for display on a dark background.
-  MCP_ICON_THEME_DARK = 2;
-}
-
 // MCPIcon describes a single icon image associated with a resource.
 // It corresponds to the Icon struct in the MCP Go SDK.
 message MCPIcon {
   // URI pointing to the icon resource. This can be an HTTP/HTTPS URL pointing
-  // to an image file, or a data URI with base64-encoded image data. Required.
+  // to an image file, or an inline `data:` URI carrying the image bytes.
+  // Required.
   string src = 1;
 
   // MIME type of the icon image. Should be provided when the server's
@@ -102,4 +92,16 @@ message MCPResource {
 
   // Icons representing the resource in client UIs.
   repeated MCPIcon icons = 9;
+}
+
+// MCPIconTheme indicates the background context an icon is designed for.
+enum MCPIconTheme {
+  // No theme specified. The icon is suitable for any background.
+  MCP_ICON_THEME_UNSPECIFIED = 0;
+
+  // The icon is designed for display on a light background.
+  MCP_ICON_THEME_LIGHT = 1;
+
+  // The icon is designed for display on a dark background.
+  MCP_ICON_THEME_DARK = 2;
 }

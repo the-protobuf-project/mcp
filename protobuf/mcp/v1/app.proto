@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package mcp;
 
-import "google/api/resource.proto";
-
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "AppProto";
@@ -11,11 +9,6 @@ option java_package = "com.mcp.protobuf";
 
 // MCPApp describes application-level metadata for an MCP server.
 message MCPApp {
-  option (google.api.resource) = {
-    type: "mcp.protobuf/MCPApp"
-    pattern: "apps/{app}"
-  };
-
   // The display name of the MCP application.
   string name = 1;
   // The version of the MCP application (e.g. "1.0.0").

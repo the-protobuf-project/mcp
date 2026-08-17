@@ -7,17 +7,6 @@ option java_multiple_files = true;
 option java_outer_classname = "PromptProto";
 option java_package = "com.mcp.protobuf";
 
-// MCPRole specifies the intended recipient of a prompt message.
-enum MCPRole {
-  MCP_ROLE_UNSPECIFIED = 0;
-
-  // The user role; default when omitted.
-  MCP_ROLE_USER = 1;
-
-  // The assistant role (e.g. for Claude).
-  MCP_ROLE_ASSISTANT = 2;
-}
-
 // MCPPrompt defines a reusable prompt template exposed at the service level.
 //
 // The arguments are defined as a proper proto message referenced by schema.
@@ -55,4 +44,16 @@ message MCPToolOptions {
   // execution. Requires a server-streaming RPC whose response has a oneof with
   // mcp.MCPProgress and the result type.
   optional bool progress = 3;
+}
+
+// MCPRole specifies the intended recipient of a prompt message.
+enum MCPRole {
+  // No role specified. Treated as MCP_ROLE_USER.
+  MCP_ROLE_UNSPECIFIED = 0;
+
+  // The user role; default when omitted.
+  MCP_ROLE_USER = 1;
+
+  // The assistant role (e.g. for Claude).
+  MCP_ROLE_ASSISTANT = 2;
 }

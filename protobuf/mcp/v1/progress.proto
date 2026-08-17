@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package mcp;
 
-import "google/protobuf/any.proto";
 import "google/protobuf/struct.proto";
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
@@ -46,8 +45,16 @@ message MCPProgress {
   // Extra metadata associated with the progress update.
   map<string, google.protobuf.Struct> meta = 1;
 
-  // Token identifying the progress stream.
-  google.protobuf.Any progress_token = 2;
+  // Token identifying the progress stream, echoed back from the client's
+  // params._meta.progressToken. The MCP spec allows the client to send either
+  // a string or an integer, so exactly one of these is set.
+  oneof progress_token {
+    // Token the client sent as a JSON string, e.g. "abc123".
+    string token_string = 2;
+
+    // Token the client sent as a JSON integer, e.g. 42.
+    int64 token_int = 6;
+  }
 
   // Human-readable status text.
   string message = 3;
