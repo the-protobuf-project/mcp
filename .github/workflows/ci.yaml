@@ -105,3 +105,18 @@ jobs:
       - name: Cargo check
         working-directory: examples/rust
         run: cargo check --all-targets
+
+  google-protobuf-lint:
+    name: Lint (Google Protobuf)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: the-protobuf-project/setup-google-api-linter@v1.0.0
+        with:
+          # The buf module root. Files self-import as `mcp/v1/...`, which only
+          # resolves when the linter runs from here.
+          working-directory: protobuf
+          paths: mcp/v1/*.proto
+          # Resolve `google/api/*` from the googleapis dep in buf.yaml; nothing
+          # is vendored, so without this the protos do not compile.
+          buf: true
