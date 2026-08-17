@@ -1,14 +1,13 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
-import "mcp/v1/mime_type.proto";
 import "mcp/v1/prompt.proto";
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ResourceProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPAnnotations carries audience and priority metadata attached to a resource.
 // It corresponds to the Annotations struct in the MCP Go SDK.
@@ -70,7 +69,7 @@ message MCPResource {
 
   // Programmatic identifier for the resource. Used as the display name when
   // title is absent.
-  string name = 3;
+  string id = 3;
 
   // Human-readable display name, optimised for UI and end-user contexts.
   // Preferred over name when both are present.
@@ -80,8 +79,9 @@ message MCPResource {
   // as a hint to help the LLM understand what the resource contains.
   optional string description = 5;
 
-  // The MIME type of the resource content, if known.
-  MCPMimeType mime_type = 6;
+  // The MIME type of the resource content, if known, e.g. "application/json"
+  // or "text/markdown".
+  string mime_type = 6;
 
   // The size of the raw resource content in bytes (before any base64 encoding
   // or tokenisation), if known. Clients may use this to estimate context usage.

@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "EnumProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPEnumOptions attaches a description to an enum type.
-// Used as: option (mcp.enum) = { description: "..." };
+// Used as: option (mcp.v1.enum) = { description: "..." };
 // The description appears in the MCP tool inputSchema for enum fields.
 message MCPEnumOptions {
   // Human-readable description of the enum (e.g. for JSON Schema).
@@ -16,7 +16,7 @@ message MCPEnumOptions {
 }
 
 // MCPEnumValueOptions attaches a description to an enum value.
-// Used as: ENUM_VALUE = 0 [(mcp.enum_value) = { description: "..." }];
+// Used as: ENUM_VALUE = 0 [(mcp.v1.enum_value) = { description: "..." }];
 // Value descriptions are combined into the schema description for the enum field.
 message MCPEnumValueOptions {
   // Human-readable description of this enum value.

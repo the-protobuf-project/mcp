@@ -20,7 +20,6 @@ proto_library(
     strip_import_prefix = "/protobuf",
     visibility = ["//visibility:public"],
     deps = [
-        "@protobuf//:any_proto",
         "@protobuf//:descriptor_proto",
         "@protobuf//:struct_proto",
     ],

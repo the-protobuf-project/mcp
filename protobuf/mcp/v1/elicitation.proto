@@ -1,13 +1,11 @@
 syntax = "proto3";
 
-package mcp;
-
-import "google/protobuf/any.proto";
+package mcp.v1;
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ElicitationProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPElicitation defines a user-input step shown before a tool executes.
 //
@@ -17,13 +15,13 @@ option java_package = "com.mcp.protobuf";
 //   - URL mode: redirect the user to an external URL for input.
 //
 // Form mode example:
-//   option (mcp.elicitation) = {
+//   option (mcp.v1.elicitation) = {
 //     message: "Please confirm before deleting."
-//     schema: { [type.googleapis.com/todo.v1.DeleteConfirmation]: {} }
+//     schema: "todo.v1.DeleteConfirmation"
 //   };
 //
 // URL mode example:
-//   option (mcp.elicitation) = {
+//   option (mcp.v1.elicitation) = {
 //     mode: ELICITATION_MODE_URL
 //     message: "Complete authentication via the link below."
 //     url: "https://example.com/auth"
@@ -33,16 +31,12 @@ message MCPElicitation {
   // Message shown to the user (prompt text, e.g. "Are you sure?").
   string message = 1;
 
-  // [Form mode] The proto message type whose fields define the elicitation form.
-  // Pass an empty instance of the message so the generator can extract its type
-  // URL and resolve the fields at code-generation time.
-  //
-  // Example:
-  //   schema: { [type.googleapis.com/todo.v1.DeleteConfirmation]: {} }
+  // [Form mode] Fully-qualified proto message name whose fields define the
+  // elicitation form, e.g. "todo.v1.DeleteConfirmation".
   //
   // The generator reads the message descriptor to extract field names, types,
   // descriptions, required-ness, and enum values — no hand-written schema needed.
-  google.protobuf.Any schema = 2;
+  string schema = 2;
 
   // Elicitation mode. When UNSPECIFIED, inferred from other fields:
   //   - FORM if schema is set

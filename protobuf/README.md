@@ -34,7 +34,7 @@ Configure MCP app metadata on your gRPC service:
 
 ```protobuf
 service MyService {
-  option (mcp.service) = {
+  option (mcp.v1.service) = {
     app: {
       name: "My App"
       version: "1.0.0"
@@ -50,7 +50,7 @@ Override the auto-generated MCP tool name or description on individual RPCs:
 
 ```protobuf
 rpc CreateItem(CreateItemRequest) returns (Item) {
-  option (mcp.tool) = {
+  option (mcp.v1.tool) = {
     description: "Creates a new item with the given fields."
   };
 }
@@ -63,7 +63,7 @@ whose fields define the prompt arguments:
 
 ```protobuf
 rpc GetItem(GetItemRequest) returns (Item) {
-  option (mcp.prompt) = {
+  option (mcp.v1.prompt) = {
     name: "summarize_items"
     description: "Summarize all items for a user"
     schema: "mypackage.SummarizeItemsArgs"
@@ -78,9 +78,9 @@ empty instance of the proto message whose fields define the form:
 
 ```protobuf
 rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty) {
-  option (mcp.elicitation) = {
+  option (mcp.v1.elicitation) = {
     message: "Are you sure you want to delete this item?"
-    schema: { [type.googleapis.com/mypackage.DeleteConfirmation]: {} }
+    schema: "mypackage.DeleteConfirmation"
     required: true
   };
 }
@@ -90,7 +90,7 @@ In **URL mode**, the user is directed to an external URL instead:
 
 ```protobuf
 rpc Authenticate(AuthRequest) returns (AuthResponse) {
-  option (mcp.elicitation) = {
+  option (mcp.v1.elicitation) = {
     mode: MCP_ELICITATION_MODE_URL
     message: "Complete authentication via the link below."
     url: "https://example.com/auth"
@@ -108,7 +108,7 @@ does not support elicitation; the default is to proceed anyway.
 Add JSON Schema metadata to message fields for the MCP tool inputSchema:
 
 ```protobuf
-string name = 1 [(mcp.field) = {
+string name = 1 [(mcp.v1.field) = {
   description: "Resource name of the item."
   examples: "items/123"
   format: MCP_FIELD_FORMAT_URI
@@ -125,9 +125,9 @@ Add descriptions to enum types and individual enum values:
 
 ```protobuf
 enum Priority {
-  option (mcp.enum) = { description: "Priority level." };
-  LOW = 0 [(mcp.enum_value) = { description: "Low priority." }];
-  HIGH = 1 [(mcp.enum_value) = { description: "High priority." }];
+  option (mcp.v1.enum) = { description: "Priority level." };
+  LOW = 0 [(mcp.v1.enum_value) = { description: "Low priority." }];
+  HIGH = 1 [(mcp.v1.enum_value) = { description: "High priority." }];
 }
 ```
 
@@ -139,7 +139,7 @@ There are two ways to expose MCP resources.
 
 ```protobuf
 service TodoService {
-  option (mcp.service) = {
+  option (mcp.v1.service) = {
     resources: [
       {
         pattern: "todo://users/{user}/todos/{todo}"

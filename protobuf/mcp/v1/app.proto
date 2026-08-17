@@ -1,16 +1,16 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "AppProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPApp describes application-level metadata for an MCP server.
 message MCPApp {
   // The display name of the MCP application.
-  string name = 1;
+  string display_name = 1;
   // The version of the MCP application (e.g. "1.0.0").
   string version = 2;
   // A human-readable description of the MCP application.

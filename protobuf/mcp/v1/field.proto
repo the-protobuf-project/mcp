@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 import "mcp/v1/field_type.proto";
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "FieldProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPFieldOptions annotates a proto field with MCP-specific metadata used
 // during JSON Schema generation and MCP tool registration.

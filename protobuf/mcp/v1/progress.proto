@@ -1,25 +1,25 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 import "google/protobuf/struct.proto";
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ProgressProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPProgress is sent in server-streaming RPC chunks to report progress to MCP clients.
 // Use in a oneof with your result type:
 //
 //	message CreateTodoStreamChunk {
 //	  oneof payload {
-//	    mcp.MCPProgress progress = 1;
+//	    mcp.v1.MCPProgress progress = 1;
 //	    Todo result = 2;
 //	  }
 //	}
 //	rpc CreateTodo(CreateTodoRequest) returns (stream CreateTodoStreamChunk) {
-//	  option (mcp.tool) = { progress: true };
+//	  option (mcp.v1.tool) = { progress: true };
 //	}
 //
 // How to send _meta (MCP client):

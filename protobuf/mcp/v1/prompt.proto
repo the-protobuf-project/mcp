@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "PromptProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPPrompt defines a reusable prompt template exposed at the service level.
 //
@@ -22,8 +22,8 @@ option java_package = "com.mcp.protobuf";
 //     }
 //   ]
 message MCPPrompt {
-  // Unique prompt name (e.g. "summarize_todos"). Only set when overriding.
-  optional string name = 1;
+  // Unique prompt identifier (e.g. "summarize_todos"). Only set when overriding.
+  optional string id = 1;
   // Human-readable description of what this prompt does. Only set when overriding.
   optional string description = 2;
   // Fully-qualified proto message name whose fields define the prompt arguments.
@@ -33,16 +33,16 @@ message MCPPrompt {
 }
 
 // MCPToolOptions configures an individual RPC method as an MCP tool.
-// Used as: option (mcp.tool) = { ... };
+// Used as: option (mcp.v1.tool) = { ... };
 message MCPToolOptions {
-  // Override the auto-generated MCP tool name. Only set when overriding.
-  optional string name = 1;
+  // Override the auto-generated MCP tool identifier. Only set when overriding.
+  optional string id = 1;
   // Override the tool description (defaults to the RPC's leading comment). Only set when overriding.
   optional string description = 2;
   // When true, this RPC supports MCP progress notifications. Clients may include
   // progressToken in params._meta; the server will send progress updates during
   // execution. Requires a server-streaming RPC whose response has a oneof with
-  // mcp.MCPProgress and the result type.
+  // mcp.v1.MCPProgress and the result type.
   optional bool progress = 3;
 }
 

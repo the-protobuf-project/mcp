@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ServiceOptionsProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 import "mcp/v1/app.proto";
 import "mcp/v1/resource.proto";
