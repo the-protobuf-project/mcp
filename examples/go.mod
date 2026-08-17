@@ -4,12 +4,12 @@ go 1.26.4
 
 require (
 	github.com/modelcontextprotocol/go-sdk v1.7.0
-	github.com/the-protobuf-project/runtime-go/agents v0.0.0-00010101000000-000000000000
+	github.com/the-protobuf-project/runtime-go/agents v0.0.0-20260817102809-e3dbd49df375
 	google.golang.org/grpc v1.83.0
 	google.golang.org/protobuf v1.36.12
 )
 
-require google.golang.org/genproto/googleapis/api v0.0.0-20260810153831-ec0a7760b754 // indirect
+require google.golang.org/genproto/googleapis/api v0.0.0-20260810153831-ec0a7760b754
 
 require (
 	buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go v1.36.12-20260622085421-d8286d36a0cc.1
@@ -26,9 +26,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260810153831-ec0a7760b754 // indirect
 )
 
+// Resolve the plugin and annotations from this checkout rather than a release,
+// so the examples exercise the code under test. Workspace members share their
+// replace directives, so this path must stay inside the repository -- see go.work.
 replace github.com/the-protobuf-project/mcp => ../
-
-// The MCP runtime lives in runtime-go's agents module (as agents/mcp) and has
-// no tagged release yet, so it resolves from a sibling checkout. Drop this
-// once it is published.
-replace github.com/the-protobuf-project/runtime-go/agents => ../../runtime/runtime-go/agents

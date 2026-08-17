@@ -424,7 +424,7 @@ For each proto service, the plugin generates:
 | **Tools** (per RPC) | `s.AddTool(...)`                                    | `@server.call_tool()`                  | `ServerHandler::call_tool()`      | `TodoServiceMcpImpl` (cxx FFI)   |
 | **Prompts**         | `s.AddPrompt(...)`                                  | `@server.get_prompt()`                 | `ServerHandler::get_prompt()`     | —                                |
 | **Resources**       | `s.AddResource(...)` / `s.AddResourceTemplate(...)` | `@server.list_resources()`             | `ServerHandler::list_resources()` | —                                |
-| **Elicitation**     | `mcpruntime.RunElicitation(...)`                    | `session.elicit(...)`                  | `peer.create_elicitation(...)`    | —                                |
+| **Elicitation**     | `mcp.RunElicitation(...)`                           | `session.elicit(...)`                  | `peer.create_elicitation(...)`    | —                                |
 | **Serve function**  | `ServeTodoServiceMCP()`                             | `serve_todo_service_mcp()`             | `serve_todo_service_mcp()`        | `start_*_mcp_http` / `_stdio`    |
 | **gRPC forwarding** | `ForwardToTodoServiceMCPClient()`                   | `forward_to_todo_service_mcp_client()` | —                                 | In-process (C++ gRPC server)     |
 | **Interface/trait** | `TodoServiceMCPServer`                              | `TodoServiceMCPServer` (Protocol)      | `TodoServiceMcpServer` (trait)    | `TodoServiceMcpImpl` (C++ class) |
@@ -475,13 +475,17 @@ The Go runtime that generated code links against lives in
 [runtime-go](https://github.com/the-protobuf-project/runtime-go); this repository
 ships the plugin and the annotations only.
 
+```sh
+go get github.com/the-protobuf-project/runtime-go/agents
+```
+
 ```go
 import "github.com/the-protobuf-project/runtime-go/agents/mcp"
 
-cfg := &mcpruntime.MCPServerConfig{
+cfg := &mcp.MCPServerConfig{
     Name:       "my-service",
     Version:    "1.0.0",
-    Transports: []mcpruntime.Transport{mcpruntime.TransportStdio, mcpruntime.TransportStreamableHTTP},
+    Transports: []mcp.Transport{mcp.TransportStdio, mcp.TransportStreamableHTTP},
     Addr:       ":8082",
     BasePath:   "/todo/v1/todoservice/mcp",
 }
