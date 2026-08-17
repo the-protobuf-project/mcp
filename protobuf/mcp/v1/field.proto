@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package mcp;
+
+import "mcp/v1/field_type.proto";
+
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
+option java_multiple_files = true;
+option java_outer_classname = "FieldProto";
+option java_package = "com.mcp.protobuf";
+
+// MCPFieldFormat specifies the JSON Schema format keyword value for a field.
+// Only the subset of formats with broadly consistent client support is listed.
+// Use MCP_FIELD_FORMAT_UNSPECIFIED to omit the format keyword entirely.
+enum MCPFieldFormat {
+  MCP_FIELD_FORMAT_UNSPECIFIED = 0;
+
+  // ISO 8601 date-time string, e.g. "2025-01-12T15:00:58Z".
+  MCP_FIELD_FORMAT_DATE_TIME = 1;
+
+  // ISO 8601 date string, e.g. "2025-01-12".
+  MCP_FIELD_FORMAT_DATE = 2;
+
+  // ISO 8601 time string, e.g. "15:00:58Z".
+  MCP_FIELD_FORMAT_TIME = 3;
+
+  // An absolute URI, e.g. "https://example.com/resource".
+  MCP_FIELD_FORMAT_URI = 4;
+
+  // A UUID string, e.g. "550e8400-e29b-41d4-a716-446655440000".
+  MCP_FIELD_FORMAT_UUID = 5;
+
+  // An email address, e.g. "user@example.com".
+  MCP_FIELD_FORMAT_EMAIL = 6;
+
+  // A base64-encoded byte string.
+  MCP_FIELD_FORMAT_BYTE = 7;
+}
+
+// MCPFieldOptions annotates a proto field with MCP-specific metadata used
+// during JSON Schema generation and MCP tool registration.
+message MCPFieldOptions {
+  // Human-readable description of the field shown in the MCP tool's input schema.
+  string description = 1;
+
+  // Example values for this field, shown to the LLM as schema examples.
+  repeated string examples = 2;
+
+  // When true, signals to clients that this field is deprecated and may be
+  // removed in a future version.
+  bool deprecated = 3;
+
+  // JSON Schema format keyword to apply to this field. Overrides the format
+  // inferred from the proto field type (e.g. bytes fields default to "byte").
+  // Set to MCP_FIELD_FORMAT_UNSPECIFIED to suppress the format keyword.
+  MCPFieldFormat format = 4;
+
+  // JSON Schema type to apply to this field. Overrides the type inferred from
+  // the proto field type. Useful for fields whose wire type does not match their
+  // intended schema type (e.g. an int64 that should appear as "string" in JSON).
+  MCPFieldType type = 5;
+}

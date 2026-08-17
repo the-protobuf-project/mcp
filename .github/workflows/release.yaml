@@ -41,7 +41,7 @@ jobs:
         uses: bufbuild/buf-setup-action@v1
 
       - name: Push proto module to BSR
-        run: cd proto && buf push --label "$VERSION"
+        run: cd protobuf && buf push --label "$VERSION"
         env:
           BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
 

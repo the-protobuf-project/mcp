@@ -8,11 +8,11 @@ option java_outer_classname = "AnnotationsProto";
 option java_package = "com.mcp.protobuf";
 
 import "google/protobuf/descriptor.proto";
-import "mcp/protobuf/service_options.proto";
-import "mcp/protobuf/prompt.proto";
-import "mcp/protobuf/elicitation.proto";
-import "mcp/protobuf/field.proto";
-import "mcp/protobuf/enum.proto";
+import "mcp/v1/service_options.proto";
+import "mcp/v1/prompt.proto";
+import "mcp/v1/elicitation.proto";
+import "mcp/v1/field.proto";
+import "mcp/v1/enum.proto";
 
 // Attach MCP service options (app, prompts, resources) to a gRPC service.
 extend google.protobuf.ServiceOptions {

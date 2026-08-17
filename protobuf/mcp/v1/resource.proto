@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package mcp;
+
+import "mcp/v1/mime_type.proto";
+import "mcp/v1/prompt.proto";
+
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
+option java_multiple_files = true;
+option java_outer_classname = "ResourceProto";
+option java_package = "com.mcp.protobuf";
+
+// MCPAnnotations carries audience and priority metadata attached to a resource.
+// It corresponds to the Annotations struct in the MCP Go SDK.
+message MCPAnnotations {
+  // Who the resource is intended for. May contain multiple values to indicate
+  // content useful for more than one audience (e.g. both user and assistant).
+  repeated MCPRole audience = 1;
+
+  // ISO 8601 formatted timestamp of when the resource was last modified.
+  // Examples: last activity in an open file, time the resource was attached.
+  optional string last_modified = 2;
+
+  // Describes how important this data is for operating the server.
+  // A value of 1.0 means "most important" (effectively required);
+  // 0.0 means "least important" (entirely optional).
+  optional double priority = 3;
+}
+
+// MCPIconTheme indicates the background context an icon is designed for.
+enum MCPIconTheme {
+  MCP_ICON_THEME_UNSPECIFIED = 0;
+
+  // The icon is designed for display on a light background.
+  MCP_ICON_THEME_LIGHT = 1;
+
+  // The icon is designed for display on a dark background.
+  MCP_ICON_THEME_DARK = 2;
+}
+
+// MCPIcon describes a single icon image associated with a resource.
+// It corresponds to the Icon struct in the MCP Go SDK.
+message MCPIcon {
+  // URI pointing to the icon resource. This can be an HTTP/HTTPS URL pointing
+  // to an image file, or a data URI with base64-encoded image data. Required.
+  string src = 1;
+
+  // MIME type of the icon image. Should be provided when the server's
+  // Content-Type header is missing or too generic.
+  optional string mime_type = 2;
+
+  // Size specification for the icon. Examples:
+  //   ["48x48"]           — single fixed size
+  //   ["any"]             — scalable format such as SVG
+  //   ["48x48", "96x96"]  — multiple available sizes
+  repeated string sizes = 3;
+
+  // The background context this icon is designed for.
+  // Omit if the icon is suitable for any background.
+  MCPIconTheme theme = 4;
+}
+
+// MCPResource describes an MCP resource exposed by a gRPC service.
+// It corresponds to the Resource struct in the MCP Go SDK.
+//
+// Either uri or pattern must be set (enforced by the oneof).
+// Use uri for a concrete resource at a fixed location.
+// Use pattern for a URI template that matches a family of resources.
+message MCPResource {
+  // Identifies whether this is a concrete resource (uri) or a URI-template
+  // resource (pattern). Exactly one must be set.
+  oneof uri_or_pattern {
+    // The URI of a specific resource, e.g. "file:///home/user/report.pdf".
+    string uri = 1;
+
+    // A URI template pattern for a family of resources,
+    // e.g. "file:///home/user/{filename}".
+    string pattern = 2;
+  }
+
+  // Programmatic identifier for the resource. Used as the display name when
+  // title is absent.
+  string name = 3;
+
+  // Human-readable display name, optimised for UI and end-user contexts.
+  // Preferred over name when both are present.
+  optional string title = 4;
+
+  // A description of what this resource represents. Clients may use this
+  // as a hint to help the LLM understand what the resource contains.
+  optional string description = 5;
+
+  // The MIME type of the resource content, if known.
+  MCPMimeType mime_type = 6;
+
+  // The size of the raw resource content in bytes (before any base64 encoding
+  // or tokenisation), if known. Clients may use this to estimate context usage.
+  optional int64 size = 7;
+
+  // Optional annotations describing intended audience and priority.
+  optional MCPAnnotations annotations = 8;
+
+  // Icons representing the resource in client UIs.
+  repeated MCPIcon icons = 9;
+}

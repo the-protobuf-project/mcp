@@ -12,7 +12,7 @@ lint:
     - ENUM_VALUE_PREFIX
     - COMMENT_ENUM_VALUE
     - COMMENT_ENUM
-    # Files live under mcp/protobuf/ but declare `package mcp` (matching the
+    # Files live under mcp/v1/ but declare `package mcp` (matching the
     # published buf.build/the-protobuf-project/mcp module), so the directory
     # intentionally does not match the package.
     - PACKAGE_DIRECTORY_MATCH

@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package mcp;
 
+import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
+
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ProgressProto";
@@ -40,10 +43,18 @@ option java_package = "com.mcp.protobuf";
 // The plugin auto-generates MCP tool handlers that send progress notifications
 // and return the final result.
 message MCPProgress {
-  // Progress value so far (must increase with each chunk).
-  double progress = 1;
-  // Optional total; omit if unknown.
-  optional double total = 2;
-  // Human-readable status message.
+  // Extra metadata associated with the progress update.
+  map<string, google.protobuf.Struct> meta = 1;
+
+  // Token identifying the progress stream.
+  google.protobuf.Any progress_token = 2;
+
+  // Human-readable status text.
   string message = 3;
+
+  // Current progress amount.
+  double progress = 4;
+
+  // Expected total amount.
+  optional double total = 5;
 }

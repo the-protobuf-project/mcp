@@ -164,7 +164,7 @@ buf dep update
 syntax = "proto3";
 package todo.v1;
 
-import "mcp/protobuf/annotations.proto";
+import "mcp/v1/annotations.proto";
 
 service TodoService {
   option (mcp.service) = {
@@ -181,7 +181,7 @@ service TodoService {
     };
     option (mcp.elicitation) = {
       message: "Please confirm the todo details before creating."
-      schema: "todo.v1.CreateTodoConfirmation"
+      schema: { [type.googleapis.com/todo.v1.CreateTodoConfirmation]: {} }
     };
   }
 
@@ -269,7 +269,7 @@ MCP_TRANSPORT=stdio npx @modelcontextprotocol/inspector -- ./server
 
 ## MCP Annotations
 
-All annotations are imported from `mcp/protobuf/annotations.proto` ([BSR](https://buf.build/the-protobuf-project/mcp)).
+All annotations are imported from `mcp/v1/annotations.proto` ([BSR](https://buf.build/the-protobuf-project/mcp)).
 
 ### Service-level: `mcp.service`
 
@@ -310,16 +310,33 @@ rpc GetItem(GetItemRequest) returns (Item) {
 
 ### Elicitation: `mcp.elicitation`
 
-Request user confirmation before executing a tool. The `schema` references a proto message whose fields become the confirmation form:
+Request user input before executing a tool. In **form mode**, `schema` carries an
+empty instance of a proto message whose fields become the form:
 
 ```protobuf
 rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty) {
   option (mcp.elicitation) = {
     message: "Are you sure you want to delete this item?"
-    schema: "mypackage.DeleteConfirmation"
+    schema: { [type.googleapis.com/mypackage.DeleteConfirmation]: {} }
+    required: true            // optional: abort the call if the user declines
   };
 }
 ```
+
+In **URL mode**, the user is sent to an external URL instead of a form:
+
+```protobuf
+rpc Authenticate(AuthRequest) returns (AuthResponse) {
+  option (mcp.elicitation) = {
+    mode: MCP_ELICITATION_MODE_URL
+    message: "Complete authentication via the link below."
+    url: "https://example.com/auth"
+    elicitation_id: "auth-session-abc"
+  };
+}
+```
+
+The mode is inferred when unset — form if `schema` is set, URL if `url` is set.
 
 Elicitation is supported in Go, Python, and Rust with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation. The C++ generator does not emit elicitation handlers.
 
@@ -335,8 +352,8 @@ message User {
       description: "The resource name of the user. You can parse the user id from the resource name."
       examples: "users/alice"
       examples: "users/bob"
-      format: "uri"           // optional: override format (uri, email, uuid, etc.)
-      deprecated: false       // optional: mark field as deprecated
+      format: MCP_FIELD_FORMAT_URI  // optional: override the JSON Schema format
+      deprecated: false             // optional: mark field as deprecated
     }
   ];
 }
@@ -374,7 +391,7 @@ For enum fields, enum descriptions take precedence over `(mcp.field)` descriptio
 For long-running operations, use gRPC server streaming with `mcp.MCPProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
 
 ```protobuf
-import "mcp/protobuf/progress.proto";
+import "mcp/v1/progress.proto";
 
 message CreateTodoStreamChunk {
   oneof payload {
@@ -392,7 +409,29 @@ The plugin auto-generates tool handlers that send MCP `notifications/progress` f
 
 ### Resources
 
-Resources are auto-detected from `google.api.resource` annotations on proto messages. No additional MCP annotation is needed.
+Resources are auto-detected from `google.api.resource` annotations on proto
+messages — no additional MCP annotation is needed. They can also be declared
+explicitly on the service via `mcp.service.resources`:
+
+```protobuf
+service TodoService {
+  option (mcp.service) = {
+    resources: [
+      {
+        pattern: "todo://users/{user}/todos/{todo}"
+        name: "Todo"
+        title: "Todo item"
+        description: "A single todo item belonging to a user."
+        mime_type: MCP_MIME_TYPE_APPLICATION_JSON
+        annotations: { audience: [MCP_ROLE_USER, MCP_ROLE_ASSISTANT] priority: 0.8 }
+      }
+    ]
+  };
+}
+```
+
+Set `uri` for a fixed resource, or `pattern` for a URI template — the two are a
+oneof, so exactly one applies.
 
 ## Project Structure
 
@@ -402,8 +441,8 @@ mcp/
 ├── go.work                    # Workspace (root + examples)
 ├── MODULE.bazel               # Bazel module (also published to the BCR)
 ├── Justfile                   # Common dev tasks
-├── proto/                     # Publishable buf module (BSR)
-│   └── mcp/protobuf/          # MCP annotation .proto source files
+├── protobuf/                  # Publishable buf module (BSR)
+│   └── mcp/v1/                # MCP annotation .proto source files
 ├── plugin/
 │   ├── cmd/protoc-gen-mcp/    # Plugin binary (go install target)
 │   └── generator/             # Code generation (Go, Python, Rust, C++)
