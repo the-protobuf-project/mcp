@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1"
-	"github.com/the-protobuf-project/runtime-go/mcpruntime"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -40,17 +40,17 @@ func TestSmokeCounterService(t *testing.T) {
 	defer conn.Close()
 
 	client := counterpbv1.NewCounterServiceClient(conn)
-	server := mcpruntime.NewMCPServer(&mcpruntime.MCPServerConfig{
+	server := mcp.NewMCPServer(&mcp.MCPServerConfig{
 		Name:    "smoke-counter",
 		Version: "0.0.1",
 	})
 	counterpbv1.ForwardToCounterServiceMCPClient(server, client)
 
-	clientTransport, serverTransport := mcp.NewInMemoryTransports()
+	clientTransport, serverTransport := mcpsdk.NewInMemoryTransports()
 	done := make(chan error, 1)
 	go func() { done <- server.Run(ctx, serverTransport) }()
 
-	mcpClient := mcp.NewClient(&mcp.Implementation{
+	mcpClient := mcpsdk.NewClient(&mcpsdk.Implementation{
 		Name:    "smoke-client",
 		Version: "0.0.1",
 	}, nil)
@@ -60,7 +60,7 @@ func TestSmokeCounterService(t *testing.T) {
 	}
 	defer func() { _ = session.Close() }()
 
-	toolsResult, err := session.ListTools(ctx, &mcp.ListToolsParams{})
+	toolsResult, err := session.ListTools(ctx, &mcpsdk.ListToolsParams{})
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestSmokeCounterService(t *testing.T) {
 	}
 
 	countArgs, _ := json.Marshal(map[string]any{"to": 3})
-	countResult, err := session.CallTool(ctx, &mcp.CallToolParams{
+	countResult, err := session.CallTool(ctx, &mcpsdk.CallToolParams{
 		Name:      "counter_service-count_v1",
 		Arguments: json.RawMessage(countArgs),
 	})
@@ -86,7 +86,7 @@ func TestSmokeCounterService(t *testing.T) {
 	t.Logf("Count response: %s", text)
 }
 
-func extractText(result *mcp.CallToolResult) string {
+func extractText(result *mcpsdk.CallToolResult) string {
 	if result == nil || len(result.Content) == 0 {
 		return ""
 	}

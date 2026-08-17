@@ -7,7 +7,7 @@
 package todopbv1
 
 import (
-	_ "github.com/the-protobuf-project/mcp/protobuf/mcppb"
+	_ "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"

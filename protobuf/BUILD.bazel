@@ -1,9 +1,0 @@
-load("@rules_go//go:def.bzl", "go_library")
-
-go_library(
-    name = "protobuf",
-    srcs = ["doc.go"],
-    importpath = "github.com/the-protobuf-project/mcp/protobuf",
-    visibility = ["//visibility:public"],
-    deps = ["//protobuf/mcppb"],
-)

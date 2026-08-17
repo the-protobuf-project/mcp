@@ -7,7 +7,7 @@
 package counterpbv1
 
 import (
-	mcppb "github.com/the-protobuf-project/mcp/protobuf/mcppb"
+	protobuf "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -71,7 +71,7 @@ func (x *CountStreamChunk) GetPayload() isCountStreamChunk_Payload {
 	return nil
 }
 
-func (x *CountStreamChunk) GetProgress() *mcppb.MCPProgress {
+func (x *CountStreamChunk) GetProgress() *protobuf.MCPProgress {
 	if x != nil {
 		if x, ok := x.Payload.(*CountStreamChunk_Progress); ok {
 			return x.Progress
@@ -94,7 +94,7 @@ type isCountStreamChunk_Payload interface {
 }
 
 type CountStreamChunk_Progress struct {
-	Progress *mcppb.MCPProgress `protobuf:"bytes,1,opt,name=progress,proto3,oneof"`
+	Progress *protobuf.MCPProgress `protobuf:"bytes,1,opt,name=progress,proto3,oneof"`
 }
 
 type CountStreamChunk_Result struct {
@@ -135,10 +135,10 @@ func file_counter_v1_counter_service_proto_rawDescGZIP() []byte {
 
 var file_counter_v1_counter_service_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_counter_v1_counter_service_proto_goTypes = []any{
-	(*CountStreamChunk)(nil),  // 0: counter.v1.CountStreamChunk
-	(*mcppb.MCPProgress)(nil), // 1: mcp.MCPProgress
-	(*CountResponse)(nil),     // 2: counter.v1.CountResponse
-	(*CountRequest)(nil),      // 3: counter.v1.CountRequest
+	(*CountStreamChunk)(nil),     // 0: counter.v1.CountStreamChunk
+	(*protobuf.MCPProgress)(nil), // 1: mcp.MCPProgress
+	(*CountResponse)(nil),        // 2: counter.v1.CountResponse
+	(*CountRequest)(nil),         // 3: counter.v1.CountRequest
 }
 var file_counter_v1_counter_service_proto_depIdxs = []int32{
 	1, // 0: counter.v1.CountStreamChunk.progress:type_name -> mcp.MCPProgress

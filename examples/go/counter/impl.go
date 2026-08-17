@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	mcppb "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
 	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1"
-	"github.com/the-protobuf-project/mcp/protobuf/mcppb"
-	"github.com/the-protobuf-project/runtime-go/mcpruntime"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -34,7 +34,7 @@ func (s *counterServer) Count(req *counterpbv1.CountRequest, stream grpc.ServerS
 
 	// Only send progress when client requested it via metadata (from params._meta.progressToken).
 	md, _ := metadata.FromIncomingContext(stream.Context())
-	wantsProgress := len(md.Get(mcpruntime.GRPCProgressTokenKey)) > 0
+	wantsProgress := len(md.Get(mcp.GRPCProgressTokenKey)) > 0
 
 	for i := int32(0); i <= to; i++ {
 		select {

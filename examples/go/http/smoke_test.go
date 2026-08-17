@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/todo/todopbv1"
-	"github.com/the-protobuf-project/runtime-go/mcpruntime"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 )
 
 // TestSmokeTodoService verifies the full pipeline:
@@ -23,25 +23,25 @@ func TestSmokeTodoService(t *testing.T) {
 
 	// --- Server ---
 	srv := newTodoServer()
-	server := mcpruntime.NewMCPServer(&mcpruntime.MCPServerConfig{
+	server := mcp.NewMCPServer(&mcp.MCPServerConfig{
 		Name:    "smoke-test",
 		Version: "0.0.1",
 	})
 	todopbv1.RegisterTodoServiceMCPHandler(server, srv)
 
 	// --- In-memory transport ---
-	clientTransport, serverTransport := mcp.NewInMemoryTransports()
+	clientTransport, serverTransport := mcpsdk.NewInMemoryTransports()
 
 	done := make(chan error, 1)
 	go func() { done <- server.Run(ctx, serverTransport) }()
 
 	// --- Client ---
-	client := mcp.NewClient(&mcp.Implementation{
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{
 		Name:    "smoke-client",
 		Version: "0.0.1",
-	}, &mcp.ClientOptions{
-		ElicitationHandler: func(_ context.Context, req *mcp.ElicitRequest) (*mcp.ElicitResult, error) {
-			return &mcp.ElicitResult{Action: "accept", Content: map[string]any{"confirm": "yes"}}, nil
+	}, &mcpsdk.ClientOptions{
+		ElicitationHandler: func(_ context.Context, req *mcpsdk.ElicitRequest) (*mcpsdk.ElicitResult, error) {
+			return &mcpsdk.ElicitResult{Action: "accept", Content: map[string]any{"confirm": "yes"}}, nil
 		},
 	})
 	session, err := client.Connect(ctx, clientTransport, nil)
@@ -51,7 +51,7 @@ func TestSmokeTodoService(t *testing.T) {
 	defer func() { _ = session.Close() }()
 
 	// 1) List tools
-	toolsResult, err := session.ListTools(ctx, &mcp.ListToolsParams{})
+	toolsResult, err := session.ListTools(ctx, &mcpsdk.ListToolsParams{})
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestSmokeTodoService(t *testing.T) {
 			"priority":    "PRIORITY_HIGH",
 		},
 	})
-	createResult, err := session.CallTool(ctx, &mcp.CallToolParams{
+	createResult, err := session.CallTool(ctx, &mcpsdk.CallToolParams{
 		Name:      "todo_service-create_todo_v1",
 		Arguments: json.RawMessage(createArgs),
 	})
@@ -94,7 +94,7 @@ func TestSmokeTodoService(t *testing.T) {
 	getArgs, _ := json.Marshal(map[string]any{
 		"name": "users/alice/todos/task-1",
 	})
-	getResult, err := session.CallTool(ctx, &mcp.CallToolParams{
+	getResult, err := session.CallTool(ctx, &mcpsdk.CallToolParams{
 		Name:      "todo_service-get_todo_v1",
 		Arguments: json.RawMessage(getArgs),
 	})
@@ -112,7 +112,7 @@ func TestSmokeTodoService(t *testing.T) {
 	listArgs, _ := json.Marshal(map[string]any{
 		"parent": "users/alice",
 	})
-	listResult, err := session.CallTool(ctx, &mcp.CallToolParams{
+	listResult, err := session.CallTool(ctx, &mcpsdk.CallToolParams{
 		Name:      "todo_service-list_todos_v1",
 		Arguments: json.RawMessage(listArgs),
 	})
@@ -130,7 +130,7 @@ func TestSmokeTodoService(t *testing.T) {
 	deleteArgs, _ := json.Marshal(map[string]any{
 		"name": "users/alice/todos/task-1",
 	})
-	_, err = session.CallTool(ctx, &mcp.CallToolParams{
+	_, err = session.CallTool(ctx, &mcpsdk.CallToolParams{
 		Name:      "todo_service-delete_todo_v1",
 		Arguments: json.RawMessage(deleteArgs),
 	})
@@ -140,7 +140,7 @@ func TestSmokeTodoService(t *testing.T) {
 	t.Log("DeleteTodo succeeded")
 
 	// 6) Verify deleted — ListTodos should return empty
-	listResult2, err := session.CallTool(ctx, &mcp.CallToolParams{
+	listResult2, err := session.CallTool(ctx, &mcpsdk.CallToolParams{
 		Name:      "todo_service-list_todos_v1",
 		Arguments: json.RawMessage(listArgs),
 	})
@@ -154,7 +154,7 @@ func TestSmokeTodoService(t *testing.T) {
 	t.Log("Verified todo was deleted")
 }
 
-func extractText(result *mcp.CallToolResult) string {
+func extractText(result *mcpsdk.CallToolResult) string {
 	if result == nil || len(result.Content) == 0 {
 		return ""
 	}

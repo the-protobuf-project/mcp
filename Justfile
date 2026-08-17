@@ -41,7 +41,7 @@ lint:
 
 # Run go vet
 vet:
-    go vet ./plugin/... ./protobuf/...
+    go vet ./plugin/...
 
 # Check formatting
 fmt-check:
@@ -87,13 +87,6 @@ test-cpp:
 # Run all tests (Go + Python + Rust + C++)
 test-all: test test-python test-rust test-cpp
 
-# Generate pre-compiled proto libraries (Go + Python + Rust)
-generate-proto:
-    cd proto && buf generate
-    go fmt ./protobuf/... ./plugin/...
-    @echo '__path__ = __import__("pkgutil").extend_path(__path__, __name__)' > protobuf/python/mcp/__init__.py
-    @touch protobuf/python/mcp/protobuf/__init__.py
-
 # Generate C++ proto stubs with local protoc (matches system libprotobuf)
 generate-cpp:
     cd examples && buf export proto -o /tmp/proto_export
@@ -114,7 +107,7 @@ build-cpp:
     cd examples/cpp && make
 
 # Rebuild the plugin and regenerate all example proto code
-generate: generate-proto install
+generate: install
     cd examples && buf generate
     # generated Go lives in the examples module, so it is formatted from there
     cd examples && go fmt ./proto/generated/go/...

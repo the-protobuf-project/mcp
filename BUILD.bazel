@@ -1,5 +1,4 @@
 load("@gazelle//:def.bzl", "gazelle")
 
 # gazelle:prefix github.com/the-protobuf-project/mcp
-# gazelle:resolve go github.com/the-protobuf-project/mcp/protobuf/mcppb //protobuf/mcppb:mcppb
 gazelle(name = "gazelle")

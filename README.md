@@ -121,13 +121,15 @@ Or download a binary from [GitHub Releases](https://github.com/the-protobuf-proj
 The MCP annotation types (`mcp.*`) are needed at runtime so generated code can
 resolve its imports — just like `googleapis-common-protos` for Google API types.
 
-- **Go** — pre-compiled and shipped as part of this module:
-  [`protobuf/mcppb`](protobuf/README.md)
-  (`go get github.com/the-protobuf-project/mcp/protobuf/mcppb`).
-- **Other languages** — add the published Buf module as a dependency and
-  generate the types in your own client (see [Quick Start](#quick-start) below).
-  Nothing extra to install: the annotations come from
-  [`buf.build/the-protobuf-project/mcp`](https://buf.build/the-protobuf-project/mcp).
+They come from the published Buf module,
+[`buf.build/the-protobuf-project/mcp`](https://buf.build/the-protobuf-project/mcp),
+in every language — this repository ships the plugin and the `.proto` files, and
+generates no language bindings of its own.
+
+- **Go** — the registry builds them for you:
+  `go get buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go`.
+- **Other languages** — add the module as a dependency and generate the types in
+  your own client (see [Quick Start](#quick-start) below).
 
 ## Quick Start
 
@@ -474,7 +476,7 @@ The Go runtime that generated code links against lives in
 ships the plugin and the annotations only.
 
 ```go
-import "github.com/the-protobuf-project/runtime-go/mcpruntime"
+import "github.com/the-protobuf-project/runtime-go/agents/mcp"
 
 cfg := &mcpruntime.MCPServerConfig{
     Name:       "my-service",

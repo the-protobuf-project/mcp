@@ -7,15 +7,15 @@ import (
 	"os"
 
 	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/todo/todopbv1"
-	"github.com/the-protobuf-project/runtime-go/mcpruntime"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	transports := mcpruntime.ParseTransports("streamable-http")
+	transports := mcp.ParseTransports("streamable-http")
 	if t := os.Getenv("MCP_TRANSPORT"); t != "" {
-		transports = mcpruntime.ParseTransports(t)
+		transports = mcp.ParseTransports(t)
 	}
 	mcpAddr := ":8082"
 	if a := os.Getenv("MCP_ADDR"); a != "" {
@@ -44,7 +44,7 @@ func main() {
 	}()
 
 	// Start MCP server (blocks).
-	cfg := &mcpruntime.MCPServerConfig{
+	cfg := &mcp.MCPServerConfig{
 		Name:       "todo-mcp-example",
 		Version:    "0.1.0",
 		Transports: transports,
@@ -53,7 +53,7 @@ func main() {
 		GeneratedBasePath: todopbv1.TodoServiceMCPDefaultBasePath,
 	}
 
-	if ep, err := mcpruntime.ServerEndpoint(cfg); err == nil {
+	if ep, err := mcp.ServerEndpoint(cfg); err == nil {
 		log.Printf("MCP will listen on %s", ep.URL)
 	}
 

@@ -18,4 +18,11 @@ go_sdk.download(version = "1.26.4")
 # Configure Gazelle to load the list of Go modules from go.mod using the
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
-use_repo(go_deps, "build_buf_gen_go_bufbuild_protovalidate_protocolbuffers_go", "com_github_the_protobuf_project_protokit", "org_golang_google_genproto_googleapis_api", "org_golang_google_protobuf")
+use_repo(
+    go_deps,
+    "build_buf_gen_go_bufbuild_protovalidate_protocolbuffers_go",
+    "build_buf_gen_go_the_protobuf_project_mcp_protocolbuffers_go",
+    "com_github_the_protobuf_project_protokit",
+    "org_golang_google_genproto_googleapis_api",
+    "org_golang_google_protobuf",
+)

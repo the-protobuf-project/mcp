@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1"
-	"github.com/the-protobuf-project/runtime-go/mcpruntime"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
@@ -19,9 +19,9 @@ import (
 )
 
 func main() {
-	transports := mcpruntime.ParseTransports("streamable-http")
+	transports := mcp.ParseTransports("streamable-http")
 	if t := os.Getenv("MCP_TRANSPORT"); t != "" {
-		transports = mcpruntime.ParseTransports(t)
+		transports = mcp.ParseTransports(t)
 	}
 	mcpAddr := ":8083"
 	if a := os.Getenv("MCP_ADDR"); a != "" {
@@ -65,7 +65,7 @@ func main() {
 
 	client := counterpbv1.NewCounterServiceClient(conn)
 
-	cfg := &mcpruntime.MCPServerConfig{
+	cfg := &mcp.MCPServerConfig{
 		Name:              "counter-mcp-example",
 		Version:           "0.1.0",
 		Transports:        transports,
@@ -75,11 +75,11 @@ func main() {
 		HealthCheckConn:   conn,
 	}
 
-	if ep, err := mcpruntime.ServerEndpoint(cfg); err == nil {
+	if ep, err := mcp.ServerEndpoint(cfg); err == nil {
 		log.Printf("MCP will listen on %s (forwarding Count to gRPC at %s, /health probes gRPC)", ep.URL, grpcAddr)
 	}
 
-	if err := mcpruntime.StartServer(context.Background(), cfg, func(s *mcp.Server) {
+	if err := mcp.StartServer(context.Background(), cfg, func(s *mcpsdk.Server) {
 		counterpbv1.ForwardToCounterServiceMCPClient(s, client)
 	}); err != nil {
 		log.Fatalf("MCP server error: %v", err)

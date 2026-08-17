@@ -5,16 +5,16 @@ import (
 	"log"
 
 	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/todo/todopbv1"
-	"github.com/the-protobuf-project/runtime-go/mcpruntime"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 )
 
 func main() {
 	srv := newTodoServer()
 
-	cfg := &mcpruntime.MCPServerConfig{
+	cfg := &mcp.MCPServerConfig{
 		Name:              "todo-mcp-stdio",
 		Version:           "0.1.0",
-		Transports:        []mcpruntime.Transport{mcpruntime.TransportStdio},
+		Transports:        []mcp.Transport{mcp.TransportStdio},
 		GeneratedBasePath: todopbv1.TodoServiceMCPDefaultBasePath,
 	}
 
