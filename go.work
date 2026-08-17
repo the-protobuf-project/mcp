@@ -1,5 +1,10 @@
-go 1.25.6
+go 1.26.4
 
+// A workspace applies the union of its members' replace directives to every
+// module in it, so a filesystem replace in examples/go.mod also rewrites builds
+// of the root module -- even for packages the root module never imports. Keep
+// every replace path inside this repository; a sibling-checkout path resolves
+// locally but fails every CI job with "no such file or directory".
 use (
 	.
 	./examples

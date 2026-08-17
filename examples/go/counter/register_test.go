@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1"
+	"github.com/the-protobuf-project/runtime-go/agents/mcp"
 )
 
 // TestRegisterCounterServiceMCPHandler verifies the in-process (Register) path
@@ -28,7 +28,7 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	mcpServer := runtime.NewMCPServer(&runtime.MCPServerConfig{
+	mcpServer := mcp.NewMCPServer(&mcp.MCPServerConfig{
 		Name:    "register-smoke",
 		Version: "0.0.1",
 	})
@@ -39,7 +39,7 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 
 	// Use the streamable-HTTP transport so that detached-context notifications
 	// (sent after the tool response is returned) are routed to the SSE stream.
-	handler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server {
+	handler := mcpsdk.NewStreamableHTTPHandler(func(*http.Request) *mcpsdk.Server {
 		return mcpServer
 	}, nil)
 	ts := httptest.NewServer(handler)
@@ -47,16 +47,16 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 
 	var (
 		mu             sync.Mutex
-		progressNotifs []mcp.ProgressNotificationParams
+		progressNotifs []mcpsdk.ProgressNotificationParams
 		gotFinal       = make(chan struct{})
 		closeOnce      sync.Once
 	)
 
-	mcpClient := mcp.NewClient(&mcp.Implementation{
+	mcpClient := mcpsdk.NewClient(&mcpsdk.Implementation{
 		Name:    "register-smoke-client",
 		Version: "0.0.1",
-	}, &mcp.ClientOptions{
-		ProgressNotificationHandler: func(_ context.Context, req *mcp.ProgressNotificationClientRequest) {
+	}, &mcpsdk.ClientOptions{
+		ProgressNotificationHandler: func(_ context.Context, req *mcpsdk.ProgressNotificationClientRequest) {
 			mu.Lock()
 			progressNotifs = append(progressNotifs, *req.Params)
 			// SendDoneProgress sets Total=1.0 as the sentinel for completion.
@@ -68,7 +68,7 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 		},
 	})
 
-	session, err := mcpClient.Connect(ctx, &mcp.StreamableClientTransport{
+	session, err := mcpClient.Connect(ctx, &mcpsdk.StreamableClientTransport{
 		Endpoint: ts.URL + "/mcp",
 	}, nil)
 	if err != nil {
@@ -77,7 +77,7 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 	defer func() { _ = session.Close() }()
 
 	// 1. Verify Count tool is listed.
-	toolsResult, err := session.ListTools(ctx, &mcp.ListToolsParams{})
+	toolsResult, err := session.ListTools(ctx, &mcpsdk.ListToolsParams{})
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
 	}
@@ -96,10 +96,10 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 	// 2. Call Count(to=3) with progressToken — expect immediate {"status":"started"}.
 	// Meta must be pre-initialized; SetProgressToken doesn't call SetMeta when nil.
 	countArgs, _ := json.Marshal(map[string]any{"to": 3})
-	callParams := &mcp.CallToolParams{
+	callParams := &mcpsdk.CallToolParams{
 		Name:      "counter_service-count_v1",
 		Arguments: json.RawMessage(countArgs),
-		Meta:      mcp.Meta{},
+		Meta:      mcpsdk.Meta{},
 	}
 	callParams.SetProgressToken("test-progress-token")
 
@@ -126,7 +126,7 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 
 	// 4. Verify final notification carries the CountResponse JSON.
 	mu.Lock()
-	notifs := append([]mcp.ProgressNotificationParams{}, progressNotifs...)
+	notifs := append([]mcpsdk.ProgressNotificationParams{}, progressNotifs...)
 	mu.Unlock()
 
 	var finalMsg string

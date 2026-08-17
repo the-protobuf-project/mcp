@@ -10,4 +10,4 @@ tasks:
     platform: ${{ platform }}
     bazel: ${{ bazel }}
     build_targets:
-      - "@grpc_mcp_gateway//proto/mcp/protobuf:mcppb_proto"
+      - "@mcp//proto/mcp/protobuf:mcppb_proto"

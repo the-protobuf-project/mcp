@@ -1,6 +1,6 @@
 # Examples
 
-End-to-end examples demonstrating how to expose gRPC services as MCP servers in Go, Python, and Rust using `grpc-mcp-gateway`.
+End-to-end examples demonstrating how to expose gRPC services as MCP servers in Go, Python, and Rust using `protoc-gen-mcp`.
 
 ## Overview
 
@@ -84,14 +84,14 @@ Clients request progress by including `progressToken` in `params._meta` when cal
 - **`mcp.enum`** / **`mcp.enum_value`** — enum-level and per-value descriptions
 - **`google.api.resource`** — auto-detected MCP resources from AIP resource annotations
 
-**CounterService** uses `progress: true` on the tool option and the oneof layout above. See [Progress](https://github.com/the-protobuf-project/grpc-mcp-gateway#progress-server-streaming) in the main README for details.
+**CounterService** uses `progress: true` on the tool option and the oneof layout above. See [Progress](https://github.com/the-protobuf-project/mcp#progress-server-streaming) in the main README for details.
 
 ## Code Generation
 
 Install the plugin and generate code for all languages:
 
 ```bash
-go install github.com/the-protobuf-project/grpc-mcp-gateway/plugin/cmd/protoc-gen-mcp@latest
+go install github.com/the-protobuf-project/mcp/plugin/cmd/protoc-gen-mcp@latest
 
 cd examples
 buf generate

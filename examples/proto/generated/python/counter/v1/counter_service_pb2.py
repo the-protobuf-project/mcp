@@ -27,14 +27,14 @@ from mcp.protobuf import progress_pb2 as mcp_dot_protobuf_dot_progress__pb2
 from counter.v1 import counter_pb2 as counter_dot_v1_dot_counter__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n counter/v1/counter_service.proto\x12\ncounter.v1\x1a\x1emcp/protobuf/annotations.proto\x1a\x1bmcp/protobuf/progress.proto\x1a\x18\x63ounter/v1/counter.proto\"\x82\x01\n\x10\x43ountStreamChunk\x12.\n\x08progress\x18\x01 \x01(\x0b\x32\x10.mcp.MCPProgressH\x00R\x08progress\x12\x33\n\x06result\x18\x02 \x01(\x0b\x32\x19.counter.v1.CountResponseH\x00R\x06resultB\t\n\x07payload2\xb8\x02\n\x0e\x43ounterService\x12\xd4\x01\n\x05\x43ount\x12\x18.counter.v1.CountRequest\x1a\x1c.counter.v1.CountStreamChunk\"\x90\x01\xca\xf3\x18\x8b\x01\x12\x86\x01\x43ounts from 0 up to the given number. Sends progress updates as it counts. Use with progressToken in _meta for progress notifications.\x18\x01\x30\x01\x1aO\xc2\xf3\x18K\nI\n\x0b\x43ounter App\x12\x05\x31.0.0\x1a\x33\x41 simple counter that streams progress as it countsB\x95\x01\n\x0e\x63om.counter.v1B\x13\x43ounterServiceProtoP\x01Zlgithub.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1;counterpbv1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n counter/v1/counter_service.proto\x12\ncounter.v1\x1a\x1emcp/protobuf/annotations.proto\x1a\x1bmcp/protobuf/progress.proto\x1a\x18\x63ounter/v1/counter.proto\"\x82\x01\n\x10\x43ountStreamChunk\x12.\n\x08progress\x18\x01 \x01(\x0b\x32\x10.mcp.MCPProgressH\x00R\x08progress\x12\x33\n\x06result\x18\x02 \x01(\x0b\x32\x19.counter.v1.CountResponseH\x00R\x06resultB\t\n\x07payload2\xb8\x02\n\x0e\x43ounterService\x12\xd4\x01\n\x05\x43ount\x12\x18.counter.v1.CountRequest\x1a\x1c.counter.v1.CountStreamChunk\"\x90\x01\xca\xf3\x18\x8b\x01\x12\x86\x01\x43ounts from 0 up to the given number. Sends progress updates as it counts. Use with progressToken in _meta for progress notifications.\x18\x01\x30\x01\x1aO\xc2\xf3\x18K\nI\n\x0b\x43ounter App\x12\x05\x31.0.0\x1a\x33\x41 simple counter that streams progress as it countsB\x88\x01\n\x0e\x63om.counter.v1B\x13\x43ounterServiceProtoP\x01Z_github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1;counterpbv1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'counter.v1.counter_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
-  _globals['DESCRIPTOR']._serialized_options = b'\n\016com.counter.v1B\023CounterServiceProtoP\001Zlgithub.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1;counterpbv1'
+  _globals['DESCRIPTOR']._serialized_options = b'\n\016com.counter.v1B\023CounterServiceProtoP\001Z_github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1;counterpbv1'
   _globals['_COUNTERSERVICE']._loaded_options = None
   _globals['_COUNTERSERVICE']._serialized_options = b'\302\363\030K\nI\n\013Counter App\022\0051.0.0\0323A simple counter that streams progress as it counts'
   _globals['_COUNTERSERVICE'].methods_by_name['Count']._loaded_options = None

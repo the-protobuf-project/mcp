@@ -1,7 +1,7 @@
 package generator
 
 import (
-	"github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb"
+	mcppb "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )

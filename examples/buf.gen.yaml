@@ -2,21 +2,37 @@ version: v2
 # Single input (no paths) ensures strategy:all gets one plugin invocation with all files.
 inputs:
   - directory: proto
+# The MCP annotation types are consumed from the Buf Schema Registry rather than
+# generated here, so generated code must import them from there too. Without
+# this override protoc-gen-go emits the go_package baked into the .proto files,
+# which points at a package this repo no longer ships.
+managed:
+  enabled: true
+  # Only the MCP dependency is managed. Managing the examples' own protos would
+  # also apply buf's default C#/ObjC/PHP/Ruby options, changing their descriptors
+  # for no reason.
+  disable:
+    - path: counter
+    - path: todo
+  override:
+    - file_option: go_package_prefix
+      module: buf.build/the-protobuf-project/mcp
+      value: buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go
 plugins:
   # --- Go ---
   - local: protoc-gen-go
     out: proto/generated/go
     opt:
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go
+      - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   - local: protoc-gen-go-grpc
     out: proto/generated/go
     opt:
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go
+      - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   - local: protoc-gen-mcp
     out: proto/generated/go
     opt:
       - lang=go
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go
+      - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   # --- Python ---
   # Pin to match the protobuf runtime available on PyPI (see proto/buf.gen.yaml).
   - remote: buf.build/protocolbuffers/python:v34.1

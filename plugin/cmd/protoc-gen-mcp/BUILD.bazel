@@ -3,7 +3,7 @@ load("@rules_go//go:def.bzl", "go_binary", "go_library")
 go_library(
     name = "protoc-gen-mcp_lib",
     srcs = ["main.go"],
-    importpath = "github.com/the-protobuf-project/grpc-mcp-gateway/plugin/cmd/protoc-gen-mcp",
+    importpath = "github.com/the-protobuf-project/mcp/plugin/cmd/protoc-gen-mcp",
     visibility = ["//visibility:private"],
     deps = [
         "//plugin/generator",

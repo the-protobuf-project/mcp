@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime/debug"
 
-	"github.com/the-protobuf-project/grpc-mcp-gateway/plugin/generator"
+	"github.com/the-protobuf-project/mcp/plugin/generator"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -38,7 +38,7 @@ func main() {
 	lang := flags.String(
 		"lang",
 		"go",
-		`Target language for generated MCP code (go, python, rust, all).`,
+		`Target language for generated MCP code (go, python, rust, cpp, all).`,
 	)
 	packageSuffix := flags.String(
 		"package_suffix",
@@ -51,31 +51,6 @@ func main() {
 	protogen.Options{
 		ParamFunc: flags.Set,
 	}.Run(func(gen *protogen.Plugin) error {
-		if *lang == "all" {
-			for _, f := range gen.Files {
-				if !f.Generate {
-					continue
-				}
-				if err := generator.GenerateAll(f, gen, *packageSuffix); err != nil {
-					return err
-				}
-			}
-			return generator.GenerateCppBatch(gen)
-		}
-		if *lang == "cpp" {
-			return generator.GenerateCppBatch(gen)
-		}
-		for _, f := range gen.Files {
-			if !f.Generate {
-				continue
-			}
-			if err := generator.GenerateFile(f, gen, generator.GenerateOptions{
-				Lang:          generator.Language(*lang),
-				PackageSuffix: *packageSuffix,
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
+		return generator.Generate(gen, *lang, *packageSuffix)
 	})
 }

@@ -81,14 +81,14 @@ homebrew_casks:
       name: homebrew-tap
       token: '{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}'
     directory: Casks
-    homepage: 'https://github.com/the-protobuf-project/grpc-mcp-gateway'
+    homepage: 'https://github.com/the-protobuf-project/mcp'
     description: 'Protoc plugin generating MCP server code (Go, Python, Rust, C++) from Protobuf + gRPC definitions'
     ids:
       - protoc-gen-mcp-archive
     binaries:
       - protoc-gen-mcp
     url:
-      verified: 'github.com/the-protobuf-project/grpc-mcp-gateway/'
+      verified: 'github.com/the-protobuf-project/mcp/'
     hooks:
       post:
         install: |
@@ -99,12 +99,12 @@ homebrew_casks:
 release:
   github:
     owner: the-protobuf-project
-    name: grpc-mcp-gateway
+    name: mcp
   draft: false
   prerelease: auto
   name_template: 'v{{.Version}}'
   header: |
-    ## grpc-mcp-gateway v{{.Version}}
+    ## mcp v{{.Version}}
 
     `protoc-gen-mcp` generates MCP (Model Context Protocol) server code from your
     gRPC/Protobuf service definitions. Download the binary for your platform below.
@@ -118,13 +118,13 @@ release:
 
     #### Go install (plugin)
     ```bash
-    go install github.com/the-protobuf-project/grpc-mcp-gateway/plugin/cmd/protoc-gen-mcp@v{{.Version}}
+    go install github.com/the-protobuf-project/mcp/plugin/cmd/protoc-gen-mcp@v{{.Version}}
     ```
 
     #### Manual (macOS / Linux)
     ```bash
     # Pick your platform, e.g. darwin_arm64 / linux_amd64
-    curl -LO https://github.com/the-protobuf-project/grpc-mcp-gateway/releases/download/v{{.Version}}/protoc-gen-mcp_{{.Version}}_darwin_arm64.tar.gz
+    curl -LO https://github.com/the-protobuf-project/mcp/releases/download/v{{.Version}}/protoc-gen-mcp_{{.Version}}_darwin_arm64.tar.gz
     tar -xzf protoc-gen-mcp_{{.Version}}_darwin_arm64.tar.gz
     sudo mv protoc-gen-mcp /usr/local/bin/
     ```

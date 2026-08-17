@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"text/template"
 
-	"github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb"
+	mcppb "buf.build/gen/go/the-protobuf-project/mcp/protocolbuffers/go/mcp/protobuf"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -71,21 +70,8 @@ func (g *PythonFileGenerator) Generate() {
 	outName := file.GeneratedFilenamePrefix + "_pb2_mcp.py"
 	gf := g.gen.NewGeneratedFile(outName, "")
 
-	funcMap := template.FuncMap{
-		"snakeCase":    toSnakeCase,
-		"pyString":     pyStringLiteral,
-		"lower":        strings.ToLower,
-		"escapeQuotes": func(s string) string { return strings.ReplaceAll(s, `"`, `\"`) },
-	}
-
-	tpl, err := template.New("pygen").Funcs(funcMap).Parse(codeTemplates[LangPython])
-	if err != nil {
-		g.gen.Error(err)
-		return
-	}
-
 	params := g.buildPyParams()
-	if err := tpl.Execute(gf, params); err != nil {
+	if err := pythonTemplate.Execute(gf, params); err != nil {
 		g.gen.Error(err)
 	}
 }

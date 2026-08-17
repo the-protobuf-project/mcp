@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"text/template"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -98,40 +97,9 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	)
 	g.genImportPath = goImportPath
 
-	funcMap := template.FuncMap{
-		"backtick":     func() string { return "`" },
-		"escapeQuotes": func(s string) string { return strings.ReplaceAll(s, `"`, `\"`) },
-		// safeRawString wraps s in a backtick raw-string literal.
-		// If s itself contains a backtick (e.g. from Markdown code spans in proto
-		// comments), it splits on backticks and emits a concatenation expression so
-		// the generated source is still valid Go syntax.
-		// Example: "foo`bar" → `foo` + "`" + `bar`
-		"safeRawString": func(s string) string {
-			if !strings.Contains(s, "`") {
-				return "`" + s + "`"
-			}
-			parts := strings.Split(s, "`")
-			var segments []string
-			for i, p := range parts {
-				if i > 0 {
-					segments = append(segments, `"`+"`"+`"`)
-				}
-				if p != "" {
-					segments = append(segments, "`"+p+"`")
-				}
-			}
-			return strings.Join(segments, " + ")
-		},
-	}
-	tpl, err := template.New("gen").Funcs(funcMap).Parse(codeTemplates[LangGo])
-	if err != nil {
-		g.gen.Error(err)
-		return
-	}
-
 	params := g.buildParams()
 	var buf bytes.Buffer
-	if err := tpl.Execute(&buf, params); err != nil {
+	if err := goTemplate.Execute(&buf, params); err != nil {
 		g.gen.Error(err)
 		return
 	}

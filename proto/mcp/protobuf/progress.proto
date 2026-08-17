@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package mcp;
 
-option go_package = "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb";
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ProgressProto";
 option java_package = "com.mcp.protobuf";

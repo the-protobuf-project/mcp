@@ -17,6 +17,6 @@ go_library(
         "python.tpl",
         "rust.tpl",
     ],
-    importpath = "github.com/the-protobuf-project/grpc-mcp-gateway/plugin/generator/templates",
+    importpath = "github.com/the-protobuf-project/mcp/plugin/generator/templates",
     visibility = ["//visibility:public"],
 )

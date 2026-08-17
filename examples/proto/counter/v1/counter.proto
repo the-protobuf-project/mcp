@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package counter.v1;
 
-option go_package = "github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1;counterpbv1";
+option go_package = "github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1;counterpbv1";
 option java_multiple_files = true;
 option java_outer_classname = "CounterProto";
 option java_package = "com.counter.v1";

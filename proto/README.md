@@ -1,6 +1,6 @@
-# grpc-mcp-gateway
+# mcp
 
-[![BSR](https://img.shields.io/badge/BSR-buf.build%2Fthe-protobuf-project%2Fgrpc--mcp--gateway-blue)](https://buf.build/the-protobuf-project/mcp)
+[![BSR](https://img.shields.io/badge/BSR-buf.build%2Fthe-protobuf-project%2Fmcp-blue)](https://buf.build/the-protobuf-project/mcp)
 
 Protobuf annotations for exposing gRPC services as [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers.
 

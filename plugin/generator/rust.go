@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	"text/template"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -64,22 +63,8 @@ func (g *RustFileGenerator) Generate() {
 	outName := filepath.Join(dir, stem+".mcp.rs")
 	gf := g.gen.NewGeneratedFile(outName, "")
 
-	funcMap := template.FuncMap{
-		"snakeCase":          toSnakeCase,
-		"screamingSnakeCase": toScreamingSnakeCase,
-		"lower":              strings.ToLower,
-		"rsEscape":           rsStringEscape,
-		"escapeQuotes":       func(s string) string { return strings.ReplaceAll(s, `"`, `\"`) },
-	}
-
-	tpl, err := template.New("rsgen").Funcs(funcMap).Parse(codeTemplates[LangRust])
-	if err != nil {
-		g.gen.Error(err)
-		return
-	}
-
 	params := g.buildRsParams()
-	if err := tpl.Execute(gf, params); err != nil {
+	if err := rustTemplate.Execute(gf, params); err != nil {
 		g.gen.Error(err)
 	}
 }
