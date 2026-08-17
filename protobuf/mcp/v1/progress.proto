@@ -1,23 +1,25 @@
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
+
+import "google/protobuf/struct.proto";
 
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "ProgressProto";
-option java_package = "com.mcp.protobuf";
+option java_package = "com.mcp.v1";
 
 // MCPProgress is sent in server-streaming RPC chunks to report progress to MCP clients.
 // Use in a oneof with your result type:
 //
 //	message CreateTodoStreamChunk {
 //	  oneof payload {
-//	    mcp.MCPProgress progress = 1;
+//	    mcp.v1.MCPProgress progress = 1;
 //	    Todo result = 2;
 //	  }
 //	}
 //	rpc CreateTodo(CreateTodoRequest) returns (stream CreateTodoStreamChunk) {
-//	  option (mcp.tool) = { progress: true };
+//	  option (mcp.v1.tool) = { progress: true };
 //	}
 //
 // How to send _meta (MCP client):
@@ -40,10 +42,26 @@ option java_package = "com.mcp.protobuf";
 // The plugin auto-generates MCP tool handlers that send progress notifications
 // and return the final result.
 message MCPProgress {
-  // Progress value so far (must increase with each chunk).
-  double progress = 1;
-  // Optional total; omit if unknown.
-  optional double total = 2;
-  // Human-readable status message.
+  // Extra metadata associated with the progress update.
+  map<string, google.protobuf.Struct> meta = 1;
+
+  // Token identifying the progress stream, echoed back from the client's
+  // params._meta.progressToken. The MCP spec allows the client to send either
+  // a string or an integer, so exactly one of these is set.
+  oneof progress_token {
+    // Token the client sent as a JSON string, e.g. "abc123".
+    string token_string = 2;
+
+    // Token the client sent as a JSON integer, e.g. 42.
+    int64 token_int = 6;
+  }
+
+  // Human-readable status text.
   string message = 3;
+
+  // Current progress amount.
+  double progress = 4;
+
+  // Expected total amount.
+  optional double total = 5;
 }

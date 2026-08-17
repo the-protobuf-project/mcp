@@ -51,7 +51,7 @@ matrix lists, the BCR PR's CI will fail — bump the `bazel:` list in
 You can sanity-check the published target locally:
 
 ```bash
-bazel build //proto/mcp/protobuf:mcppb_proto
+bazel build //protobuf/mcp/v1:mcppb_proto
 ```
 
 ## What happens on release

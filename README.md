@@ -59,12 +59,12 @@ Open-sourced by **The Protobuf Project**.
 
 - **Multi-language** — Generate MCP server code for Go, Python, Rust, and C++ from a single `.proto` file
 - **Tools** — Every unary RPC becomes an MCP tool with a JSON Schema derived from the protobuf request message
-- **Prompts** — Attach prompt templates to RPCs with schema-validated arguments via `(mcp.prompt)`
-- **Field descriptions** — Add `(mcp.field) = { description: "..." }` to message fields for schema descriptions
-- **Enum descriptions** — Add `(mcp.enum)` and `(mcp.enum_value)` for enum-level and per-value descriptions in the schema
-- **Progress** — Use gRPC server streaming with `mcp.MCPProgress` for MCP progress notifications on long-running tools
+- **Prompts** — Attach prompt templates to RPCs with schema-validated arguments via `(mcp.v1.prompt)`
+- **Field descriptions** — Add `(mcp.v1.field) = { description: "..." }` to message fields for schema descriptions
+- **Enum descriptions** — Add `(mcp.v1.enum)` and `(mcp.v1.enum_value)` for enum-level and per-value descriptions in the schema
+- **Progress** — Use gRPC server streaming with `mcp.v1.MCPProgress` for MCP progress notifications on long-running tools
 - **Resources** — Auto-detect MCP resources from `google.api.resource` annotations
-- **Elicitation** — Generate confirmation dialogs before tool execution via `(mcp.elicitation)`
+- **Elicitation** — Generate confirmation dialogs before tool execution via `(mcp.v1.elicitation)`
 - **Transports** — stdio, SSE, and streamable-http — run multiple concurrently in a single process
 - **gRPC forwarding** — Forward MCP tool calls to a remote gRPC server instead of an in-process impl (Go)
 - **Published Protos** — Import the MCP annotations from [`buf.build/the-protobuf-project/mcp`](https://buf.build/the-protobuf-project/mcp) and generate the types in your own client
@@ -164,33 +164,33 @@ buf dep update
 syntax = "proto3";
 package todo.v1;
 
-import "mcp/protobuf/annotations.proto";
+import "mcp/v1/annotations.proto";
 
 service TodoService {
-  option (mcp.service) = {
+  option (mcp.v1.service) = {
     app: {
-      name: "Todo App"
+      display_name: "Todo App"
       version: "1.0.0"
       description: "A simple todo management application"
     }
   };
 
   rpc CreateTodo(CreateTodoRequest) returns (Todo) {
-    option (mcp.tool) = {
+    option (mcp.v1.tool) = {
       description: "Creates a new todo item."
     };
-    option (mcp.elicitation) = {
+    option (mcp.v1.elicitation) = {
       message: "Please confirm the todo details before creating."
       schema: "todo.v1.CreateTodoConfirmation"
     };
   }
 
   rpc GetTodo(GetTodoRequest) returns (Todo) {
-    option (mcp.tool) = {
+    option (mcp.v1.tool) = {
       description: "Retrieves a todo by resource name."
     };
-    option (mcp.prompt) = {
-      name: "summarize_todos"
+    option (mcp.v1.prompt) = {
+      id: "summarize_todos"
       description: "Summarize all pending todo items for a user"
       schema: "todo.v1.SummarizeTodosArgs"
     };
@@ -199,13 +199,13 @@ service TodoService {
 
 // Enum with descriptions for MCP tool schema
 enum Priority {
-  option (mcp.enum) = { description: "Priority level for a todo item." };
+  option (mcp.v1.enum) = { description: "Priority level for a todo item." };
 
-  PRIORITY_UNSPECIFIED = 0 [(mcp.enum_value) = { description: "Unspecified; use default priority." }];
-  PRIORITY_LOW = 1 [(mcp.enum_value) = { description: "Low priority; can be done when convenient." }];
-  PRIORITY_MEDIUM = 2 [(mcp.enum_value) = { description: "Normal priority; default for most todos." }];
-  PRIORITY_HIGH = 3 [(mcp.enum_value) = { description: "High priority; should be done soon." }];
-  PRIORITY_URGENT = 4 [(mcp.enum_value) = { description: "Urgent; do first." }];
+  PRIORITY_UNSPECIFIED = 0 [(mcp.v1.enum_value) = { description: "Unspecified; use default priority." }];
+  PRIORITY_LOW = 1 [(mcp.v1.enum_value) = { description: "Low priority; can be done when convenient." }];
+  PRIORITY_MEDIUM = 2 [(mcp.v1.enum_value) = { description: "Normal priority; default for most todos." }];
+  PRIORITY_HIGH = 3 [(mcp.v1.enum_value) = { description: "High priority; should be done soon." }];
+  PRIORITY_URGENT = 4 [(mcp.v1.enum_value) = { description: "Urgent; do first." }];
 }
 ```
 
@@ -269,61 +269,78 @@ MCP_TRANSPORT=stdio npx @modelcontextprotocol/inspector -- ./server
 
 ## MCP Annotations
 
-All annotations are imported from `mcp/protobuf/annotations.proto` ([BSR](https://buf.build/the-protobuf-project/mcp)).
+All annotations are imported from `mcp/v1/annotations.proto` ([BSR](https://buf.build/the-protobuf-project/mcp)).
 
-### Service-level: `mcp.service`
+### Service-level: `mcp.v1.service`
 
 Defines app metadata for the MCP server:
 
 ```protobuf
-option (mcp.service) = {
-  app: { name: "My App" version: "1.0.0" description: "..." }
+option (mcp.v1.service) = {
+  app: { display_name: "My App" version: "1.0.0" description: "..." }
 };
 ```
 
-### Tool: `mcp.tool`
+### Tool: `mcp.v1.tool`
 
 Override auto-generated tool name or description:
 
 ```protobuf
 rpc CreateItem(CreateItemRequest) returns (Item) {
-  option (mcp.tool) = {
-    name: "custom_tool_name"
+  option (mcp.v1.tool) = {
+    id: "custom_tool_name"
     description: "Custom description for LLMs."
   };
 }
 ```
 
-### Prompt: `mcp.prompt`
+### Prompt: `mcp.v1.prompt`
 
 Attach a prompt template to an RPC. The `schema` references a proto message whose fields become prompt arguments:
 
 ```protobuf
 rpc GetItem(GetItemRequest) returns (Item) {
-  option (mcp.prompt) = {
-    name: "summarize_items"
+  option (mcp.v1.prompt) = {
+    id: "summarize_items"
     description: "Summarize all items"
     schema: "mypackage.SummarizeItemsArgs"
   };
 }
 ```
 
-### Elicitation: `mcp.elicitation`
+### Elicitation: `mcp.v1.elicitation`
 
-Request user confirmation before executing a tool. The `schema` references a proto message whose fields become the confirmation form:
+Request user input before executing a tool. In **form mode**, `schema` is the
+fully-qualified name of a proto message whose fields become the form:
 
 ```protobuf
 rpc DeleteItem(DeleteItemRequest) returns (google.protobuf.Empty) {
-  option (mcp.elicitation) = {
+  option (mcp.v1.elicitation) = {
     message: "Are you sure you want to delete this item?"
     schema: "mypackage.DeleteConfirmation"
+    required: true            // optional: abort the call if the user declines
   };
 }
 ```
 
+In **URL mode**, the user is sent to an external URL instead of a form:
+
+```protobuf
+rpc Authenticate(AuthRequest) returns (AuthResponse) {
+  option (mcp.v1.elicitation) = {
+    mode: MCP_ELICITATION_MODE_URL
+    message: "Complete authentication via the link below."
+    url: "https://example.com/auth"
+    elicitation_id: "auth-session-abc"
+  };
+}
+```
+
+The mode is inferred when unset — form if `schema` is set, URL if `url` is set.
+
 Elicitation is supported in Go, Python, and Rust with graceful degradation — if the client doesn't support elicitation, the tool proceeds without confirmation. The C++ generator does not emit elicitation handlers.
 
-### Field: `mcp.field`
+### Field: `mcp.v1.field`
 
 Add JSON Schema metadata to a message field for the MCP tool inputSchema:
 
@@ -331,12 +348,12 @@ Add JSON Schema metadata to a message field for the MCP tool inputSchema:
 message User {
   string name = 1 [
     (google.api.field_behavior) = IDENTIFIER,
-    (mcp.field) = {
+    (mcp.v1.field) = {
       description: "The resource name of the user. You can parse the user id from the resource name."
       examples: "users/alice"
       examples: "users/bob"
-      format: "uri"           // optional: override format (uri, email, uuid, etc.)
-      deprecated: false       // optional: mark field as deprecated
+      format: MCP_FIELD_FORMAT_URI  // optional: override the JSON Schema format
+      deprecated: false             // optional: mark field as deprecated
     }
   ];
 }
@@ -347,19 +364,19 @@ message User {
 - **deprecated** — Mark the field as deprecated in the schema
 - **format** — JSON Schema format override (e.g. `uri`, `email`, `uuid`)
 
-### Enum: `mcp.enum` and `mcp.enum_value`
+### Enum: `mcp.v1.enum` and `mcp.v1.enum_value`
 
 Add descriptions to enum types and individual enum values for the MCP tool inputSchema:
 
 ```protobuf
 enum Priority {
-  option (mcp.enum) = { description: "Priority level for a todo item." };
+  option (mcp.v1.enum) = { description: "Priority level for a todo item." };
 
-  PRIORITY_UNSPECIFIED = 0 [(mcp.enum_value) = { description: "Unspecified; use default priority." }];
-  PRIORITY_LOW = 1 [(mcp.enum_value) = { description: "Low priority; can be done when convenient." }];
-  PRIORITY_MEDIUM = 2 [(mcp.enum_value) = { description: "Normal priority; default for most todos." }];
-  PRIORITY_HIGH = 3 [(mcp.enum_value) = { description: "High priority; should be done soon." }];
-  PRIORITY_URGENT = 4 [(mcp.enum_value) = { description: "Urgent; do first." }];
+  PRIORITY_UNSPECIFIED = 0 [(mcp.v1.enum_value) = { description: "Unspecified; use default priority." }];
+  PRIORITY_LOW = 1 [(mcp.v1.enum_value) = { description: "Low priority; can be done when convenient." }];
+  PRIORITY_MEDIUM = 2 [(mcp.v1.enum_value) = { description: "Normal priority; default for most todos." }];
+  PRIORITY_HIGH = 3 [(mcp.v1.enum_value) = { description: "High priority; should be done soon." }];
+  PRIORITY_URGENT = 4 [(mcp.v1.enum_value) = { description: "Urgent; do first." }];
 }
 ```
 
@@ -367,18 +384,18 @@ The schema includes:
 - **description** — Combined enum-level and per-value descriptions
 - **enumDescriptions** — Map of value name → description for structured access
 
-For enum fields, enum descriptions take precedence over `(mcp.field)` description when both are present.
+For enum fields, enum descriptions take precedence over `(mcp.v1.field)` description when both are present.
 
 ### Progress (server streaming)
 
-For long-running operations, use gRPC server streaming with `mcp.MCPProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
+For long-running operations, use gRPC server streaming with `mcp.v1.MCPProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
 
 ```protobuf
-import "mcp/protobuf/progress.proto";
+import "mcp/v1/progress.proto";
 
 message CreateTodoStreamChunk {
   oneof payload {
-    mcp.MCPProgress progress = 1;
+    mcp.v1.MCPProgress progress = 1;
     Todo result = 2;
   }
 }
@@ -392,7 +409,29 @@ The plugin auto-generates tool handlers that send MCP `notifications/progress` f
 
 ### Resources
 
-Resources are auto-detected from `google.api.resource` annotations on proto messages. No additional MCP annotation is needed.
+Resources are auto-detected from `google.api.resource` annotations on proto
+messages — no additional MCP annotation is needed. They can also be declared
+explicitly on the service via `mcp.v1.service.resources`:
+
+```protobuf
+service TodoService {
+  option (mcp.v1.service) = {
+    resources: [
+      {
+        pattern: "todo://users/{user}/todos/{todo}"
+        id: "Todo"
+        title: "Todo item"
+        description: "A single todo item belonging to a user."
+        mime_type: "application/json"
+        annotations: { audience: [MCP_ROLE_USER, MCP_ROLE_ASSISTANT] priority: 0.8 }
+      }
+    ]
+  };
+}
+```
+
+Set `uri` for a fixed resource, or `pattern` for a URI template — the two are a
+oneof, so exactly one applies.
 
 ## Project Structure
 
@@ -402,8 +441,8 @@ mcp/
 ├── go.work                    # Workspace (root + examples)
 ├── MODULE.bazel               # Bazel module (also published to the BCR)
 ├── Justfile                   # Common dev tasks
-├── proto/                     # Publishable buf module (BSR)
-│   └── mcp/protobuf/          # MCP annotation .proto source files
+├── protobuf/                  # Publishable buf module (BSR)
+│   └── mcp/v1/                # MCP annotation .proto source files
 ├── plugin/
 │   ├── cmd/protoc-gen-mcp/    # Plugin binary (go install target)
 │   └── generator/             # Code generation (Go, Python, Rust, C++)
@@ -453,7 +492,7 @@ The tool's `inputSchema` is derived from the protobuf request message:
 - `buf.validate` constraints → `minLength`, `maxLength`, `pattern`, `minimum`, `maximum`, etc.
 - Well-known types (Timestamp, Duration, FieldMask, Struct, Any, wrappers) → appropriate JSON Schema
 - Protobuf `oneof` → JSON Schema `oneOf`/`anyOf`
-- Enums → JSON Schema `enum` with string values; `(mcp.enum)` / `(mcp.enum_value)` → `description` and `enumDescriptions`
+- Enums → JSON Schema `enum` with string values; `(mcp.v1.enum)` / `(mcp.v1.enum_value)` → `description` and `enumDescriptions`
 
 ## Transport Configuration
 

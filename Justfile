@@ -53,7 +53,7 @@ fmt:
 
 # Lint proto files
 buf-lint:
-    cd proto && buf lint
+    cd protobuf && buf lint
 
 # Run all Go tests
 test:
@@ -127,11 +127,11 @@ clean:
 
 # Push proto module to buf.build/the-protobuf-project/mcp
 buf-push:
-    cd proto && buf push
+    cd protobuf && buf push
 
 # Push proto module with a specific label (e.g. a release tag)
 buf-push-label label:
-    cd proto && buf push --label {{label}}
+    cd protobuf && buf push --label {{label}}
 
 # Build the Python proto package (sdist + wheel)
 build-pypi:
@@ -163,5 +163,5 @@ release version: clean (build-all version)
     @ls -lh dist/
     @echo ""
     @echo "Pushing proto module to BSR with label {{version}} ..."
-    cd proto && buf push --label {{version}}
+    cd protobuf && buf push --label {{version}}
     @echo "Done. Proto published as buf.build/the-protobuf-project/mcp:{{version}}"

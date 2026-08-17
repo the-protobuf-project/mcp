@@ -1,7 +1,7 @@
 # gazelle:ignore
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 
-# Proto imports use paths like "mcp/protobuf/foo.proto" relative to proto/.
+# Proto imports use paths like "mcp/v1/foo.proto" relative to protobuf/.
 proto_library(
     name = "mcppb_proto",
     srcs = [
@@ -17,10 +17,10 @@ proto_library(
         "resource.proto",
         "service_options.proto",
     ],
-    strip_import_prefix = "/proto",
+    strip_import_prefix = "/protobuf",
     visibility = ["//visibility:public"],
     deps = [
-        "@googleapis//google/api:resource_proto",
         "@protobuf//:descriptor_proto",
+        "@protobuf//:struct_proto",
     ],
 )

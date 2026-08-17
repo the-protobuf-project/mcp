@@ -6,10 +6,11 @@ import (
 )
 
 // mcpProgressFQNs lists the fully-qualified names under which MCPProgress may
-// appear. The annotations declare package "mcp" (matching the published
-// buf.build/the-protobuf-project/mcp module); "mcp.protobuf" is the legacy
-// package name, still accepted so older generated protos keep working.
+// appear. The annotations declare package "mcp.v1"; "mcp" and "mcp.protobuf"
+// are earlier package names, still accepted so protos generated against
+// published versions of buf.build/the-protobuf-project/mcp keep working.
 var mcpProgressFQNs = map[string]bool{
+	"mcp.v1.MCPProgress":       true,
 	"mcp.MCPProgress":          true,
 	"mcp.protobuf.MCPProgress": true,
 }

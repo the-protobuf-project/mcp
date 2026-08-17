@@ -1,0 +1,16 @@
+version: v2
+modules:
+  - path: .
+    name: buf.build/the-protobuf-project/mcp
+deps:
+  - buf.build/googleapis/googleapis
+lint:
+  use:
+    - STANDARD
+  except:
+    - ENUM_VALUE_PREFIX
+    - COMMENT_ENUM_VALUE
+    - COMMENT_ENUM
+breaking:
+  use:
+    - FILE

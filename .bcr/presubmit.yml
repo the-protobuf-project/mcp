@@ -10,4 +10,4 @@ tasks:
     platform: ${{ platform }}
     bazel: ${{ bazel }}
     build_targets:
-      - "@mcp//proto/mcp/protobuf:mcppb_proto"
+      - "@mcp//protobuf/mcp/v1:mcppb_proto"

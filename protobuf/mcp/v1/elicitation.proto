@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package mcp.v1;
+
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
+option java_multiple_files = true;
+option java_outer_classname = "ElicitationProto";
+option java_package = "com.mcp.v1";
+
+// MCPElicitation defines a user-input step shown before a tool executes.
+//
+// Supports two modes:
+//   - Form mode (default): a structured form whose fields come from a proto
+//     message type you attach via schema.
+//   - URL mode: redirect the user to an external URL for input.
+//
+// Form mode example:
+//   option (mcp.v1.elicitation) = {
+//     message: "Please confirm before deleting."
+//     schema: "todo.v1.DeleteConfirmation"
+//   };
+//
+// URL mode example:
+//   option (mcp.v1.elicitation) = {
+//     mode: ELICITATION_MODE_URL
+//     message: "Complete authentication via the link below."
+//     url: "https://example.com/auth"
+//     elicitation_id: "auth-session-abc"
+//   };
+message MCPElicitation {
+  // Message shown to the user (prompt text, e.g. "Are you sure?").
+  string message = 1;
+
+  // [Form mode] Fully-qualified proto message name whose fields define the
+  // elicitation form, e.g. "todo.v1.DeleteConfirmation".
+  //
+  // The generator reads the message descriptor to extract field names, types,
+  // descriptions, required-ness, and enum values — no hand-written schema needed.
+  string schema = 2;
+
+  // Elicitation mode. When UNSPECIFIED, inferred from other fields:
+  //   - FORM if schema is set
+  //   - URL  if url is set
+  //   - FORM otherwise (no input collected)
+  MCPElicitationMode mode = 3;
+
+  // [URL mode] External URL the user is directed to for input.
+  string url = 4;
+
+  // [URL mode] Unique identifier for this elicitation session, used to
+  // correlate the external callback with the in-flight tool call.
+  string elicitation_id = 5;
+
+  // When true, the tool call is aborted if the user declines/cancels or
+  // the client does not support elicitation. Default false: elicitation is
+  // attempted but failures are silently ignored and the tool proceeds with
+  // the original LLM-provided arguments.
+  bool required = 6;
+}
+
+// MCPElicitationMode selects how the user provides input.
+enum MCPElicitationMode {
+  // Inferred automatically: FORM if schema is set, URL if url is set.
+  MCP_ELICITATION_MODE_UNSPECIFIED = 0;
+  // Form-based dialog: a JSON schema built from the attached proto message is
+  // shown to the user as a structured input form.
+  MCP_ELICITATION_MODE_FORM = 1;
+  // URL-based: the user is directed to an external URL to complete input.
+  MCP_ELICITATION_MODE_URL = 2;
+}
