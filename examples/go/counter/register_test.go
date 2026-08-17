@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1"
+	"github.com/the-protobuf-project/runtime-go/mcpruntime"
 )
 
 // TestRegisterCounterServiceMCPHandler verifies the in-process (Register) path
@@ -28,7 +28,7 @@ func TestRegisterCounterServiceMCPHandler(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	mcpServer := runtime.NewMCPServer(&runtime.MCPServerConfig{
+	mcpServer := mcpruntime.NewMCPServer(&mcpruntime.MCPServerConfig{
 		Name:    "register-smoke",
 		Version: "0.0.1",
 	})

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package todo.v1;
 
-option go_package = "github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/todo/todopbv1;todopbv1";
+option go_package = "github.com/the-protobuf-project/mcp/examples/proto/generated/go/todo/todopbv1;todopbv1";
 option java_multiple_files = true;
 option java_outer_classname = "TodoServiceProto";
 option java_package = "com.todo.v1";

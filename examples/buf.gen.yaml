@@ -7,16 +7,16 @@ plugins:
   - local: protoc-gen-go
     out: proto/generated/go
     opt:
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go
+      - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   - local: protoc-gen-go-grpc
     out: proto/generated/go
     opt:
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go
+      - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   - local: protoc-gen-mcp
     out: proto/generated/go
     opt:
       - lang=go
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go
+      - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   # --- Python ---
   # Pin to match the protobuf runtime available on PyPI (see proto/buf.gen.yaml).
   - remote: buf.build/protocolbuffers/python:v34.1

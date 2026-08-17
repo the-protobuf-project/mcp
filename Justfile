@@ -1,7 +1,7 @@
-# grpc-mcp-gateway Justfile
+# mcp Justfile
 # Run `just --list` to see all available recipes.
 
-mod := "github.com/the-protobuf-project/grpc-mcp-gateway/v2"
+mod := "github.com/the-protobuf-project/mcp"
 bin := "protoc-gen-mcp"
 
 # Default: list all recipes
@@ -41,7 +41,7 @@ lint:
 
 # Run go vet
 vet:
-    go vet ./plugin/... ./runtime/...
+    go vet ./plugin/... ./protobuf/...
 
 # Check formatting
 fmt-check:
@@ -90,9 +90,9 @@ test-all: test test-python test-rust test-cpp
 # Generate pre-compiled proto libraries (Go + Python + Rust)
 generate-proto:
     cd proto && buf generate
-    go fmt ./mcp/protobuf/... ./plugin/...
-    @echo '__path__ = __import__("pkgutil").extend_path(__path__, __name__)' > mcp/protobuf/python/mcp/__init__.py
-    @touch mcp/protobuf/python/mcp/protobuf/__init__.py
+    go fmt ./protobuf/... ./plugin/...
+    @echo '__path__ = __import__("pkgutil").extend_path(__path__, __name__)' > protobuf/python/mcp/__init__.py
+    @touch protobuf/python/mcp/protobuf/__init__.py
 
 # Generate C++ proto stubs with local protoc (matches system libprotobuf)
 generate-cpp:
@@ -116,7 +116,9 @@ build-cpp:
 # Rebuild the plugin and regenerate all example proto code
 generate: generate-proto install
     cd examples && buf generate
-    go fmt ./examples/proto/generated/go/... ./plugin/...
+    # generated Go lives in the examples module, so it is formatted from there
+    cd examples && go fmt ./proto/generated/go/...
+    go fmt ./plugin/...
     just generate-cpp
 
 # Run all checks (fmt, vet, lint, test, build)
@@ -140,19 +142,19 @@ buf-push-label label:
 
 # Build the Python proto package (sdist + wheel)
 build-pypi:
-    cd mcp/protobuf/python && python -m build
+    cd protobuf/python && python -m build
 
 # Publish Python proto library to PyPI
 publish-pypi: build-pypi
-    cd mcp/protobuf/python && twine upload dist/*
+    cd protobuf/python && twine upload dist/*
 
 # Dry-run publish Rust proto library to crates.io
 publish-crates-dry:
-    cd mcp/protobuf/rust && cargo publish --dry-run
+    cd protobuf/rust && cargo publish --dry-run
 
 # Publish Rust proto library to crates.io
 publish-crates:
-    cd mcp/protobuf/rust && cargo publish
+    cd protobuf/rust && cargo publish
 
 # Create release archives for all platforms and push protos to BSR
 release version: clean (build-all version)

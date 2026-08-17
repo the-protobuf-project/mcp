@@ -7,4 +7,4 @@ plugins:
   - local: protoc-gen-go
     out: ..
     opt:
-      - module=github.com/the-protobuf-project/grpc-mcp-gateway
+      - module=github.com/the-protobuf-project/mcp

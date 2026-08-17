@@ -4,7 +4,7 @@ package mcp;
 
 import "google/api/resource.proto";
 
-option go_package = "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb";
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "AppProto";
 option java_package = "com.mcp.protobuf";

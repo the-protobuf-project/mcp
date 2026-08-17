@@ -22,7 +22,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 {{- end }}
 
-	"github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+	"github.com/the-protobuf-project/runtime-go/mcpruntime"
 )
 
 // JSON schemas for each RPC method, used as the inputSchema for MCP tools.
@@ -34,7 +34,7 @@ var {{ $key }}SchemaJSON = {{ safeRawString $val }}
 // so that LLM clients can discover and invoke the underlying RPCs.
 var (
 {{- range $key, $val := .SchemaJSON }}
-	{{ $key }}Tool = runtime.MustCreateTool("{{ (index $.ToolMeta $key).Name }}", {{ safeRawString (index $.ToolMeta $key).Description }}, {{ $key }}SchemaJSON)
+	{{ $key }}Tool = mcpruntime.MustCreateTool("{{ (index $.ToolMeta $key).Name }}", {{ safeRawString (index $.ToolMeta $key).Description }}, {{ $key }}SchemaJSON)
 {{- end }}
 )
 
@@ -77,23 +77,23 @@ type {{ $svcName }}MCPClient interface {
 
 // Register{{ $svcName }}MCPHandler registers all {{ $svcName }} RPC methods as MCP
 // tools, prompts, resources, and apps on the given server based on proto options.
-func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer, opts ...runtime.Option) {
-	cfg := runtime.ApplyOptions(opts...)
+func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer, opts ...mcpruntime.Option) {
+	cfg := mcpruntime.ApplyOptions(opts...)
 	_ = cfg
 {{- if and $svcOpts $svcOpts.App }}
-	appResourceURI := runtime.AppResourceURI("{{ $svcName }}")
+	appResourceURI := mcpruntime.AppResourceURI("{{ $svcName }}")
 {{- end }}
 
 {{- range $methName, $tool := $methods }}
 {{- if $tool.StreamProgress }}
 	{
-		tool := runtime.PrepareToolWithExtras({{ $svcName }}_{{ $methName }}Tool, cfg.ExtraProperties)
+		tool := mcpruntime.PrepareToolWithExtras({{ $svcName }}_{{ $methName }}Tool, cfg.ExtraProperties)
 {{- if and $svcOpts $svcOpts.App }}
-		tool = runtime.SetToolAppMeta(tool, appResourceURI)
+		tool = mcpruntime.SetToolAppMeta(tool, appResourceURI)
 {{- end }}
 		s.AddTool(tool, func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
-			elicitFields := []runtime.ElicitField{
+			elicitFields := []mcpruntime.ElicitField{
 			{{- range $tool.MethodOpts.Elicitation.Fields }}
 				{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
 			{{- end }}
@@ -109,7 +109,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			// pass returns a pending result asking the client for input, and
 			// the client retries the call with the answer, so this handler
 			// body runs twice.
-			elicitResult, elicitPending, elicitErr := runtime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+			elicitResult, elicitPending, elicitErr := mcpruntime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
 			}
@@ -117,13 +117,13 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 				return elicitPending, nil
 			}
 			if elicitResult.Action != "accept" {
-				return runtime.TextResult("Action cancelled by user."), nil
+				return mcpruntime.TextResult("Action cancelled by user."), nil
 			}
 {{- end }}
 			var pbReq {{ $tool.RequestType }}
-			args, ctx := runtime.ExtractExtras(ctx, req.Params.Arguments, cfg)
+			args, ctx := mcpruntime.ExtractExtras(ctx, req.Params.Arguments, cfg)
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
-			args = runtime.MergeElicitResult(args, elicitResult.Content, elicitFields)
+			args = mcpruntime.MergeElicitResult(args, elicitResult.Content, elicitFields)
 {{- end }}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(args, &pbReq); err != nil {
 				return nil, err
@@ -135,8 +135,8 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			// grpcCtx detaches from the tool-call cancellation so the gRPC
 			// server method can complete its stream after the HTTP response is sent.
 			notifCtx := context.Background()
-			grpcCtx := runtime.WithIncomingProgressToken(context.WithoutCancel(ctx), token)
-			stream := runtime.NewInProcessServerStream[*{{ $tool.StreamProgress.StreamChunkType }}](grpcCtx)
+			grpcCtx := mcpruntime.WithIncomingProgressToken(context.WithoutCancel(ctx), token)
+			stream := mcpruntime.NewInProcessServerStream[*{{ $tool.StreamProgress.StreamChunkType }}](grpcCtx)
 			errCh := make(chan error, 1)
 			go func() {
 				defer stream.Close()
@@ -150,36 +150,36 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 					chunk, ok := stream.Recv()
 					if !ok {
 						if err := <-errCh; err != nil {
-							_ = runtime.SendDoneProgress(notifCtx, session, token, fmt.Sprintf(`{"error":%q}`, err.Error()))
+							_ = mcpruntime.SendDoneProgress(notifCtx, session, token, fmt.Sprintf(`{"error":%q}`, err.Error()))
 						}
 						return
 					}
 					switch {
 					case chunk.Get{{ $tool.StreamProgress.ProgressField }}() != nil:
-						_ = runtime.SendProgressFromProto(notifCtx, session, token, chunk.Get{{ $tool.StreamProgress.ProgressField }}())
+						_ = mcpruntime.SendProgressFromProto(notifCtx, session, token, chunk.Get{{ $tool.StreamProgress.ProgressField }}())
 					case chunk.Get{{ $tool.StreamProgress.ResultField }}() != nil:
 						out, err := (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(chunk.Get{{ $tool.StreamProgress.ResultField }}())
 						if err != nil {
-							_ = runtime.SendDoneProgress(notifCtx, session, token, fmt.Sprintf(`{"error":%q}`, err.Error()))
+							_ = mcpruntime.SendDoneProgress(notifCtx, session, token, fmt.Sprintf(`{"error":%q}`, err.Error()))
 						} else {
-							_ = runtime.SendDoneProgress(notifCtx, session, token, string(out))
+							_ = mcpruntime.SendDoneProgress(notifCtx, session, token, string(out))
 						}
 						return
 					}
 				}
 			}()
-			return runtime.TextResult(`{"status":"started"}`), nil
+			return mcpruntime.TextResult(`{"status":"started"}`), nil
 		})
 	}
 {{- else }}
 	{
-		tool := runtime.PrepareToolWithExtras({{ $svcName }}_{{ $methName }}Tool, cfg.ExtraProperties)
+		tool := mcpruntime.PrepareToolWithExtras({{ $svcName }}_{{ $methName }}Tool, cfg.ExtraProperties)
 {{- if and $svcOpts $svcOpts.App }}
-		tool = runtime.SetToolAppMeta(tool, appResourceURI)
+		tool = mcpruntime.SetToolAppMeta(tool, appResourceURI)
 {{- end }}
 		s.AddTool(tool, func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
-			elicitFields := []runtime.ElicitField{
+			elicitFields := []mcpruntime.ElicitField{
 			{{- range $tool.MethodOpts.Elicitation.Fields }}
 				{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
 			{{- end }}
@@ -195,7 +195,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			// pass returns a pending result asking the client for input, and
 			// the client retries the call with the answer, so this handler
 			// body runs twice.
-			elicitResult, elicitPending, elicitErr := runtime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+			elicitResult, elicitPending, elicitErr := mcpruntime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
 			}
@@ -203,31 +203,31 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 				return elicitPending, nil
 			}
 			if elicitResult.Action != "accept" {
-				return runtime.TextResult("Action cancelled by user."), nil
+				return mcpruntime.TextResult("Action cancelled by user."), nil
 			}
 {{- end }}
 			var pbReq {{ $tool.RequestType }}
-			args, ctx := runtime.ExtractExtras(ctx, req.Params.Arguments, cfg)
+			args, ctx := mcpruntime.ExtractExtras(ctx, req.Params.Arguments, cfg)
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
-			args = runtime.MergeElicitResult(args, elicitResult.Content, elicitFields)
+			args = mcpruntime.MergeElicitResult(args, elicitResult.Content, elicitFields)
 {{- end }}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(args, &pbReq); err != nil {
 				return nil, err
 			}
 			// Dispatch through the unary interceptor chain (when configured) so
 			// middleware sees this call exactly as it would the wire RPC.
-			rawResp, err := runtime.InvokeUnary(ctx, cfg.UnaryInterceptor, "{{ $tool.FullMethod }}", srv, &pbReq, func(ctx context.Context, req any) (any, error) {
+			rawResp, err := mcpruntime.InvokeUnary(ctx, cfg.UnaryInterceptor, "{{ $tool.FullMethod }}", srv, &pbReq, func(ctx context.Context, req any) (any, error) {
 				return srv.{{ $methName }}(ctx, req.(*{{ $tool.RequestType }}))
 			})
 			if err != nil {
-				return runtime.HandleError(err)
+				return mcpruntime.HandleError(err)
 			}
 			resp := rawResp.(*{{ $tool.ResponseType }})
 			out, err := (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
 			if err != nil {
 				return nil, err
 			}
-			return runtime.TextResult(string(out)), nil
+			return mcpruntime.TextResult(string(out)), nil
 		})
 	}
 {{- end }}
@@ -241,7 +241,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 		Name:        "{{ .Name }}",
 		Description: "{{ .Description }}",
 		MIMEType:    "{{ .MimeType }}",
-	}, runtime.DefaultResourceHandler())
+	}, mcpruntime.DefaultResourceHandler())
 {{- end }}
 {{- if .URITemplate }}
 	s.AddResourceTemplate(&mcp.ResourceTemplate{
@@ -249,7 +249,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 		Name:        "{{ .Name }}",
 		Description: "{{ .Description }}",
 		MIMEType:    "{{ .MimeType }}",
-	}, runtime.DefaultResourceHandler())
+	}, mcpruntime.DefaultResourceHandler())
 {{- end }}
 {{- end }}
 {{- end }}
@@ -269,7 +269,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
 		{{- end }}
 		},
-	}, runtime.DefaultPromptHandler("{{ escapeQuotes $tool.MethodOpts.Prompt.Description }}"))
+	}, mcpruntime.DefaultPromptHandler("{{ escapeQuotes $tool.MethodOpts.Prompt.Description }}"))
 {{- end }}
 {{- end }}
 {{- end }}
@@ -279,7 +279,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 		URI:      appResourceURI,
 		Name:     "{{ escapeQuotes $svcOpts.App.Name }}",
 		MIMEType: "text/html",
-	}, runtime.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}"))
+	}, mcpruntime.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}"))
 {{- end }}
 }
 {{- end }}
@@ -314,7 +314,7 @@ func {{ $svcName }}CompletionMap() map[string][]string {
 // Serve{{ $svcName }}MCP creates an MCP server, registers the service tools, and
 // starts serving using the configured transport (streamable-http, sse, or stdio).
 // Uses the proto-derived BasePath. This is a blocking call.
-func Serve{{ $svcName }}MCP(ctx context.Context, srv {{ $svcName }}MCPServer, cfg *runtime.MCPServerConfig, opts ...runtime.Option) error {
+func Serve{{ $svcName }}MCP(ctx context.Context, srv {{ $svcName }}MCPServer, cfg *mcpruntime.MCPServerConfig, opts ...mcpruntime.Option) error {
 	// Set the proto-derived path as the generated default
 	cfg.GeneratedBasePath = {{ $svcName }}MCPDefaultBasePath
 
@@ -324,16 +324,16 @@ func Serve{{ $svcName }}MCP(ctx context.Context, srv {{ $svcName }}MCPServer, cf
 		if cfg.ServerOptions == nil {
 			cfg.ServerOptions = &mcp.ServerOptions{}
 		}
-		cfg.ServerOptions.CompletionHandler = runtime.CompletionHandlerFromEnums(completionMap)
+		cfg.ServerOptions.CompletionHandler = mcpruntime.CompletionHandlerFromEnums(completionMap)
 	}
 
 	// Forward the hosting server's unary interceptor chain so every tool call
 	// runs the same middleware (validation, auth, tracing) as the wire RPC.
 	if cfg.UnaryInterceptor != nil {
-		opts = append(opts, runtime.WithUnaryInterceptor(cfg.UnaryInterceptor))
+		opts = append(opts, mcpruntime.WithUnaryInterceptor(cfg.UnaryInterceptor))
 	}
 
-	return runtime.StartServer(ctx, cfg, func(s *mcp.Server) {
+	return mcpruntime.StartServer(ctx, cfg, func(s *mcp.Server) {
 		Register{{ $svcName }}MCPHandler(s, srv, opts...)
 	})
 }
@@ -345,22 +345,22 @@ func Serve{{ $svcName }}MCP(ctx context.Context, srv {{ $svcName }}MCPServer, cf
 // ForwardTo{{ $svcName }}MCPClient registers all {{ $svcName }} tools, prompts,
 // resources, and apps on the MCP server, forwarding every tool call to a
 // remote gRPC server via the provided client stub.
-func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPClient, opts ...runtime.Option) {
-	cfg := runtime.ApplyOptions(opts...)
+func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPClient, opts ...mcpruntime.Option) {
+	cfg := mcpruntime.ApplyOptions(opts...)
 	_ = cfg
 {{- if and $svcOpts $svcOpts.App }}
-	appResourceURI := runtime.AppResourceURI("{{ $svcName }}")
+	appResourceURI := mcpruntime.AppResourceURI("{{ $svcName }}")
 {{- end }}
 
 {{- range $methName, $tool := $methods }}
 	{
-		tool := runtime.PrepareToolWithExtras({{ $svcName }}_{{ $methName }}Tool, cfg.ExtraProperties)
+		tool := mcpruntime.PrepareToolWithExtras({{ $svcName }}_{{ $methName }}Tool, cfg.ExtraProperties)
 {{- if and $svcOpts $svcOpts.App }}
-		tool = runtime.SetToolAppMeta(tool, appResourceURI)
+		tool = mcpruntime.SetToolAppMeta(tool, appResourceURI)
 {{- end }}
 		s.AddTool(tool, func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
-			elicitFields := []runtime.ElicitField{
+			elicitFields := []mcpruntime.ElicitField{
 			{{- range $tool.MethodOpts.Elicitation.Fields }}
 				{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
 			{{- end }}
@@ -376,7 +376,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 			// pass returns a pending result asking the client for input, and
 			// the client retries the call with the answer, so this handler
 			// body runs twice.
-			elicitResult, elicitPending, elicitErr := runtime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+			elicitResult, elicitPending, elicitErr := mcpruntime.RunElicitation(req, "{{ $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
 			}
@@ -384,25 +384,25 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 				return elicitPending, nil
 			}
 			if elicitResult.Action != "accept" {
-				return runtime.TextResult("Action cancelled by user."), nil
+				return mcpruntime.TextResult("Action cancelled by user."), nil
 			}
 {{- end }}
 			var pbReq {{ $tool.RequestType }}
-			args, ctx := runtime.ExtractExtras(ctx, req.Params.Arguments, cfg)
+			args, ctx := mcpruntime.ExtractExtras(ctx, req.Params.Arguments, cfg)
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
-			args = runtime.MergeElicitResult(args, elicitResult.Content, elicitFields)
+			args = mcpruntime.MergeElicitResult(args, elicitResult.Content, elicitFields)
 {{- end }}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(args, &pbReq); err != nil {
 				return nil, err
 			}
-			ctx = runtime.ForwardMetadata(ctx)
+			ctx = mcpruntime.ForwardMetadata(ctx)
 {{- if $tool.StreamProgress }}
 			if token := req.Params.GetProgressToken(); token != nil {
-				ctx = runtime.WithProgressToken(ctx, token)
+				ctx = mcpruntime.WithProgressToken(ctx, token)
 			}
 			stream, err := client.{{ $methName }}(ctx, &pbReq)
 			if err != nil {
-				return runtime.HandleError(err)
+				return mcpruntime.HandleError(err)
 			}
 			token := req.Params.GetProgressToken()
 			for {
@@ -411,29 +411,29 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 					if errors.Is(err, context.Canceled) {
 						return nil, err
 					}
-					return runtime.HandleError(err)
+					return mcpruntime.HandleError(err)
 				}
 				switch {
 				case chunk.Get{{ $tool.StreamProgress.ProgressField }}() != nil:
-					_ = runtime.SendProgressFromProto(ctx, req.Session, token, chunk.Get{{ $tool.StreamProgress.ProgressField }}())
+					_ = mcpruntime.SendProgressFromProto(ctx, req.Session, token, chunk.Get{{ $tool.StreamProgress.ProgressField }}())
 				case chunk.Get{{ $tool.StreamProgress.ResultField }}() != nil:
 					out, err := (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(chunk.Get{{ $tool.StreamProgress.ResultField }}())
 					if err != nil {
 						return nil, err
 					}
-					return runtime.TextResult(string(out)), nil
+					return mcpruntime.TextResult(string(out)), nil
 				}
 			}
 {{- else }}
 			resp, err := client.{{ $methName }}(ctx, &pbReq)
 			if err != nil {
-				return runtime.HandleError(err)
+				return mcpruntime.HandleError(err)
 			}
 			out, err := (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
 			if err != nil {
 				return nil, err
 			}
-			return runtime.TextResult(string(out)), nil
+			return mcpruntime.TextResult(string(out)), nil
 {{- end }}
 		})
 	}
@@ -447,7 +447,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 		Name:        "{{ .Name }}",
 		Description: "{{ .Description }}",
 		MIMEType:    "{{ .MimeType }}",
-	}, runtime.DefaultResourceHandler())
+	}, mcpruntime.DefaultResourceHandler())
 {{- end }}
 {{- if .URITemplate }}
 	s.AddResourceTemplate(&mcp.ResourceTemplate{
@@ -455,7 +455,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 		Name:        "{{ .Name }}",
 		Description: "{{ .Description }}",
 		MIMEType:    "{{ .MimeType }}",
-	}, runtime.DefaultResourceHandler())
+	}, mcpruntime.DefaultResourceHandler())
 {{- end }}
 {{- end }}
 {{- end }}
@@ -475,7 +475,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 			{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
 		{{- end }}
 		},
-	}, runtime.DefaultPromptHandler("{{ escapeQuotes $tool.MethodOpts.Prompt.Description }}"))
+	}, mcpruntime.DefaultPromptHandler("{{ escapeQuotes $tool.MethodOpts.Prompt.Description }}"))
 {{- end }}
 {{- end }}
 {{- end }}
@@ -485,7 +485,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 		URI:      appResourceURI,
 		Name:     "{{ escapeQuotes $svcOpts.App.Name }}",
 		MIMEType: "text/html",
-	}, runtime.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}"))
+	}, mcpruntime.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}"))
 {{- end }}
 }
 {{- end }}

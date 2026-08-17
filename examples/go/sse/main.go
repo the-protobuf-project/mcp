@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/todo/todopbv1"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/todo/todopbv1"
+	"github.com/the-protobuf-project/runtime-go/mcpruntime"
 )
 
 func main() {
@@ -17,15 +17,15 @@ func main() {
 
 	srv := newTodoServer()
 
-	cfg := &runtime.MCPServerConfig{
+	cfg := &mcpruntime.MCPServerConfig{
 		Name:              "todo-mcp-sse",
 		Version:           "0.1.0",
-		Transports:        []runtime.Transport{runtime.TransportSSE},
+		Transports:        []mcpruntime.Transport{mcpruntime.TransportSSE},
 		Addr:              addr,
 		GeneratedBasePath: todopbv1.TodoServiceMCPDefaultBasePath,
 	}
 
-	if ep, err := runtime.ServerEndpoint(cfg); err == nil {
+	if ep, err := mcpruntime.ServerEndpoint(cfg); err == nil {
 		log.Printf("MCP SSE server listening on %s", ep.URL)
 	}
 

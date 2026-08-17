@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1"
+	"github.com/the-protobuf-project/runtime-go/mcpruntime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -40,7 +40,7 @@ func TestSmokeCounterService(t *testing.T) {
 	defer conn.Close()
 
 	client := counterpbv1.NewCounterServiceClient(conn)
-	server := runtime.NewMCPServer(&runtime.MCPServerConfig{
+	server := mcpruntime.NewMCPServer(&mcpruntime.MCPServerConfig{
 		Name:    "smoke-counter",
 		Version: "0.0.1",
 	})

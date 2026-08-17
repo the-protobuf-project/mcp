@@ -7,14 +7,14 @@
 //
 // Usage:
 //
-//	import _ "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf"
+//	import _ "github.com/the-protobuf-project/mcp/protobuf"
 //
 // The blank import is typically added automatically by protoc-gen-go when
 // your .proto files import mcp/protobuf/annotations.proto.
 //
 // For direct type access, use the mcppb subpackage:
 //
-//	import "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb"
+//	import "github.com/the-protobuf-project/mcp/protobuf/mcppb"
 package protobuf
 
-import _ "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb"
+import _ "github.com/the-protobuf-project/mcp/protobuf/mcppb"

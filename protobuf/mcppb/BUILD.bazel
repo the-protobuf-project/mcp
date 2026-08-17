@@ -16,7 +16,7 @@ go_library(
         "resource.pb.go",
         "service_options.pb.go",
     ],
-    importpath = "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb",
+    importpath = "github.com/the-protobuf-project/mcp/protobuf/mcppb",
     visibility = ["//visibility:public"],
     deps = [
         "@org_golang_google_genproto_googleapis_api//annotations",

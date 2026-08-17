@@ -1,9 +1,11 @@
 package generator
 
 import (
-	"fmt"
+	"io/fs"
+	"strings"
+	"text/template"
 
-	"github.com/the-protobuf-project/grpc-mcp-gateway/plugin/generator/templates"
+	"github.com/the-protobuf-project/mcp/plugin/generator/templates"
 )
 
 // Supported languages for code generation.
@@ -14,27 +16,105 @@ const (
 	LangCpp    = "cpp"
 )
 
-// codeTemplates maps language name → embedded template content.
-var codeTemplates = map[string]string{
-	LangGo:     mustReadTemplate("go.tpl"),
-	LangPython: mustReadTemplate("python.tpl"),
-	LangRust:   mustReadTemplate("rust.tpl"),
-	LangCpp:    mustReadTemplate("cpp/mcp.h.tpl"),
-}
+// escapeQuotes escapes double quotes for embedding in a quoted string literal.
+// Every language's func map exposes it as "escapeQuotes".
+func escapeQuotes(s string) string { return strings.ReplaceAll(s, `"`, `\"`) }
 
-// GetTemplate returns the code template for the given language.
-func GetTemplate(lang string) (string, error) {
-	tpl, ok := codeTemplates[lang]
-	if !ok {
-		return "", fmt.Errorf("unsupported language %q (supported: go, python, rust, cpp)", lang)
+// safeRawString wraps s in a backtick raw-string literal. If s itself contains a
+// backtick (e.g. from Markdown code spans in proto comments), it splits on
+// backticks and emits a concatenation expression so the generated source is
+// still valid Go syntax. Example: "foo`bar" -> `foo` + "`" + `bar`
+func safeRawString(s string) string {
+	if !strings.Contains(s, "`") {
+		return "`" + s + "`"
 	}
-	return tpl, nil
+	parts := strings.Split(s, "`")
+	var segments []string
+	for i, p := range parts {
+		if i > 0 {
+			segments = append(segments, `"`+"`"+`"`)
+		}
+		if p != "" {
+			segments = append(segments, "`"+p+"`")
+		}
+	}
+	return strings.Join(segments, " + ")
 }
 
-func mustReadTemplate(name string) string {
-	b, err := templates.FS.ReadFile(name)
+// Per-language template func maps. They are stateless, so they are built once
+// here rather than per generated file.
+var (
+	goFuncMap = template.FuncMap{
+		"backtick":      func() string { return "`" },
+		"escapeQuotes":  escapeQuotes,
+		"safeRawString": safeRawString,
+	}
+
+	pythonFuncMap = template.FuncMap{
+		"snakeCase":    toSnakeCase,
+		"pyString":     pyStringLiteral,
+		"lower":        strings.ToLower,
+		"escapeQuotes": escapeQuotes,
+	}
+
+	rustFuncMap = template.FuncMap{
+		"snakeCase":          toSnakeCase,
+		"screamingSnakeCase": toScreamingSnakeCase,
+		"lower":              strings.ToLower,
+		"rsEscape":           rsStringEscape,
+		"escapeQuotes":       escapeQuotes,
+	}
+
+	cppFuncMap = template.FuncMap{
+		"snakeCase":          toSnakeCase,
+		"screamingSnakeCase": toScreamingSnakeCase,
+		"rsEscape":           rsStringEscape,
+		"cppEscape":          cppStringEscape,
+		"escapeQuotes":       escapeQuotes,
+	}
+)
+
+// Templates are parsed once at package initialization. Parsing is independent
+// of the file being generated, so doing it per file re-parsed the same source
+// for every proto in the request.
+//
+// protokit's templates.MustParse is not used here: it parses via template.ParseFS
+// without a FuncMap, and text/template rejects a template referencing an unknown
+// function at parse time, so the funcs above must be registered first.
+var (
+	goTemplate     = mustParseTemplate("gen", "go.tpl", goFuncMap)
+	pythonTemplate = mustParseTemplate("pygen", "python.tpl", pythonFuncMap)
+	rustTemplate   = mustParseTemplate("rsgen", "rust.tpl", rustFuncMap)
+	cppTemplates   = mustParseGlob("cpp/*.tpl", cppFuncMap)
+)
+
+// mustParseTemplate parses a single embedded template. It panics on failure, so
+// a malformed template fails at startup rather than mid-generation.
+func mustParseTemplate(name, path string, funcs template.FuncMap) *template.Template {
+	b, err := templates.FS.ReadFile(path)
 	if err != nil {
-		panic("generator: embedded template " + name + " not found: " + err.Error())
+		panic("generator: embedded template " + path + " not found: " + err.Error())
 	}
-	return string(b)
+	tpl, err := template.New(name).Funcs(funcs).Parse(string(b))
+	if err != nil {
+		panic("generator: parse embedded template " + path + ": " + err.Error())
+	}
+	return tpl
+}
+
+// mustParseGlob parses every embedded template matching pattern, keyed by its
+// embedded path (e.g. "cpp/handler.tpl").
+func mustParseGlob(pattern string, funcs template.FuncMap) map[string]*template.Template {
+	paths, err := fs.Glob(templates.FS, pattern)
+	if err != nil {
+		panic("generator: glob embedded templates " + pattern + ": " + err.Error())
+	}
+	if len(paths) == 0 {
+		panic("generator: no embedded templates match " + pattern)
+	}
+	out := make(map[string]*template.Template, len(paths))
+	for _, p := range paths {
+		out[p] = mustParseTemplate(p, p, funcs)
+	}
+	return out
 }

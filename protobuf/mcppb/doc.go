@@ -3,7 +3,7 @@
 //
 // # Install
 //
-//	go get github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb
+//	go get github.com/the-protobuf-project/mcp/protobuf/mcppb
 //
 // # Types
 //
@@ -27,7 +27,7 @@
 //
 // For generated code that uses these options, import the parent package for side effects:
 //
-//	import _ "github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf"
+//	import _ "github.com/the-protobuf-project/mcp/protobuf"
 //
 // That registers the extension fields so proto.GetExtension works.
 package mcppb

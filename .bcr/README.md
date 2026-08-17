@@ -64,7 +64,7 @@ bazel build //proto/mcp/protobuf:mcppb_proto
    from these templates, pushes a branch to the fork, and opens a PR against
    `bazelbuild/bazel-central-registry`.
 4. A BCR maintainer reviews and merges the PR. The module then resolves via
-   `bazel_dep(name = "grpc_mcp_gateway", version = "X.Y.Z")`.
+   `bazel_dep(name = "mcp", version = "X.Y.Z")`.
 
 ## Notes
 

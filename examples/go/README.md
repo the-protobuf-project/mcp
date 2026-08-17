@@ -5,7 +5,7 @@ MCP server examples in Go: **TodoService** (CRUD, prompts, elicitation) and **Co
 ## Prerequisites
 
 - Go 1.25+
-- `protoc-gen-mcp` installed (`go install github.com/the-protobuf-project/grpc-mcp-gateway/plugin/cmd/protoc-gen-mcp@latest`)
+- `protoc-gen-mcp` installed (`go install github.com/the-protobuf-project/mcp/plugin/cmd/protoc-gen-mcp@latest`)
 - Generated code already in `proto/generated/go/` (run `buf generate` from `examples/`)
 
 ## Structure

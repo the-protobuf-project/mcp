@@ -26,14 +26,14 @@ from mcp.protobuf import annotations_pb2 as mcp_dot_protobuf_dot_annotations__pb
 from mcp.protobuf import field_pb2 as mcp_dot_protobuf_dot_field__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x63ounter/v1/counter.proto\x12\ncounter.v1\x1a\x1emcp/protobuf/annotations.proto\x1a\x18mcp/protobuf/field.proto\"q\n\x0c\x43ountRequest\x12\x61\n\x02to\x18\x01 \x01(\x05\x42Q\xe2\xf3\x18M\nDCount from 0 up to this number. Progress updates are sent each step.\x12\x01\x35\x12\x02\x31\x30R\x02to\"%\n\rCountResponse\x12\x14\n\x05\x63ount\x18\x01 \x01(\x05R\x05\x63ountB\x8e\x01\n\x0e\x63om.counter.v1B\x0c\x43ounterProtoP\x01Zlgithub.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1;counterpbv1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x63ounter/v1/counter.proto\x12\ncounter.v1\x1a\x1emcp/protobuf/annotations.proto\x1a\x18mcp/protobuf/field.proto\"q\n\x0c\x43ountRequest\x12\x61\n\x02to\x18\x01 \x01(\x05\x42Q\xe2\xf3\x18M\nDCount from 0 up to this number. Progress updates are sent each step.\x12\x01\x35\x12\x02\x31\x30R\x02to\"%\n\rCountResponse\x12\x14\n\x05\x63ount\x18\x01 \x01(\x05R\x05\x63ountB\x81\x01\n\x0e\x63om.counter.v1B\x0c\x43ounterProtoP\x01Z_github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1;counterpbv1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'counter.v1.counter_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
-  _globals['DESCRIPTOR']._serialized_options = b'\n\016com.counter.v1B\014CounterProtoP\001Zlgithub.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/counter/counterpbv1;counterpbv1'
+  _globals['DESCRIPTOR']._serialized_options = b'\n\016com.counter.v1B\014CounterProtoP\001Z_github.com/the-protobuf-project/mcp/examples/proto/generated/go/counter/counterpbv1;counterpbv1'
   _globals['_COUNTREQUEST'].fields_by_name['to']._loaded_options = None
   _globals['_COUNTREQUEST'].fields_by_name['to']._serialized_options = b'\342\363\030M\nDCount from 0 up to this number. Progress updates are sent each step.\022\0015\022\00210'
   _globals['_COUNTREQUEST']._serialized_start=98

@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	"text/template"
 
-	"github.com/the-protobuf-project/grpc-mcp-gateway/plugin/generator/templates"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -71,26 +69,13 @@ func (g *CppFileGenerator) Generate(emitShared bool) {
 	stem := strings.TrimSuffix(filepath.Base(file.Desc.Path()), ".proto")
 	params := g.buildCppParams(dir, stem)
 
-	funcMap := template.FuncMap{
-		"snakeCase":          toSnakeCase,
-		"screamingSnakeCase": toScreamingSnakeCase,
-		"rsEscape":           rsStringEscape,
-		"cppEscape":          cppStringEscape,
-		"escapeQuotes":       func(s string) string { return strings.ReplaceAll(s, `"`, `\"`) },
-	}
-
 	genFile := func(outPath, tplName string) {
+		tpl, ok := cppTemplates[tplName]
+		if !ok {
+			g.gen.Error(fmt.Errorf("embedded template %s not found", tplName))
+			return
+		}
 		gf := g.gen.NewGeneratedFile(outPath, "")
-		tplStr, err := templates.FS.ReadFile(tplName)
-		if err != nil {
-			g.gen.Error(fmt.Errorf("embedded template %s not found: %w", tplName, err))
-			return
-		}
-		tpl, err := template.New(tplName).Funcs(funcMap).Parse(string(tplStr))
-		if err != nil {
-			g.gen.Error(err)
-			return
-		}
 		if err := tpl.Execute(gf, params); err != nil {
 			g.gen.Error(err)
 		}

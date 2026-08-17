@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/examples/proto/generated/go/todo/todopbv1"
-	"github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+	"github.com/the-protobuf-project/mcp/examples/proto/generated/go/todo/todopbv1"
+	"github.com/the-protobuf-project/runtime-go/mcpruntime"
 )
 
 // TestSmokeTodoService verifies the full pipeline:
@@ -23,7 +23,7 @@ func TestSmokeTodoService(t *testing.T) {
 
 	// --- Server ---
 	srv := newTodoServer()
-	server := runtime.NewMCPServer(&runtime.MCPServerConfig{
+	server := mcpruntime.NewMCPServer(&mcpruntime.MCPServerConfig{
 		Name:    "smoke-test",
 		Version: "0.0.1",
 	})

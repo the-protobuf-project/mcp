@@ -1,4 +1,4 @@
-# grpc-mcp-gateway
+# mcp
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/f624e503-8b62-4954-b496-ec1d4fbaf0ef" width="314" height="314" />
@@ -13,18 +13,19 @@
   <a href="https://go.dev/">
     <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go" />
   </a>
-  <a href="https://pkg.go.dev/github.com/the-protobuf-project/grpc-mcp-gateway">
-    <img src="https://pkg.go.dev/badge/github.com/the-protobuf-project/grpc-mcp-gateway.svg" />
+  <a href="https://pkg.go.dev/github.com/the-protobuf-project/mcp">
+    <img src="https://pkg.go.dev/badge/github.com/the-protobuf-project/mcp.svg" />
   </a>
   <a href="https://buf.build/the-protobuf-project/mcp">
-    <img src="https://img.shields.io/badge/BSR-buf.build%2Fthe-protobuf-project%2Fgrpc--mcp--gateway-blue" />
+    <img src="https://img.shields.io/badge/BSR-buf.build%2Fthe-protobuf-project%2Fmcp-blue" />
   </a>
 </p>
 
 ## Overview
 
-**grpc-mcp-gateway** is a `protoc` plugin and runtime that automatically
-converts your gRPC services into MCP-compatible servers.
+**mcp** is a `protoc` plugin that automatically converts your gRPC services
+into MCP-compatible servers. The Go runtime the generated code links against
+lives in [runtime-go](https://github.com/the-protobuf-project/runtime-go).
 
 **gRPC → MCP proxy generator following the [MCP Specification](https://modelcontextprotocol.io/specification).**
 
@@ -110,10 +111,10 @@ sequenceDiagram
 ### Plugin
 
 ```bash
-go install github.com/the-protobuf-project/grpc-mcp-gateway/plugin/cmd/protoc-gen-mcp@latest
+go install github.com/the-protobuf-project/mcp/plugin/cmd/protoc-gen-mcp@latest
 ```
 
-Or download a binary from [GitHub Releases](https://github.com/the-protobuf-project/grpc-mcp-gateway/releases).
+Or download a binary from [GitHub Releases](https://github.com/the-protobuf-project/mcp/releases).
 
 ### MCP annotation types
 
@@ -121,8 +122,8 @@ The MCP annotation types (`mcp.*`) are needed at runtime so generated code can
 resolve its imports — just like `googleapis-common-protos` for Google API types.
 
 - **Go** — pre-compiled and shipped as part of this module:
-  [`mcp/protobuf/mcppb`](mcp/protobuf/README.md)
-  (`go get github.com/the-protobuf-project/grpc-mcp-gateway/mcp/protobuf/mcppb`).
+  [`protobuf/mcppb`](protobuf/README.md)
+  (`go get github.com/the-protobuf-project/mcp/protobuf/mcppb`).
 - **Other languages** — add the published Buf module as a dependency and
   generate the types in your own client (see [Quick Start](#quick-start) below).
   Nothing extra to install: the annotations come from
@@ -383,14 +384,13 @@ Resources are auto-detected from `google.api.resource` annotations on proto mess
 ## Project Structure
 
 ```
-grpc-mcp-gateway/
+mcp/
 ├── go.mod                          # Single Go module
 ├── go.work                         # Workspace (root + examples)
 ├── proto/                          # Publishable buf module (BSR)
 │   └── mcp/protobuf/              # MCP annotation .proto source files
-├── mcp/protobuf/                  # Pre-compiled Go proto types
-│   └── mcppb/                     # Go (.pb.go) — see [mcp/protobuf/README.md](mcp/protobuf/README.md)
-├── runtime/                       # Go runtime — [README](runtime/README.md)
+├── protobuf/                      # Pre-compiled Go proto types
+│   └── mcppb/                     # Go (.pb.go) — see [protobuf/README.md](protobuf/README.md)
 ├── plugin/
 │   ├── cmd/protoc-gen-mcp/        # Plugin binary (go install target)
 │   └── generator/                 # Code generation (Go, Python, Rust, C++)
@@ -422,7 +422,7 @@ For each proto service, the plugin generates:
 | **Tools** (per RPC) | `s.AddTool(...)`                                    | `@server.call_tool()`                  | `ServerHandler::call_tool()`      | `TodoServiceMcpImpl` (cxx FFI)   |
 | **Prompts**         | `s.AddPrompt(...)`                                  | `@server.get_prompt()`                 | `ServerHandler::get_prompt()`     | —                                |
 | **Resources**       | `s.AddResource(...)` / `s.AddResourceTemplate(...)` | `@server.list_resources()`             | `ServerHandler::list_resources()` | —                                |
-| **Elicitation**     | `runtime.RunElicitation(...)`                       | `session.elicit(...)`                  | `peer.create_elicitation(...)`    | —                                |
+| **Elicitation**     | `mcpruntime.RunElicitation(...)`                    | `session.elicit(...)`                  | `peer.create_elicitation(...)`    | —                                |
 | **Serve function**  | `ServeTodoServiceMCP()`                             | `serve_todo_service_mcp()`             | `serve_todo_service_mcp()`        | `start_*_mcp_http` / `_stdio`    |
 | **gRPC forwarding** | `ForwardToTodoServiceMCPClient()`                   | `forward_to_todo_service_mcp_client()` | —                                 | In-process (C++ gRPC server)     |
 | **Interface/trait** | `TodoServiceMCPServer`                              | `TodoServiceMCPServer` (Protocol)      | `TodoServiceMcpServer` (trait)    | `TodoServiceMcpImpl` (C++ class) |
@@ -469,13 +469,17 @@ MCP_TRANSPORT=stdio,streamable-http cargo run --bin http
 
 ### Go runtime configuration
 
-```go
-import "github.com/the-protobuf-project/grpc-mcp-gateway/runtime"
+The Go runtime that generated code links against lives in
+[runtime-go](https://github.com/the-protobuf-project/runtime-go); this repository
+ships the plugin and the annotations only.
 
-cfg := &runtime.MCPServerConfig{
+```go
+import "github.com/the-protobuf-project/runtime-go/mcpruntime"
+
+cfg := &mcpruntime.MCPServerConfig{
     Name:       "my-service",
     Version:    "1.0.0",
-    Transports: []runtime.Transport{runtime.TransportStdio, runtime.TransportStreamableHTTP},
+    Transports: []mcpruntime.Transport{mcpruntime.TransportStdio, mcpruntime.TransportStreamableHTTP},
     Addr:       ":8082",
     BasePath:   "/todo/v1/todoservice/mcp",
 }
