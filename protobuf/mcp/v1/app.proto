@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package mcp.v1;
 
+import "mcp/v1/icon.proto";
+
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "AppProto";
@@ -15,4 +17,13 @@ message MCPApp {
   string version = 2;
   // A human-readable description of the MCP application.
   string description = 3;
+
+  // Display name preferred over display_name in UI and end-user contexts.
+  optional string title = 4;
+
+  // Website for the server, shown by clients that surface one.
+  optional string website_url = 5;
+
+  // Icons representing the server in client UIs.
+  repeated MCPIcon icons = 6;
 }

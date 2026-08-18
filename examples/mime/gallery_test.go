@@ -286,3 +286,69 @@ func TestToolsCarryBehaviouralHints(t *testing.T) {
 			*listed.Annotations.DestructiveHint)
 	}
 }
+
+// Display metadata — title and icons — is what a client shows a human. It has
+// to reach every primitive that declares it, not just resources.
+func TestDisplayMetadataReachesTheClient(t *testing.T) {
+	session, ctx := connect(t)
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+	var listed *mcp.Tool
+	for _, tool := range tools.Tools {
+		if tool.Name == "list_assets" {
+			listed = tool
+		}
+	}
+	if listed == nil {
+		t.Fatal("list_assets missing")
+	}
+	if listed.Title != "List assets" {
+		t.Errorf("tool Title = %q, want %q", listed.Title, "List assets")
+	}
+	if len(listed.Icons) != 1 {
+		t.Errorf("tool has %d icons, want 1", len(listed.Icons))
+	} else if listed.Icons[0].Theme != "light" {
+		t.Errorf("tool icon theme = %q, want light", listed.Icons[0].Theme)
+	}
+
+	prompts, err := session.ListPrompts(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListPrompts: %v", err)
+	}
+	if len(prompts.Prompts) == 0 {
+		t.Fatal("no prompts listed")
+	}
+	p := prompts.Prompts[0]
+	if p.Title != "Summarise the gallery" {
+		t.Errorf("prompt Title = %q", p.Title)
+	}
+	// A prompt argument's title comes from (mcp.v1.field).title on the schema
+	// message, which is a different annotation reaching the same wire field.
+	if len(p.Arguments) == 0 {
+		t.Fatal("prompt has no arguments")
+	}
+	if p.Arguments[0].Title != "Media type" {
+		t.Errorf("prompt argument Title = %q, want %q", p.Arguments[0].Title, "Media type")
+	}
+
+	resources, err := session.ListResources(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListResources: %v", err)
+	}
+	appURI := mcp.AppResourceURI("GalleryService")
+	for _, r := range resources.Resources {
+		if r.URI == appURI {
+			if r.Title != "The Asset Gallery" {
+				t.Errorf("app Title = %q", r.Title)
+			}
+			if len(r.Icons) != 1 {
+				t.Errorf("app has %d icons, want 1", len(r.Icons))
+			}
+			return
+		}
+	}
+	t.Errorf("app resource %s missing", appURI)
+}

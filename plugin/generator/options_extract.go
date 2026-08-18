@@ -20,8 +20,11 @@ func ExtractServiceOptions(svc *protogen.Service) *MCPServiceOpts {
 	if app := ext.GetApp(); app != nil {
 		result.App = &MCPAppOpts{
 			Name:        app.GetDisplayName(),
+			Title:       app.GetTitle(),
 			Version:     app.GetVersion(),
 			Description: app.GetDescription(),
+			WebsiteURL:  app.GetWebsiteUrl(),
+			Icons:       convertIcons(app.GetIcons()),
 		}
 	}
 	for _, res := range ext.GetResources() {
@@ -59,14 +62,7 @@ func convertResource(res *mcppb.MCPResource) MCPResourceOpts {
 		}
 		out.Annotations = converted
 	}
-	for _, icon := range res.GetIcons() {
-		out.Icons = append(out.Icons, MCPIconOpts{
-			Src:      icon.GetSrc(),
-			MimeType: icon.GetMimeType(),
-			Sizes:    icon.GetSizes(),
-			Theme:    iconTheme(icon.GetTheme()),
-		})
-	}
+	out.Icons = convertIcons(res.GetIcons())
 	return out
 }
 
@@ -85,7 +81,9 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	toolExt, ok := proto.GetExtension(opts, mcppb.E_Tool).(*mcppb.MCPToolOptions)
 	if ok && toolExt != nil {
 		result.ToolName = toolExt.GetId()
+		result.ToolTitle = toolExt.GetTitle()
 		result.ToolDescription = toolExt.GetDescription()
+		result.ToolIcons = convertIcons(toolExt.GetIcons())
 		result.Progress = toolExt.GetProgress()
 		result.Hints = toolHints(toolExt)
 		hasAnything = true
@@ -96,7 +94,9 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	if ok && promptExt != nil {
 		result.Prompt = &MCPPromptOpts{
 			Name:        promptExt.GetId(),
+			Title:       promptExt.GetTitle(),
 			Description: promptExt.GetDescription(),
+			Icons:       convertIcons(promptExt.GetIcons()),
 			Schema:      promptExt.GetSchema(),
 			Role:        roleName(promptExt.GetRole()),
 		}
@@ -138,4 +138,22 @@ func toolHints(ext *mcppb.MCPToolOptions) *MCPToolHints {
 		return nil
 	}
 	return hints
+}
+
+// convertIcons maps declared icons onto the template view. Tools, prompts,
+// resources and the app all carry the same shape.
+func convertIcons(icons []*mcppb.MCPIcon) []MCPIconOpts {
+	if len(icons) == 0 {
+		return nil
+	}
+	out := make([]MCPIconOpts, 0, len(icons))
+	for _, icon := range icons {
+		out = append(out, MCPIconOpts{
+			Src:      icon.GetSrc(),
+			MimeType: icon.GetMimeType(),
+			Sizes:    icon.GetSizes(),
+			Theme:    iconTheme(icon.GetTheme()),
+		})
+	}
+	return out
 }

@@ -37,6 +37,7 @@ message Asset {
 message ListAssetsRequest {
   // Restrict the listing to one media type, e.g. "image/png". Empty returns all.
   string mime_type = 1 [(mcp.v1.field) = {
+    title: "Media type"
     description: "Only return assets with this IANA media type. Empty returns every asset."
     examples: "text/markdown"
   }];

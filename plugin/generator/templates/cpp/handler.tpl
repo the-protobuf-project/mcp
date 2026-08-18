@@ -9,7 +9,7 @@ use rmcp::{ErrorData as McpError, RoleServer, ServerHandler, ServiceExt, model::
 use serde_json::{self, json, Value};
 
 #[allow(dead_code)]
-fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value) -> Tool {
+fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value, title: &str, icons: Value) -> Tool {
     let mut tool = json!({
         "name": name, "description": description,
         "inputSchema": serde_json::from_str::<Value>(schema_json).unwrap(),
@@ -19,6 +19,12 @@ fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_jso
     // not the same as "false".
     if !annotations.is_null() {
         tool["annotations"] = annotations;
+    }
+    if !title.is_empty() {
+        tool["title"] = json!(title);
+    }
+    if !icons.is_null() {
+        tool["icons"] = icons;
     }
     serde_json::from_value(tool).expect("generated tool schema must be valid")
 }
@@ -44,7 +50,7 @@ impl {{ $svcName }}McpHandler {
     fn tools() -> Vec<Tool> {
         vec![
         {{- range $methName, $info := $methods }}
-            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}),
+            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}, "{{ (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Title | rsEscape }}", {{ template "rsIcons" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Icons }}),
         {{- end }}
         ]
     }
@@ -117,6 +123,14 @@ pub async fn serve_{{ $svcName | snakeCase }}_mcp(
 {{- with .Idempotent }}{{ if not $first }}, {{ end }}"idempotentHint": {{ . }}{{ $first = false }}{{ end }}
 {{- with .OpenWorld }}{{ if not $first }}, {{ end }}"openWorldHint": {{ . }}{{ end }}
 })
+{{- else }}Value::Null
+{{- end }}
+{{- end }}
+
+{{- define "rsIcons" }}
+{{- if . }}json!([
+{{- range $i, $ic := . }}{{ if $i }}, {{ end }}{"src": "{{ $ic.Src | rsEscape }}"{{ if $ic.MimeType }}, "mimeType": "{{ $ic.MimeType | rsEscape }}"{{ end }}{{ if $ic.Sizes }}, "sizes": [{{ range $j, $sz := $ic.Sizes }}{{ if $j }}, {{ end }}"{{ $sz | rsEscape }}"{{ end }}]{{ end }}{{ if $ic.Theme }}, "theme": "{{ $ic.Theme | rsEscape }}"{{ end }}}{{ end }}
+])
 {{- else }}Value::Null
 {{- end }}
 {{- end }}

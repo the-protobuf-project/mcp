@@ -147,6 +147,8 @@ func (g *RustFileGenerator) buildRsParams() RsTplParams {
 				Description: desc,
 			}
 			if methOpts != nil {
+				meta.Title = methOpts.ToolTitle
+				meta.Icons = methOpts.ToolIcons
 				meta.Hints = methOpts.Hints
 			}
 			toolMeta[key] = meta

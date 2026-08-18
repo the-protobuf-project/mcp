@@ -20,7 +20,9 @@ const generatedFilenameExtension = ".pb.mcp.go"
 // ToolMeta holds the MCP tool name and description for a single RPC method.
 type ToolMeta struct {
 	Name        string
+	Title       string
 	Description string
+	Icons       []MCPIconOpts
 	// Hints is nil when the RPC declares no behavioural hints.
 	Hints *MCPToolHints
 }
@@ -205,6 +207,8 @@ func (g *FileGenerator) buildParams() TplParams {
 				Description: toolDesc,
 			}
 			if methOpts != nil {
+				meta.Title = methOpts.ToolTitle
+				meta.Icons = methOpts.ToolIcons
 				meta.Hints = methOpts.Hints
 			}
 			toolMeta[key] = meta

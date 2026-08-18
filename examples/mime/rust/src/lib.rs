@@ -67,6 +67,21 @@ mod tests {
         );
     }
 
+    // Display metadata must reach tools, not only resources.
+    #[test]
+    fn tools_carry_title_and_icons() {
+        let tools = GalleryServiceMcpHandler::<crate::tests::Stub>::tools();
+        let listed = tools
+            .iter()
+            .find(|t| t.name.as_ref() == "list_assets")
+            .expect("list_assets missing");
+
+        assert_eq!(listed.title.as_deref(), Some("List assets"));
+        let icons = listed.icons.as_ref().expect("tool has no icons");
+        assert_eq!(icons.len(), 1);
+        assert_eq!(icons[0].theme, Some(rmcp::model::IconTheme::Light));
+    }
+
     // The URI-template resource is listed separately from concrete resources.
     #[test]
     fn resource_template_is_registered() {

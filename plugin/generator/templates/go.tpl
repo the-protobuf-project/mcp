@@ -58,7 +58,7 @@ var (
 {{- with .OpenWorld }}
 		OpenWorldHint: boolPtr({{ . }}),
 {{- end }}
-	}{{ else }} nil{{ end }})
+	}{{ else }} nil{{ end }}, "{{ escapeQuotes (index $.ToolMeta $key).Title }}", {{ template "goIcons" (index $.ToolMeta $key).Icons }})
 {{- end }}
 )
 
@@ -66,10 +66,12 @@ var (
 // hints a client uses to decide whether the call needs confirmation.
 // mcp.MustCreateTool covers the input side; the rest is set here so the runtime
 // keeps a stable signature.
-func newTool(name, description, inputSchemaJSON, outputSchemaJSON string, annotations *mcp.ToolAnnotations) *mcp.Tool {
+func newTool(name, description, inputSchemaJSON, outputSchemaJSON string, annotations *mcp.ToolAnnotations, title string, icons []mcp.Icon) *mcp.Tool {
 	tool := mcp.MustCreateTool(name, description, inputSchemaJSON)
 	tool.OutputSchema = mcp.MustParseSchema(outputSchemaJSON)
 	tool.Annotations = annotations
+	tool.Title = title
+	tool.Icons = icons
 	return tool
 }
 
@@ -436,13 +438,19 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- range $methName, $tool := $methods }}
 {{- if and $tool.MethodOpts $tool.MethodOpts.Prompt }}
 	s.AddPrompt(&mcp.Prompt{
-		Name:        "{{ $tool.MethodOpts.Prompt.Name }}",
-		Description: "{{ $tool.MethodOpts.Prompt.Description }}",
+		Name:        "{{ escapeQuotes $tool.MethodOpts.Prompt.Name }}",
+{{- if $tool.MethodOpts.Prompt.Title }}
+		Title:       "{{ escapeQuotes $tool.MethodOpts.Prompt.Title }}",
+{{- end }}
+		Description: "{{ escapeQuotes $tool.MethodOpts.Prompt.Description }}",
 		Arguments: []*mcp.PromptArgument{
 		{{- range $tool.MethodOpts.Prompt.Arguments }}
-			{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
+			{Name: "{{ escapeQuotes .Name }}"{{ if .Title }}, Title: "{{ escapeQuotes .Title }}"{{ end }}, Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
 		{{- end }}
 		},
+{{- with $tool.MethodOpts.Prompt.Icons }}
+		Icons: {{ template "goIcons" . }},
+{{- end }}
 	}, func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 		// Placeholder handler carrying the role declared in the proto. Replace it
 		// via server.RemovePrompts / server.AddPrompt with your own handler.
@@ -464,7 +472,13 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 	s.AddResource(&mcp.Resource{
 		URI:      appResourceURI,
 		Name:     "{{ escapeQuotes $svcOpts.App.Name }}",
+{{- if $svcOpts.App.Title }}
+		Title:    "{{ escapeQuotes $svcOpts.App.Title }}",
+{{- end }}
 		MIMEType: "text/html",
+{{- with $svcOpts.App.Icons }}
+		Icons:    {{ template "goIcons" . }},
+{{- end }}
 	}, mcp.ResourceHandlerFor(cfg, appResourceURI, mcp.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}")))
 {{- end }}
 }
@@ -740,13 +754,19 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- range $methName, $tool := $methods }}
 {{- if and $tool.MethodOpts $tool.MethodOpts.Prompt }}
 	s.AddPrompt(&mcp.Prompt{
-		Name:        "{{ $tool.MethodOpts.Prompt.Name }}",
-		Description: "{{ $tool.MethodOpts.Prompt.Description }}",
+		Name:        "{{ escapeQuotes $tool.MethodOpts.Prompt.Name }}",
+{{- if $tool.MethodOpts.Prompt.Title }}
+		Title:       "{{ escapeQuotes $tool.MethodOpts.Prompt.Title }}",
+{{- end }}
+		Description: "{{ escapeQuotes $tool.MethodOpts.Prompt.Description }}",
 		Arguments: []*mcp.PromptArgument{
 		{{- range $tool.MethodOpts.Prompt.Arguments }}
-			{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
+			{Name: "{{ escapeQuotes .Name }}"{{ if .Title }}, Title: "{{ escapeQuotes .Title }}"{{ end }}, Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
 		{{- end }}
 		},
+{{- with $tool.MethodOpts.Prompt.Icons }}
+		Icons: {{ template "goIcons" . }},
+{{- end }}
 	}, func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 		// Placeholder handler carrying the role declared in the proto. Replace it
 		// via server.RemovePrompts / server.AddPrompt with your own handler.
@@ -768,8 +788,21 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 	s.AddResource(&mcp.Resource{
 		URI:      appResourceURI,
 		Name:     "{{ escapeQuotes $svcOpts.App.Name }}",
+{{- if $svcOpts.App.Title }}
+		Title:    "{{ escapeQuotes $svcOpts.App.Title }}",
+{{- end }}
 		MIMEType: "text/html",
+{{- with $svcOpts.App.Icons }}
+		Icons:    {{ template "goIcons" . }},
+{{- end }}
 	}, mcp.ResourceHandlerFor(cfg, appResourceURI, mcp.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}")))
 {{- end }}
 }
+{{- end }}
+
+{{- define "goIcons" }}
+{{- if . }}[]mcp.Icon{
+{{- range . }}{Source: "{{ escapeQuotes .Src }}"{{ if .MimeType }}, MIMEType: "{{ escapeQuotes .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ escapeQuotes . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ escapeQuotes .Theme }}"{{ end }}}, {{ end }}}
+{{- else }}nil
+{{- end }}
 {{- end }}

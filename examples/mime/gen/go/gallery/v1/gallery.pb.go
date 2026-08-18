@@ -320,10 +320,11 @@ const file_gallery_v1_gallery_proto_rawDesc = "" +
 	"\x03uri\x18\x04 \x01(\tB%\xe2\xf3\x18!\n" +
 	"\x1dURI the asset is served from. \x04R\x03uri\x12\x1d\n" +
 	"\n" +
-	"size_bytes\x18\x05 \x01(\x03R\tsizeBytes\"\x8f\x01\n" +
-	"\x11ListAssetsRequest\x12z\n" +
-	"\tmime_type\x18\x01 \x01(\tB]\xe2\xf3\x18Y\n" +
-	"HOnly return assets with this IANA media type. Empty returns every asset.\x12\rtext/markdownR\bmimeType\"?\n" +
+	"size_bytes\x18\x05 \x01(\x03R\tsizeBytes\"\x9c\x01\n" +
+	"\x11ListAssetsRequest\x12\x86\x01\n" +
+	"\tmime_type\x18\x01 \x01(\tBi\xe2\xf3\x18e\n" +
+	"HOnly return assets with this IANA media type. Empty returns every asset.\x12\rtext/markdown2\n" +
+	"Media typeR\bmimeType\"?\n" +
 	"\x12ListAssetsResponse\x12)\n" +
 	"\x06assets\x18\x01 \x03(\v2\x11.gallery.v1.AssetR\x06assets\"a\n" +
 	"\x0fGetAssetRequest\x12N\n" +

@@ -18,8 +18,13 @@ service GalleryService {
   option (mcp.v1.service) = {
     app: {
       display_name: "Asset Gallery"
+      title: "The Asset Gallery"
       version: "1.0.0"
       description: "A gallery of assets served across the common MCP media types"
+      website_url: "https://example.com/gallery"
+      icons: [
+        {src: "https://example.com/icons/gallery.svg" mime_type: "image/svg+xml" sizes: ["any"]}
+      ]
     }
     resources: [
       // Markdown — rendered as prose by clients that support it.
@@ -131,7 +136,11 @@ service GalleryService {
   rpc ListAssets(ListAssetsRequest) returns (ListAssetsResponse) {
     option (mcp.v1.tool) = {
       id: "list_assets"
+      title: "List assets"
       description: "List gallery assets, optionally filtered by IANA media type."
+      icons: [
+        {src: "https://example.com/icons/list.svg" mime_type: "image/svg+xml" theme: MCP_ICON_THEME_LIGHT}
+      ]
       // Listing reads the gallery and nothing else, so a client may call it
       // without asking the user first.
       read_only: true
@@ -140,6 +149,7 @@ service GalleryService {
     };
     option (mcp.v1.prompt) = {
       id: "summarize_gallery"
+      title: "Summarise the gallery"
       description: "Summarise what the gallery holds, grouped by media type"
       schema: "gallery.v1.ListAssetsRequest"
       role: MCP_ROLE_ASSISTANT

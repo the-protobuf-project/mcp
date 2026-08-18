@@ -114,7 +114,11 @@ type MCPFieldOptions struct {
 	// JSON Schema type to apply to this field. Overrides the type inferred from
 	// the proto field type. Useful for fields whose wire type does not match their
 	// intended schema type (e.g. an int64 that should appear as "string" in JSON).
-	Type          MCPFieldType `protobuf:"varint,5,opt,name=type,proto3,enum=mcp.v1.MCPFieldType" json:"type,omitempty"`
+	Type MCPFieldType `protobuf:"varint,5,opt,name=type,proto3,enum=mcp.v1.MCPFieldType" json:"type,omitempty"`
+	// Display name for the field, preferred over its proto name in UI and
+	// end-user contexts. Carried onto a prompt argument's title when this field
+	// belongs to a prompt's schema message.
+	Title         *string `protobuf:"bytes,6,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -184,11 +188,18 @@ func (x *MCPFieldOptions) GetType() MCPFieldType {
 	return MCPFieldType_MCP_FIELD_TYPE_UNSPECIFIED
 }
 
+func (x *MCPFieldOptions) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
 var File_mcp_v1_field_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_field_proto_rawDesc = "" +
 	"\n" +
-	"\x12mcp/v1/field.proto\x12\x06mcp.v1\x1a\x17mcp/v1/field_type.proto\"\xc9\x01\n" +
+	"\x12mcp/v1/field.proto\x12\x06mcp.v1\x1a\x17mcp/v1/field_type.proto\"\xee\x01\n" +
 	"\x0fMCPFieldOptions\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x1a\n" +
 	"\bexamples\x18\x02 \x03(\tR\bexamples\x12\x1e\n" +
@@ -196,7 +207,9 @@ const file_mcp_v1_field_proto_rawDesc = "" +
 	"deprecated\x18\x03 \x01(\bR\n" +
 	"deprecated\x12.\n" +
 	"\x06format\x18\x04 \x01(\x0e2\x16.mcp.v1.MCPFieldFormatR\x06format\x12(\n" +
-	"\x04type\x18\x05 \x01(\x0e2\x14.mcp.v1.MCPFieldTypeR\x04type*\xf4\x01\n" +
+	"\x04type\x18\x05 \x01(\x0e2\x14.mcp.v1.MCPFieldTypeR\x04type\x12\x19\n" +
+	"\x05title\x18\x06 \x01(\tH\x00R\x05title\x88\x01\x01B\b\n" +
+	"\x06_title*\xf4\x01\n" +
 	"\x0eMCPFieldFormat\x12 \n" +
 	"\x1cMCP_FIELD_FORMAT_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aMCP_FIELD_FORMAT_DATE_TIME\x10\x01\x12\x19\n" +
@@ -245,6 +258,7 @@ func file_mcp_v1_field_proto_init() {
 		return
 	}
 	file_mcp_v1_field_type_proto_init()
+	file_mcp_v1_field_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

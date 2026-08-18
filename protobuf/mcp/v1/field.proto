@@ -31,6 +31,11 @@ message MCPFieldOptions {
   // the proto field type. Useful for fields whose wire type does not match their
   // intended schema type (e.g. an int64 that should appear as "string" in JSON).
   MCPFieldType type = 5;
+
+  // Display name for the field, preferred over its proto name in UI and
+  // end-user contexts. Carried onto a prompt argument's title when this field
+  // belongs to a prompt's schema message.
+  optional string title = 6;
 }
 
 // MCPFieldFormat specifies the JSON Schema format keyword value for a field.

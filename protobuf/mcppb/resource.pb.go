@@ -21,59 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// MCPIconTheme indicates the background context an icon is designed for.
-type MCPIconTheme int32
-
-const (
-	// No theme specified. The icon is suitable for any background.
-	MCPIconTheme_MCP_ICON_THEME_UNSPECIFIED MCPIconTheme = 0
-	// The icon is designed for display on a light background.
-	MCPIconTheme_MCP_ICON_THEME_LIGHT MCPIconTheme = 1
-	// The icon is designed for display on a dark background.
-	MCPIconTheme_MCP_ICON_THEME_DARK MCPIconTheme = 2
-)
-
-// Enum value maps for MCPIconTheme.
-var (
-	MCPIconTheme_name = map[int32]string{
-		0: "MCP_ICON_THEME_UNSPECIFIED",
-		1: "MCP_ICON_THEME_LIGHT",
-		2: "MCP_ICON_THEME_DARK",
-	}
-	MCPIconTheme_value = map[string]int32{
-		"MCP_ICON_THEME_UNSPECIFIED": 0,
-		"MCP_ICON_THEME_LIGHT":       1,
-		"MCP_ICON_THEME_DARK":        2,
-	}
-)
-
-func (x MCPIconTheme) Enum() *MCPIconTheme {
-	p := new(MCPIconTheme)
-	*p = x
-	return p
-}
-
-func (x MCPIconTheme) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (MCPIconTheme) Descriptor() protoreflect.EnumDescriptor {
-	return file_mcp_v1_resource_proto_enumTypes[0].Descriptor()
-}
-
-func (MCPIconTheme) Type() protoreflect.EnumType {
-	return &file_mcp_v1_resource_proto_enumTypes[0]
-}
-
-func (x MCPIconTheme) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use MCPIconTheme.Descriptor instead.
-func (MCPIconTheme) EnumDescriptor() ([]byte, []int) {
-	return file_mcp_v1_resource_proto_rawDescGZIP(), []int{0}
-}
-
 // MCPAnnotations carries audience and priority metadata attached to a resource.
 // It corresponds to the Annotations struct in the MCP Go SDK.
 type MCPAnnotations struct {
@@ -143,88 +90,6 @@ func (x *MCPAnnotations) GetPriority() float64 {
 	return 0
 }
 
-// MCPIcon describes a single icon image associated with a resource.
-// It corresponds to the Icon struct in the MCP Go SDK.
-type MCPIcon struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// URI pointing to the icon resource. This can be an HTTP/HTTPS URL pointing
-	// to an image file, or an inline `data:` URI carrying the image bytes.
-	// Required.
-	Src string `protobuf:"bytes,1,opt,name=src,proto3" json:"src,omitempty"`
-	// MIME type of the icon image. Should be provided when the server's
-	// Content-Type header is missing or too generic.
-	MimeType *string `protobuf:"bytes,2,opt,name=mime_type,json=mimeType,proto3,oneof" json:"mime_type,omitempty"`
-	// Size specification for the icon. Examples:
-	//
-	//	["48x48"]           — single fixed size
-	//	["any"]             — scalable format such as SVG
-	//	["48x48", "96x96"]  — multiple available sizes
-	Sizes []string `protobuf:"bytes,3,rep,name=sizes,proto3" json:"sizes,omitempty"`
-	// The background context this icon is designed for.
-	// Omit if the icon is suitable for any background.
-	Theme         MCPIconTheme `protobuf:"varint,4,opt,name=theme,proto3,enum=mcp.v1.MCPIconTheme" json:"theme,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *MCPIcon) Reset() {
-	*x = MCPIcon{}
-	mi := &file_mcp_v1_resource_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MCPIcon) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MCPIcon) ProtoMessage() {}
-
-func (x *MCPIcon) ProtoReflect() protoreflect.Message {
-	mi := &file_mcp_v1_resource_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MCPIcon.ProtoReflect.Descriptor instead.
-func (*MCPIcon) Descriptor() ([]byte, []int) {
-	return file_mcp_v1_resource_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *MCPIcon) GetSrc() string {
-	if x != nil {
-		return x.Src
-	}
-	return ""
-}
-
-func (x *MCPIcon) GetMimeType() string {
-	if x != nil && x.MimeType != nil {
-		return *x.MimeType
-	}
-	return ""
-}
-
-func (x *MCPIcon) GetSizes() []string {
-	if x != nil {
-		return x.Sizes
-	}
-	return nil
-}
-
-func (x *MCPIcon) GetTheme() MCPIconTheme {
-	if x != nil {
-		return x.Theme
-	}
-	return MCPIconTheme_MCP_ICON_THEME_UNSPECIFIED
-}
-
 // MCPResource describes an MCP resource exposed by a gRPC service.
 // It corresponds to the Resource struct in the MCP Go SDK.
 //
@@ -266,7 +131,7 @@ type MCPResource struct {
 
 func (x *MCPResource) Reset() {
 	*x = MCPResource{}
-	mi := &file_mcp_v1_resource_proto_msgTypes[2]
+	mi := &file_mcp_v1_resource_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -278,7 +143,7 @@ func (x *MCPResource) String() string {
 func (*MCPResource) ProtoMessage() {}
 
 func (x *MCPResource) ProtoReflect() protoreflect.Message {
-	mi := &file_mcp_v1_resource_proto_msgTypes[2]
+	mi := &file_mcp_v1_resource_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -291,7 +156,7 @@ func (x *MCPResource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MCPResource.ProtoReflect.Descriptor instead.
 func (*MCPResource) Descriptor() ([]byte, []int) {
-	return file_mcp_v1_resource_proto_rawDescGZIP(), []int{2}
+	return file_mcp_v1_resource_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *MCPResource) GetUriOrPattern() isMCPResource_UriOrPattern {
@@ -391,20 +256,13 @@ var File_mcp_v1_resource_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_resource_proto_rawDesc = "" +
 	"\n" +
-	"\x15mcp/v1/resource.proto\x12\x06mcp.v1\x1a\x13mcp/v1/prompt.proto\"\xa7\x01\n" +
+	"\x15mcp/v1/resource.proto\x12\x06mcp.v1\x1a\x11mcp/v1/icon.proto\x1a\x13mcp/v1/prompt.proto\"\xa7\x01\n" +
 	"\x0eMCPAnnotations\x12+\n" +
 	"\baudience\x18\x01 \x03(\x0e2\x0f.mcp.v1.MCPRoleR\baudience\x12(\n" +
 	"\rlast_modified\x18\x02 \x01(\tH\x00R\flastModified\x88\x01\x01\x12\x1f\n" +
 	"\bpriority\x18\x03 \x01(\x01H\x01R\bpriority\x88\x01\x01B\x10\n" +
 	"\x0e_last_modifiedB\v\n" +
-	"\t_priority\"\x8d\x01\n" +
-	"\aMCPIcon\x12\x10\n" +
-	"\x03src\x18\x01 \x01(\tR\x03src\x12 \n" +
-	"\tmime_type\x18\x02 \x01(\tH\x00R\bmimeType\x88\x01\x01\x12\x14\n" +
-	"\x05sizes\x18\x03 \x03(\tR\x05sizes\x12*\n" +
-	"\x05theme\x18\x04 \x01(\x0e2\x14.mcp.v1.MCPIconThemeR\x05themeB\f\n" +
-	"\n" +
-	"_mime_type\"\xf0\x02\n" +
+	"\t_priority\"\xf0\x02\n" +
 	"\vMCPResource\x12\x12\n" +
 	"\x03uri\x18\x01 \x01(\tH\x00R\x03uri\x12\x1a\n" +
 	"\apattern\x18\x02 \x01(\tH\x00R\apattern\x12\x0e\n" +
@@ -419,11 +277,7 @@ const file_mcp_v1_resource_proto_rawDesc = "" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\a\n" +
 	"\x05_sizeB\x0e\n" +
-	"\f_annotations*a\n" +
-	"\fMCPIconTheme\x12\x1e\n" +
-	"\x1aMCP_ICON_THEME_UNSPECIFIED\x10\x00\x12\x18\n" +
-	"\x14MCP_ICON_THEME_LIGHT\x10\x01\x12\x17\n" +
-	"\x13MCP_ICON_THEME_DARK\x10\x02BQ\n" +
+	"\f_annotationsBQ\n" +
 	"\n" +
 	"com.mcp.v1B\rResourceProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
 
@@ -439,25 +293,22 @@ func file_mcp_v1_resource_proto_rawDescGZIP() []byte {
 	return file_mcp_v1_resource_proto_rawDescData
 }
 
-var file_mcp_v1_resource_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mcp_v1_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_mcp_v1_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_mcp_v1_resource_proto_goTypes = []any{
-	(MCPIconTheme)(0),      // 0: mcp.v1.MCPIconTheme
-	(*MCPAnnotations)(nil), // 1: mcp.v1.MCPAnnotations
-	(*MCPIcon)(nil),        // 2: mcp.v1.MCPIcon
-	(*MCPResource)(nil),    // 3: mcp.v1.MCPResource
-	(MCPRole)(0),           // 4: mcp.v1.MCPRole
+	(*MCPAnnotations)(nil), // 0: mcp.v1.MCPAnnotations
+	(*MCPResource)(nil),    // 1: mcp.v1.MCPResource
+	(MCPRole)(0),           // 2: mcp.v1.MCPRole
+	(*MCPIcon)(nil),        // 3: mcp.v1.MCPIcon
 }
 var file_mcp_v1_resource_proto_depIdxs = []int32{
-	4, // 0: mcp.v1.MCPAnnotations.audience:type_name -> mcp.v1.MCPRole
-	0, // 1: mcp.v1.MCPIcon.theme:type_name -> mcp.v1.MCPIconTheme
-	1, // 2: mcp.v1.MCPResource.annotations:type_name -> mcp.v1.MCPAnnotations
-	2, // 3: mcp.v1.MCPResource.icons:type_name -> mcp.v1.MCPIcon
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	2, // 0: mcp.v1.MCPAnnotations.audience:type_name -> mcp.v1.MCPRole
+	0, // 1: mcp.v1.MCPResource.annotations:type_name -> mcp.v1.MCPAnnotations
+	3, // 2: mcp.v1.MCPResource.icons:type_name -> mcp.v1.MCPIcon
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_mcp_v1_resource_proto_init() }
@@ -465,10 +316,10 @@ func file_mcp_v1_resource_proto_init() {
 	if File_mcp_v1_resource_proto != nil {
 		return
 	}
+	file_mcp_v1_icon_proto_init()
 	file_mcp_v1_prompt_proto_init()
 	file_mcp_v1_resource_proto_msgTypes[0].OneofWrappers = []any{}
-	file_mcp_v1_resource_proto_msgTypes[1].OneofWrappers = []any{}
-	file_mcp_v1_resource_proto_msgTypes[2].OneofWrappers = []any{
+	file_mcp_v1_resource_proto_msgTypes[1].OneofWrappers = []any{
 		(*MCPResource_Uri)(nil),
 		(*MCPResource_Pattern)(nil),
 	}
@@ -477,14 +328,13 @@ func file_mcp_v1_resource_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mcp_v1_resource_proto_rawDesc), len(file_mcp_v1_resource_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   3,
+			NumEnums:      0,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_mcp_v1_resource_proto_goTypes,
 		DependencyIndexes: file_mcp_v1_resource_proto_depIdxs,
-		EnumInfos:         file_mcp_v1_resource_proto_enumTypes,
 		MessageInfos:      file_mcp_v1_resource_proto_msgTypes,
 	}.Build()
 	File_mcp_v1_resource_proto = out.File

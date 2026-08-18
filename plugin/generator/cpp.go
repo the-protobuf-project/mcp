@@ -161,6 +161,8 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 				Description: desc,
 			}
 			if methOpts != nil {
+				meta.Title = methOpts.ToolTitle
+				meta.Icons = methOpts.ToolIcons
 				meta.Hints = methOpts.Hints
 			}
 			toolMeta[key] = meta

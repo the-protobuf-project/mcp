@@ -98,7 +98,11 @@ type MCPPrompt struct {
 	// Fully-qualified proto message name whose fields define the prompt arguments.
 	Schema string `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
 	// Role of the generated prompt message; defaults to user.
-	Role          MCPRole `protobuf:"varint,4,opt,name=role,proto3,enum=mcp.v1.MCPRole" json:"role,omitempty"`
+	Role MCPRole `protobuf:"varint,4,opt,name=role,proto3,enum=mcp.v1.MCPRole" json:"role,omitempty"`
+	// Display name preferred over id in UI and end-user contexts.
+	Title *string `protobuf:"bytes,5,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	// Icons representing the prompt in client UIs.
+	Icons         []*MCPIcon `protobuf:"bytes,6,rep,name=icons,proto3" json:"icons,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -161,6 +165,20 @@ func (x *MCPPrompt) GetRole() MCPRole {
 	return MCPRole_MCP_ROLE_UNSPECIFIED
 }
 
+func (x *MCPPrompt) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *MCPPrompt) GetIcons() []*MCPIcon {
+	if x != nil {
+		return x.Icons
+	}
+	return nil
+}
+
 // MCPToolOptions configures an individual RPC method as an MCP tool.
 // Used as: option (mcp.v1.tool) = { ... };
 type MCPToolOptions struct {
@@ -174,6 +192,12 @@ type MCPToolOptions struct {
 	// execution. Requires a server-streaming RPC whose response has a oneof with
 	// mcp.v1.MCPProgress and the result type.
 	Progress *bool `protobuf:"varint,3,opt,name=progress,proto3,oneof" json:"progress,omitempty"`
+	// Behavioural hints, surfaced to clients as the tool's `annotations`. They
+	// drive whether a client may invoke the tool without asking the user first.
+	//
+	// Each is optional because absent means "unknown", which a client must treat
+	// as the unsafe answer. A default of false would assert something stronger
+	// than the schema knows.
 	// The tool does not modify its environment. Typical of Get, List and Search.
 	ReadOnly *bool `protobuf:"varint,4,opt,name=read_only,json=readOnly,proto3,oneof" json:"read_only,omitempty"`
 	// The tool may perform destructive updates. Meaningful only when read_only is
@@ -185,7 +209,11 @@ type MCPToolOptions struct {
 	Idempotent *bool `protobuf:"varint,6,opt,name=idempotent,proto3,oneof" json:"idempotent,omitempty"`
 	// The tool interacts with an open world of external entities — a third-party
 	// API, the public internet — rather than a closed, predictable domain.
-	OpenWorld     *bool `protobuf:"varint,7,opt,name=open_world,json=openWorld,proto3,oneof" json:"open_world,omitempty"`
+	OpenWorld *bool `protobuf:"varint,7,opt,name=open_world,json=openWorld,proto3,oneof" json:"open_world,omitempty"`
+	// Display name preferred over id in UI and end-user contexts.
+	Title *string `protobuf:"bytes,8,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	// Icons representing the tool in client UIs.
+	Icons         []*MCPIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -269,18 +297,35 @@ func (x *MCPToolOptions) GetOpenWorld() bool {
 	return false
 }
 
+func (x *MCPToolOptions) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *MCPToolOptions) GetIcons() []*MCPIcon {
+	if x != nil {
+		return x.Icons
+	}
+	return nil
+}
+
 var File_mcp_v1_prompt_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_prompt_proto_rawDesc = "" +
 	"\n" +
-	"\x13mcp/v1/prompt.proto\x12\x06mcp.v1\"\x9b\x01\n" +
+	"\x13mcp/v1/prompt.proto\x12\x06mcp.v1\x1a\x11mcp/v1/icon.proto\"\xe7\x01\n" +
 	"\tMCPPrompt\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x16\n" +
 	"\x06schema\x18\x03 \x01(\tR\x06schema\x12#\n" +
-	"\x04role\x18\x04 \x01(\x0e2\x0f.mcp.v1.MCPRoleR\x04roleB\x05\n" +
+	"\x04role\x18\x04 \x01(\x0e2\x0f.mcp.v1.MCPRoleR\x04role\x12\x19\n" +
+	"\x05title\x18\x05 \x01(\tH\x02R\x05title\x88\x01\x01\x12%\n" +
+	"\x05icons\x18\x06 \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\x05\n" +
 	"\x03_idB\x0e\n" +
-	"\f_description\"\xdf\x02\n" +
+	"\f_descriptionB\b\n" +
+	"\x06_title\"\xab\x03\n" +
 	"\x0eMCPToolOptions\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x1f\n" +
@@ -291,7 +336,9 @@ const file_mcp_v1_prompt_proto_rawDesc = "" +
 	"idempotent\x18\x06 \x01(\bH\x05R\n" +
 	"idempotent\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"open_world\x18\a \x01(\bH\x06R\topenWorld\x88\x01\x01B\x05\n" +
+	"open_world\x18\a \x01(\bH\x06R\topenWorld\x88\x01\x01\x12\x19\n" +
+	"\x05title\x18\b \x01(\tH\aR\x05title\x88\x01\x01\x12%\n" +
+	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\x05\n" +
 	"\x03_idB\x0e\n" +
 	"\f_descriptionB\v\n" +
 	"\t_progressB\f\n" +
@@ -299,7 +346,8 @@ const file_mcp_v1_prompt_proto_rawDesc = "" +
 	"_read_onlyB\x0e\n" +
 	"\f_destructiveB\r\n" +
 	"\v_idempotentB\r\n" +
-	"\v_open_world*N\n" +
+	"\v_open_worldB\b\n" +
+	"\x06_title*N\n" +
 	"\aMCPRole\x12\x18\n" +
 	"\x14MCP_ROLE_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rMCP_ROLE_USER\x10\x01\x12\x16\n" +
@@ -325,14 +373,17 @@ var file_mcp_v1_prompt_proto_goTypes = []any{
 	(MCPRole)(0),           // 0: mcp.v1.MCPRole
 	(*MCPPrompt)(nil),      // 1: mcp.v1.MCPPrompt
 	(*MCPToolOptions)(nil), // 2: mcp.v1.MCPToolOptions
+	(*MCPIcon)(nil),        // 3: mcp.v1.MCPIcon
 }
 var file_mcp_v1_prompt_proto_depIdxs = []int32{
 	0, // 0: mcp.v1.MCPPrompt.role:type_name -> mcp.v1.MCPRole
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // 1: mcp.v1.MCPPrompt.icons:type_name -> mcp.v1.MCPIcon
+	3, // 2: mcp.v1.MCPToolOptions.icons:type_name -> mcp.v1.MCPIcon
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_mcp_v1_prompt_proto_init() }
@@ -340,6 +391,7 @@ func file_mcp_v1_prompt_proto_init() {
 	if File_mcp_v1_prompt_proto != nil {
 		return
 	}
+	file_mcp_v1_icon_proto_init()
 	file_mcp_v1_prompt_proto_msgTypes[0].OneofWrappers = []any{}
 	file_mcp_v1_prompt_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}

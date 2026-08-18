@@ -26,16 +26,20 @@ var File_gallery_v1_gallery_service_proto protoreflect.FileDescriptor
 const file_gallery_v1_gallery_service_proto_rawDesc = "" +
 	"\n" +
 	" gallery/v1/gallery_service.proto\x12\n" +
-	"gallery.v1\x1a\x18gallery/v1/gallery.proto\x1a\x18mcp/v1/annotations.proto2\xf1\f\n" +
-	"\x0eGalleryService\x12\x93\x02\n" +
+	"gallery.v1\x1a\x18gallery/v1/gallery.proto\x1a\x18mcp/v1/annotations.proto2\xbc\x0e\n" +
+	"\x0eGalleryService\x12\xf0\x02\n" +
 	"\n" +
-	"ListAssets\x12\x1d.gallery.v1.ListAssetsRequest\x1a\x1e.gallery.v1.ListAssetsResponse\"\xc5\x01\xca\xf3\x18Q\n" +
-	"\vlist_assets\x12<List gallery assets, optionally filtered by IANA media type. \x010\x018\x00\xd2\xf3\x18l\n" +
-	"\x11summarize_gallery\x127Summarise what the gallery holds, grouped by media type\x1a\x1cgallery.v1.ListAssetsRequest \x02\x12\x90\x01\n" +
+	"ListAssets\x12\x1d.gallery.v1.ListAssetsRequest\x1a\x1e.gallery.v1.ListAssetsResponse\"\xa2\x02\xca\xf3\x18\x95\x01\n" +
+	"\vlist_assets\x12<List gallery assets, optionally filtered by IANA media type. \x010\x018\x00B\vList assetsJ5\n" +
+	"\"https://example.com/icons/list.svg\x12\rimage/svg+xml \x01\xd2\xf3\x18\x83\x01\n" +
+	"\x11summarize_gallery\x127Summarise what the gallery holds, grouped by media type\x1a\x1cgallery.v1.ListAssetsRequest \x02*\x15Summarise the gallery\x12\x90\x01\n" +
 	"\bGetAsset\x12\x1b.gallery.v1.GetAssetRequest\x1a\x1c.gallery.v1.GetAssetResponse\"I\xca\xf3\x18E\n" +
-	"\tget_asset\x122Fetch a single asset's content and its media type. \x010\x018\x00\x1a\xb5\t\xc2\xf3\x18\xb0\t\n" +
-	"T\n" +
-	"\rAsset Gallery\x12\x051.0.0\x1a<A gallery of assets served across the common MCP media types\x12\xaa\x02\x1a\boverview\"\x10Gallery overview*.Prose introduction to the gallery, in Markdown2\rtext/markdown8\xd4\x04B#\n" +
+	"\tget_asset\x122Fetch a single asset's content and its media type. \x010\x018\x00\x1a\xa3\n" +
+	"\xc2\xf3\x18\x9e\n" +
+	"\n" +
+	"\xc1\x01\n" +
+	"\rAsset Gallery\x12\x051.0.0\x1a<A gallery of assets served across the common MCP media types\"\x11The Asset Gallery*\x1bhttps://example.com/gallery2;\n" +
+	"%https://example.com/icons/gallery.svg\x12\rimage/svg+xml\x1a\x03any\x12\xaa\x02\x1a\boverview\"\x10Gallery overview*.Prose introduction to the gallery, in Markdown2\rtext/markdown8\xd4\x04B#\n" +
 	"\x02\x01\x02\x12\x142026-08-17T09:00:00Z\x19\x00\x00\x00\x00\x00\x00\xf0?JD\n" +
 	",https://example.com/icons/markdown-light.svg\x12\rimage/svg+xml\x1a\x03any \x01JC\n" +
 	"+https://example.com/icons/markdown-dark.svg\x12\rimage/svg+xml\x1a\x03any \x02\n" +

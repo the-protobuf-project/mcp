@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package mcp.v1;
 
+import "mcp/v1/icon.proto";
+
 option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
 option java_multiple_files = true;
 option java_outer_classname = "PromptProto";
@@ -30,6 +32,12 @@ message MCPPrompt {
   string schema = 3;
   // Role of the generated prompt message; defaults to user.
   MCPRole role = 4;
+
+  // Display name preferred over id in UI and end-user contexts.
+  optional string title = 5;
+
+  // Icons representing the prompt in client UIs.
+  repeated MCPIcon icons = 6;
 }
 
 // MCPToolOptions configures an individual RPC method as an MCP tool.
@@ -66,6 +74,12 @@ message MCPToolOptions {
   // The tool interacts with an open world of external entities — a third-party
   // API, the public internet — rather than a closed, predictable domain.
   optional bool open_world = 7;
+
+  // Display name preferred over id in UI and end-user contexts.
+  optional string title = 8;
+
+  // Icons representing the tool in client UIs.
+  repeated MCPIcon icons = 9;
 }
 
 // MCPRole specifies the intended recipient of a prompt message.

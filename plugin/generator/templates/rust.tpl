@@ -9,7 +9,7 @@ use async_trait::async_trait;
 use rmcp::{ErrorData as McpError, RoleServer, ServerHandler, ServiceExt, model::*, service::{Peer, RequestContext}};
 use serde_json::{self, json, Value};
 
-fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value) -> Tool {
+fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value, title: &str, icons: Value) -> Tool {
     let mut tool = json!({
         "name": name, "description": description,
         "inputSchema": serde_json::from_str::<Value>(schema_json).unwrap(),
@@ -20,10 +20,16 @@ fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_jso
     if !annotations.is_null() {
         tool["annotations"] = annotations;
     }
+    if !title.is_empty() {
+        tool["title"] = json!(title);
+    }
+    if !icons.is_null() {
+        tool["icons"] = icons;
+    }
     serde_json::from_value(tool).expect("generated tool schema must be valid")
 }
 
-fn make_tool_with_app_meta(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value, app_resource_uri: &str) -> Tool {
+fn make_tool_with_app_meta(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value, title: &str, icons: Value, app_resource_uri: &str) -> Tool {
     let mut tool = json!({
         "name": name, "description": description,
         "inputSchema": serde_json::from_str::<Value>(schema_json).unwrap(),
@@ -32,6 +38,12 @@ fn make_tool_with_app_meta(name: &str, description: &str, schema_json: &str, out
     });
     if !annotations.is_null() {
         tool["annotations"] = annotations;
+    }
+    if !title.is_empty() {
+        tool["title"] = json!(title);
+    }
+    if !icons.is_null() {
+        tool["icons"] = icons;
     }
     serde_json::from_value(tool).expect("generated tool schema must be valid")
 }
@@ -120,9 +132,9 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         vec![
         {{- range $methName, $info := $methods }}
 {{- if and $svcOpts $svcOpts.App }}
-            make_tool_with_app_meta("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}, &app_uri),
+            make_tool_with_app_meta("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}, "{{ (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Title | rsEscape }}", {{ template "rsIcons" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Icons }}, &app_uri),
 {{- else }}
-            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}),
+            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}, "{{ (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Title | rsEscape }}", {{ template "rsIcons" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Icons }}),
 {{- end }}
         {{- end }}
         ]
@@ -146,6 +158,9 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         {{- if and $info.MethodOpts $info.MethodOpts.Prompt }}
             serde_json::from_value(json!({
                 "name": "{{ $info.MethodOpts.Prompt.Name }}",
+                {{- if $info.MethodOpts.Prompt.Title }}
+                "title": "{{ $info.MethodOpts.Prompt.Title | rsEscape }}",
+                {{- end }}
                 "description": "{{ $info.MethodOpts.Prompt.Description | rsEscape }}",
                 "arguments": [
                 {{- range $info.MethodOpts.Prompt.Arguments }}
@@ -468,6 +483,14 @@ pub async fn serve_{{ $svcName | snakeCase }}_mcp<T: {{ $svcName }}McpServer>(
 {{- with .Idempotent }}{{ if not $first }}, {{ end }}"idempotentHint": {{ . }}{{ $first = false }}{{ end }}
 {{- with .OpenWorld }}{{ if not $first }}, {{ end }}"openWorldHint": {{ . }}{{ end }}
 })
+{{- else }}Value::Null
+{{- end }}
+{{- end }}
+
+{{- define "rsIcons" }}
+{{- if . }}json!([
+{{- range $i, $ic := . }}{{ if $i }}, {{ end }}{"src": "{{ $ic.Src | rsEscape }}"{{ if $ic.MimeType }}, "mimeType": "{{ $ic.MimeType | rsEscape }}"{{ end }}{{ if $ic.Sizes }}, "sizes": [{{ range $j, $sz := $ic.Sizes }}{{ if $j }}, {{ end }}"{{ $sz | rsEscape }}"{{ end }}]{{ end }}{{ if $ic.Theme }}, "theme": "{{ $ic.Theme | rsEscape }}"{{ end }}}{{ end }}
+])
 {{- else }}Value::Null
 {{- end }}
 {{- end }}

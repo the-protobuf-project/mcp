@@ -9,7 +9,9 @@ type MCPServiceOpts struct {
 // MCPMethodOpts is the language-neutral view of per-RPC MCP options for templates.
 type MCPMethodOpts struct {
 	ToolName        string
+	ToolTitle       string
 	ToolDescription string
+	ToolIcons       []MCPIconOpts
 	// Progress reports whether (mcp.v1.tool).progress was set. It is advisory:
 	// the streaming bridge is emitted based on the response message's shape (see
 	// DetectStreamProgress), so this only records the author's declared intent.
@@ -34,15 +36,20 @@ type MCPToolHints struct {
 // MCPAppOpts mirrors MCPApp for templates.
 type MCPAppOpts struct {
 	Name        string
+	Title       string
 	Version     string
 	Description string
+	WebsiteURL  string
+	Icons       []MCPIconOpts
 }
 
 // MCPPromptOpts mirrors MCPPrompt for templates.
 // Arguments are derived from the proto message referenced by Schema.
 type MCPPromptOpts struct {
 	Name        string
+	Title       string
 	Description string
+	Icons       []MCPIconOpts
 	Schema      string
 	// Role is the MCP message role, "user" or "assistant". Never empty:
 	// MCP_ROLE_UNSPECIFIED resolves to "user".
@@ -53,6 +60,7 @@ type MCPPromptOpts struct {
 // MCPPromptArgOpts describes a single prompt argument resolved from a schema message.
 type MCPPromptArgOpts struct {
 	Name           string
+	Title          string
 	Description    string
 	Required       bool
 	Type           string
@@ -119,6 +127,7 @@ func (e *MCPElicitationOpts) IsURLMode() bool { return e != nil && e.Mode == eli
 // MCPElicitFieldOpts describes a single elicitation field resolved from a schema message.
 type MCPElicitFieldOpts struct {
 	Name           string
+	Title          string
 	Description    string
 	Required       bool
 	Type           string

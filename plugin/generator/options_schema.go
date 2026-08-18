@@ -3,7 +3,9 @@ package generator
 import (
 	"strings"
 
+	mcppb "github.com/the-protobuf-project/mcp/protobuf/mcppb"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -33,6 +35,7 @@ func ResolveSchemaFields(gen *protogen.Plugin, schemaFQN string) []SchemaField {
 		desc := getFieldDescription(field.Desc, CleanComment(string(field.Comments.Leading)))
 		sf := SchemaField{
 			Name:        string(field.Desc.Name()),
+			Title:       getFieldTitle(field.Desc),
 			Description: desc,
 			Required:    isFieldRequired(field.Desc),
 			Type:        protoKindToJSONType(field.Desc.Kind()),
@@ -57,7 +60,11 @@ func ResolveSchemaFields(gen *protogen.Plugin, schemaFQN string) []SchemaField {
 
 // SchemaField is a resolved field from a schema proto message.
 type SchemaField struct {
-	Name           string
+	Name string
+	// Title is the field's display name from (mcp.v1.field).title. Kept in the
+	// same position as MCPPromptArgOpts.Title and MCPElicitFieldOpts.Title so
+	// the direct struct conversions below stay valid.
+	Title          string
 	Description    string
 	Required       bool
 	Type           string
@@ -121,4 +128,14 @@ func camelToUpperSnake(s string) string {
 		}
 	}
 	return result.String()
+}
+
+// getFieldTitle returns the display title declared on a field, or "" when the
+// field declares none.
+func getFieldTitle(fd protoreflect.FieldDescriptor) string {
+	if !proto.HasExtension(fd.Options(), mcppb.E_Field) {
+		return ""
+	}
+	opts, _ := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.MCPFieldOptions)
+	return opts.GetTitle()
 }

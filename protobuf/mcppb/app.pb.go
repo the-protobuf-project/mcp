@@ -29,7 +29,13 @@ type MCPApp struct {
 	// The version of the MCP application (e.g. "1.0.0").
 	Version string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
 	// A human-readable description of the MCP application.
-	Description   string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// Display name preferred over display_name in UI and end-user contexts.
+	Title *string `protobuf:"bytes,4,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	// Website for the server, shown by clients that surface one.
+	WebsiteUrl *string `protobuf:"bytes,5,opt,name=website_url,json=websiteUrl,proto3,oneof" json:"website_url,omitempty"`
+	// Icons representing the server in client UIs.
+	Icons         []*MCPIcon `protobuf:"bytes,6,rep,name=icons,proto3" json:"icons,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -85,15 +91,42 @@ func (x *MCPApp) GetDescription() string {
 	return ""
 }
 
+func (x *MCPApp) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *MCPApp) GetWebsiteUrl() string {
+	if x != nil && x.WebsiteUrl != nil {
+		return *x.WebsiteUrl
+	}
+	return ""
+}
+
+func (x *MCPApp) GetIcons() []*MCPIcon {
+	if x != nil {
+		return x.Icons
+	}
+	return nil
+}
+
 var File_mcp_v1_app_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_app_proto_rawDesc = "" +
 	"\n" +
-	"\x10mcp/v1/app.proto\x12\x06mcp.v1\"g\n" +
+	"\x10mcp/v1/app.proto\x12\x06mcp.v1\x1a\x11mcp/v1/icon.proto\"\xe9\x01\n" +
 	"\x06MCPApp\x12!\n" +
 	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescriptionBL\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x19\n" +
+	"\x05title\x18\x04 \x01(\tH\x00R\x05title\x88\x01\x01\x12$\n" +
+	"\vwebsite_url\x18\x05 \x01(\tH\x01R\n" +
+	"websiteUrl\x88\x01\x01\x12%\n" +
+	"\x05icons\x18\x06 \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\b\n" +
+	"\x06_titleB\x0e\n" +
+	"\f_website_urlBL\n" +
 	"\n" +
 	"com.mcp.v1B\bAppProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
 
@@ -111,14 +144,16 @@ func file_mcp_v1_app_proto_rawDescGZIP() []byte {
 
 var file_mcp_v1_app_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_app_proto_goTypes = []any{
-	(*MCPApp)(nil), // 0: mcp.v1.MCPApp
+	(*MCPApp)(nil),  // 0: mcp.v1.MCPApp
+	(*MCPIcon)(nil), // 1: mcp.v1.MCPIcon
 }
 var file_mcp_v1_app_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: mcp.v1.MCPApp.icons:type_name -> mcp.v1.MCPIcon
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_mcp_v1_app_proto_init() }
@@ -126,6 +161,8 @@ func file_mcp_v1_app_proto_init() {
 	if File_mcp_v1_app_proto != nil {
 		return
 	}
+	file_mcp_v1_icon_proto_init()
+	file_mcp_v1_app_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
