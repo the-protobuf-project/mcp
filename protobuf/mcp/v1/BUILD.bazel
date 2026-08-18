@@ -7,10 +7,12 @@ proto_library(
     srcs = [
         "annotations.proto",
         "app.proto",
+        "cache.proto",
         "elicitation.proto",
         "enum.proto",
         "field.proto",
         "field_type.proto",
+        "icon.proto",
         "mime_type.proto",
         "progress.proto",
         "prompt.proto",
@@ -21,6 +23,7 @@ proto_library(
     visibility = ["//visibility:public"],
     deps = [
         "@protobuf//:descriptor_proto",
+        "@protobuf//:duration_proto",
         "@protobuf//:struct_proto",
     ],
 )

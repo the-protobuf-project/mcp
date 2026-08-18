@@ -359,10 +359,10 @@ const char descriptor_table_protodef_counter_2fv1_2fcounter_2eproto[] ABSL_ATTRI
     " \001(\005BQ\342\363\030M\nDCount from 0 up to this numb"
     "er. Progress updates are sent each step."
     "\022\0015\022\00210\"\036\n\rCountResponse\022\r\n\005count\030\001 \001(\005B"
-    "\216\001\n\016com.counter.v1B\014CounterProtoP\001Zlgith"
-    "ub.com/the-protobuf-project/grpc-mcp-gat"
-    "eway/examples/proto/generated/go/counter"
-    "/counterpbv1;counterpbv1b\006proto3"
+    "\201\001\n\016com.counter.v1B\014CounterProtoP\001Z_gith"
+    "ub.com/the-protobuf-project/mcp/examples"
+    "/proto/generated/go/counter/counterpbv1;"
+    "counterpbv1b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_counter_2fv1_2fcounter_2eproto_deps[2] = {
@@ -373,7 +373,7 @@ static ::absl::once_flag descriptor_table_counter_2fv1_2fcounter_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_counter_2fv1_2fcounter_2eproto = {
     false,
     false,
-    392,
+    379,
     descriptor_table_protodef_counter_2fv1_2fcounter_2eproto,
     "counter/v1/counter.proto",
     &descriptor_table_counter_2fv1_2fcounter_2eproto_once,

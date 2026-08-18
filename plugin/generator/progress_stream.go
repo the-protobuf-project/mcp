@@ -22,7 +22,7 @@ type StreamProgressInfo struct {
 	StreamClientType string            // Go type for gRPC client stream (e.g. "TodoService_CreateTodoClient")
 	StreamServerType string            // Go type for gRPC server stream (e.g. "TodoService_CreateTodoServer")
 	ResultType       string            // Go type for the final result (resolved)
-	ResultMessage    *protogen.Message // Result message (for Python/Rust type resolution)
+	ResultMessage    *protogen.Message // Result message (for Rust type resolution)
 	ProgressField    string            // oneof field name for progress (e.g. "Progress")
 	ResultField      string            // oneof field name for result (e.g. "Result")
 	ServiceName      string            // e.g. "TodoService"

@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package gallery.v1;
+
+import "mcp/v1/annotations.proto";
+
+option go_package = "github.com/the-protobuf-project/mcp/examples/mime/gen/go/gallery/v1;galleryv1";
+
+// Asset is a single item in the gallery. Every asset carries an IANA media type
+// so an MCP client knows how to render it: Markdown as prose, PNG as an image,
+// PDF as a download, and so on.
+message Asset {
+  // Stable identifier, e.g. "overview".
+  string id = 1 [(mcp.v1.field) = {description: "Identifier of the asset, e.g. \"overview\"."}];
+
+  // Human-readable name shown in the client UI.
+  string title = 2;
+
+  // The asset's IANA media type, e.g. "text/markdown" or "image/png". This is
+  // the same value carried by the resource declarations on GalleryService.
+  string mime_type = 3 [(mcp.v1.field) = {
+    description: "IANA media type of the asset, e.g. \"text/markdown\"."
+    examples: "text/markdown"
+    examples: "image/png"
+  }];
+
+  // Canonical URI the asset is served from.
+  string uri = 4 [(mcp.v1.field) = {
+    description: "URI the asset is served from."
+    format: MCP_FIELD_FORMAT_URI
+  }];
+
+  // Size of the raw content in bytes.
+  int64 size_bytes = 5;
+}
+
+message ListAssetsRequest {
+  // Restrict the listing to one media type, e.g. "image/png". Empty returns all.
+  string mime_type = 1 [(mcp.v1.field) = {
+    title: "Media type"
+    description: "Only return assets with this IANA media type. Empty returns every asset."
+    examples: "text/markdown"
+  }];
+}
+
+message ListAssetsResponse {
+  repeated Asset assets = 1;
+}
+
+message GetAssetRequest {
+  // Identifier of the asset to fetch.
+  string id = 1 [(mcp.v1.field) = {
+    description: "Identifier of the asset to fetch, e.g. \"logo\"."
+    examples: "overview"
+  }];
+}
+
+message GetAssetResponse {
+  // The asset's metadata, including its media type.
+  Asset asset = 1;
+
+  // Text content, set when the media type is textual (Markdown, HTML, JSON, CSV).
+  string text = 2;
+
+  // Raw bytes, set when the media type is binary (PNG, PDF). Serialised as
+  // base64 in JSON, which is why the schema reports it with the "byte" format.
+  bytes data = 3 [(mcp.v1.field) = {
+    description: "Raw bytes for binary media types."
+    format: MCP_FIELD_FORMAT_BYTE
+  }];
+}

@@ -2,6 +2,7 @@ package generator
 
 import (
 	"io/fs"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -10,15 +11,29 @@ import (
 
 // Supported languages for code generation.
 const (
-	LangGo     = "go"
-	LangPython = "python"
-	LangRust   = "rust"
-	LangCpp    = "cpp"
+	LangGo   = "go"
+	LangRust = "rust"
+	LangCpp  = "cpp"
 )
 
-// escapeQuotes escapes double quotes for embedding in a quoted string literal.
-// Every language's func map exposes it as "escapeQuotes".
-func escapeQuotes(s string) string { return strings.ReplaceAll(s, `"`, `\"`) }
+// escapeQuotes escapes s for embedding between the double quotes of a generated
+// string literal. Every language's func map exposes it as "escapeQuotes".
+//
+// Escaping only the quote character is not enough: proto option values are
+// arbitrary text, and a backslash in one is what a Go, Rust, or C++ compiler
+// reads as the start of an escape sequence. `C:\path` would not parse, a
+// trailing backslash would swallow the closing quote, and — worst of the three
+// because nothing reports it — `a\tb` would compile with a real tab in place of
+// the two characters the proto actually said.
+//
+// strconv.Quote produces exactly the escaping a Go literal needs, including
+// control and non-printable runes; the surrounding quotes it adds are stripped
+// because the templates supply their own. Rust and C++ string literals share Go's
+// escape syntax for every sequence this can emit.
+func escapeQuotes(s string) string {
+	quoted := strconv.Quote(s)
+	return quoted[1 : len(quoted)-1]
+}
 
 // safeRawString wraps s in a backtick raw-string literal. If s itself contains a
 // backtick (e.g. from Markdown code spans in proto comments), it splits on
@@ -50,13 +65,6 @@ var (
 		"safeRawString": safeRawString,
 	}
 
-	pythonFuncMap = template.FuncMap{
-		"snakeCase":    toSnakeCase,
-		"pyString":     pyStringLiteral,
-		"lower":        strings.ToLower,
-		"escapeQuotes": escapeQuotes,
-	}
-
 	rustFuncMap = template.FuncMap{
 		"snakeCase":          toSnakeCase,
 		"screamingSnakeCase": toScreamingSnakeCase,
@@ -82,10 +90,9 @@ var (
 // without a FuncMap, and text/template rejects a template referencing an unknown
 // function at parse time, so the funcs above must be registered first.
 var (
-	goTemplate     = mustParseTemplate("gen", "go.tpl", goFuncMap)
-	pythonTemplate = mustParseTemplate("pygen", "python.tpl", pythonFuncMap)
-	rustTemplate   = mustParseTemplate("rsgen", "rust.tpl", rustFuncMap)
-	cppTemplates   = mustParseGlob("cpp/*.tpl", cppFuncMap)
+	goTemplate   = mustParseTemplate("gen", "go.tpl", goFuncMap)
+	rustTemplate = mustParseTemplate("rsgen", "rust.tpl", rustFuncMap)
+	cppTemplates = mustParseGlob("cpp/*.tpl", cppFuncMap)
 )
 
 // mustParseTemplate parses a single embedded template. It panics on failure, so

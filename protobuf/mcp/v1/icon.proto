@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package mcp.v1;
+
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
+option java_multiple_files = true;
+option java_outer_classname = "IconProto";
+option java_package = "com.mcp.v1";
+
+// MCPIcon describes a single icon image associated with an MCP primitive.
+// It corresponds to the Icon struct in the MCP SDKs.
+//
+// Icons live in their own file because tools, prompts, resources and the app
+// all carry them, and resource.proto already imports prompt.proto — keeping
+// them beside resources would make that import cycle.
+message MCPIcon {
+  // URI pointing to the icon resource. This can be an HTTP/HTTPS URL pointing
+  // to an image file, or an inline `data:` URI carrying the image bytes.
+  // Required.
+  string src = 1;
+
+  // MIME type of the icon image. Should be provided when the server's
+  // Content-Type header is missing or too generic.
+  optional string mime_type = 2;
+
+  // Size specification for the icon. Examples:
+  //   ["48x48"]           — single fixed size
+  //   ["any"]             — scalable format such as SVG
+  //   ["48x48", "96x96"]  — multiple available sizes
+  repeated string sizes = 3;
+
+  // The background context this icon is designed for.
+  // Omit if the icon is suitable for any background.
+  MCPIconTheme theme = 4;
+}
+
+// MCPIconTheme indicates the background context an icon is designed for.
+enum MCPIconTheme {
+  // No theme specified. The icon is suitable for any background.
+  MCP_ICON_THEME_UNSPECIFIED = 0;
+
+  // The icon is designed for display on a light background.
+  MCP_ICON_THEME_LIGHT = 1;
+
+  // The icon is designed for display on a dark background.
+  MCP_ICON_THEME_DARK = 2;
+}

@@ -82,7 +82,7 @@ homebrew_casks:
       token: '{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}'
     directory: Casks
     homepage: 'https://github.com/the-protobuf-project/mcp'
-    description: 'Protoc plugin generating MCP server code (Go, Python, Rust, C++) from Protobuf + gRPC definitions'
+    description: 'Protoc plugin generating MCP server code (Go, Rust, C++) from Protobuf + gRPC definitions'
     ids:
       - protoc-gen-mcp-archive
     binaries:
@@ -143,5 +143,5 @@ release:
     plugins:
       - local: protoc-gen-mcp
         out: generated
-        opt: [lang=go]   # go | python | rust | cpp | all
+        opt: [lang=go]   # go | rust | cpp | all
     ```

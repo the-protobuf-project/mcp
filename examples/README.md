@@ -1,6 +1,6 @@
 # Examples
 
-End-to-end examples demonstrating how to expose gRPC services as MCP servers in Go, Python, and Rust using `protoc-gen-mcp`.
+End-to-end examples demonstrating how to expose gRPC services as MCP servers in Go, Rust, and C++ using `protoc-gen-mcp`.
 
 ## Overview
 
@@ -11,7 +11,14 @@ The examples include two proto services:
 | **TodoService** | `proto/todo/v1/`      | CRUD, prompts, elicitation, resources            |
 | **CounterService** | `proto/counter/v1/` | Server-streaming with MCP progress notifications |
 
-All languages share the same proto definitions and produce identical MCP tool surfaces. Each language example includes separate entrypoints for every supported transport:
+All languages share the same proto definitions and produce the same MCP **tool**
+surface — same names, same input and output schemas — which
+[`examples/conformance`](conformance/) verifies by driving each server with a
+real MCP client. The surrounding features differ: Go and Rust also emit prompts,
+resources, completion and elicitation, while the C++ target emits tools only.
+The conformance suite's *Known gaps* table is the current, tested list.
+
+Each language example includes separate entrypoints for every supported transport:
 
 | Transport | Description | Default Port |
 | ------------------- | ----------------------------------------- | ------------ |
@@ -99,7 +106,6 @@ buf generate
 
 This produces:
 - `proto/generated/go/` — Go pb + gRPC + MCP files
-- `proto/generated/python/` — Python pb + gRPC + MCP files
 - `proto/generated/rust/` — Rust pb + gRPC + MCP files
 
 ## Generated MCP Tools
@@ -125,7 +131,6 @@ This produces:
 | Language | Directory | Details |
 | -------- | ----------------------- | ---------------------------------- |
 | Go | [`go/`](go/) | TodoService (http, stdio, sse, grpc-gateway) + CounterService (counter) |
-| Python | [`python/`](python/) | TodoService — `FastMCP` / low-level `Server` |
 | Rust | [`rust/`](rust/) | TodoService — `rmcp` SDK with `ServerHandler` |
 
 Each has its own README with setup and run instructions.

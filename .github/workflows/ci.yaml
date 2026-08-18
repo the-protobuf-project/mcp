@@ -54,6 +54,17 @@ jobs:
           cd plugin && go test ./...
           cd ../examples && go test ./...
 
+      # The step above already exercised the Go conformance targets, but it
+      # skipped Rust and C++ (their servers are not built in this job) and a
+      # skip is indistinguishable from a pass. Naming the language makes the
+      # suite fail rather than skip if the Go servers ever stop being buildable.
+      - name: MCP conformance (Go)
+        working-directory: examples
+        env:
+          MCP_CONFORMANCE_LANGS: go
+          MCP_CONFORMANCE_REQUIRE: go
+        run: go test ./conformance/ -v
+
   bazel:
     name: Build & Test (Bazel)
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -76,35 +87,104 @@ jobs:
       - name: Bazel test
         run: bazel test //... --repo_env=ANDROID_HOME= --test_output=errors
 
-  python:
-    name: Check (Python)
+  cpp:
+    name: Build (C++)
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
+      # This job only compiles: make, cargo and protoc need no Git
+      # authentication, so the checkout token is not persisted into the
+      # repository's Git config where a build step could reach it.
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v7
-      - name: Install & verify imports
-        working-directory: examples/python
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.93.0
+      # The C++ server links a static library built from the generated Rust
+      # bridge, so this job needs both toolchains plus gRPC/protobuf headers.
+      # libgrpc++-dev pulls in libprotobuf-dev and the pkg-config files the
+      # Makefile probes for.
+      - name: Install gRPC and protobuf
         run: |
-          uv sync
-          uv run python -c "
-          import sys, os
-          sys.path.insert(0, os.path.join('..', 'proto', 'generated', 'python'))
-          from todo.v1.todo_service_pb2_mcp import register_todo_service_mcp_handler
-          print('Python generated code imports OK')
-          "
-      - name: Run smoke test
-        working-directory: examples/python
-        run: uv run python -m pytest smoke_test.py -v
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgrpc++-dev libprotobuf-dev protobuf-compiler \
+            protobuf-compiler-grpc pkg-config
+      - uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+      # The committed .pb.h files are produced by whatever protoc the developer
+      # ran, and a header from a newer protobuf than the libprotobuf being
+      # linked will not compile — protoc 27+ emits an include for
+      # runtime_version.h, which the distro package does not ship. Regenerating
+      # here with the runner's own protoc keeps the headers and the library on
+      # one version.
+      - name: Regenerate protobuf stubs against the installed protobuf
+        run: |
+          cd examples && buf export proto -o /tmp/proto_export
+          cd ..
+          # Only the dependency stubs are cleared. The service directories hold
+          # the committed *.mcp.cc/*.mcp.h alongside the *.pb.* files, and those
+          # come from protoc-gen-mcp, not protoc — deleting them here would
+          # leave the cxx bridge without the header it includes. protoc
+          # overwrites the *.pb.* files in place, so nothing else needs removing.
+          rm -rf examples/proto/generated/cpp/google \
+                 examples/proto/generated/cpp/mcp
+          protoc -I /tmp/proto_export \
+            --cpp_out=examples/proto/generated/cpp \
+            --grpc_out=examples/proto/generated/cpp \
+            --plugin=protoc-gen-grpc="$(which grpc_cpp_plugin)" \
+            /tmp/proto_export/mcp/protobuf/*.proto \
+            /tmp/proto_export/google/api/*.proto \
+            /tmp/proto_export/todo/v1/*.proto \
+            /tmp/proto_export/counter/v1/*.proto
+      - name: Cache cargo (Rust bridge)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            examples/proto/generated/cpp/rust/target
+          key: cpp-bridge-${{ hashFiles('examples/proto/generated/cpp/rust/Cargo.toml') }}
+          restore-keys: cpp-bridge-
+      - name: Make
+        working-directory: examples/cpp
+        run: make
+
+      # Compiling proved only that the generated bridge links. This drives the
+      # binary that was just built with a real MCP client, which is what catches
+      # a server that starts, speaks the protocol, and serves nothing.
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: MCP conformance (C++)
+        working-directory: examples
+        env:
+          MCP_CONFORMANCE_LANGS: cpp
+          MCP_CONFORMANCE_REQUIRE: cpp
+        run: go test ./conformance/ -v
 
   rust:
-    name: Check (Rust)
+    name: Test (Rust)
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@1.93.0
-      - name: Cargo check
+      # The conformance suite is a Go MCP client driving the Rust servers as
+      # subprocesses, so this job needs both toolchains.
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Cargo test
         working-directory: examples/rust
-        run: cargo check --all-targets
+        run: cargo test --all-targets
+      - name: Build example servers
+        working-directory: examples/rust
+        run: cargo build --bins
+      - name: MCP conformance (Rust)
+        working-directory: examples
+        env:
+          MCP_CONFORMANCE_LANGS: rust
+          MCP_CONFORMANCE_REQUIRE: rust
+        run: go test ./conformance/ -v
 
   google-protobuf-lint:
     name: Lint (Google Protobuf)

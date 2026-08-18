@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package mcp.v1;
+
+import "google/protobuf/duration.proto";
+
+option go_package = "github.com/the-protobuf-project/mcp/protobuf/mcppb";
+option java_multiple_files = true;
+option java_outer_classname = "CacheProto";
+option java_package = "com.mcp.v1";
+
+// MCPCacheHint tells clients how long they may cache a list or read result,
+// and who may share it. Introduced by MCP protocol revision 2026-07-28, which
+// made tools/list, prompts/list, resources/list, resources/templates/list and
+// resources/read cacheable.
+message MCPCacheHint {
+  // How long a client may treat the response as fresh. Semantics match HTTP
+  // Cache-Control max-age. Unset or zero means the response is immediately
+  // stale, which is also the behavior when no hint is given.
+  //
+  // A duration rather than a millisecond count: this is an elapsed span, not a
+  // point in time, and google.protobuf.Duration is the type protobuf has for
+  // that. The generator converts it to the milliseconds MCP puts on the wire.
+  optional google.protobuf.Duration ttl = 1;
+
+  // Who may share the cached response.
+  MCPCacheScope scope = 2;
+}
+
+// MCPCacheScope mirrors HTTP Cache-Control's public/private distinction.
+enum MCPCacheScope {
+  // No scope stated. Clients default this to public, so declare
+  // MCP_CACHE_SCOPE_PRIVATE explicitly for anything user-specific.
+  MCP_CACHE_SCOPE_UNSPECIFIED = 0;
+
+  // Any client or intermediary may cache the response and serve it to any
+  // user. Correct only when the response is identical for every caller.
+  MCP_CACHE_SCOPE_PUBLIC = 1;
+
+  // Only the requesting user's client may cache the response. Use this
+  // whenever the result depends on who asked — a shared cache holding a
+  // per-user response leaks it across tenants.
+  MCP_CACHE_SCOPE_PRIVATE = 2;
+}

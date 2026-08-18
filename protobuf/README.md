@@ -198,7 +198,7 @@ todo://users/{user}/todos/{todo}
 ```
 
 which the generator emits as a registered resource template — `AddResourceTemplate`
-in Go, `list_resource_templates` in Python, and `list_resources` in Rust.
+in Go and `resource_templates` in Rust.
 
 How the fields map:
 
@@ -215,6 +215,55 @@ registered as a fixed resource rather than a template.
 Both forms produce the same registration, so use `google.api.resource` when your
 protos already follow AIP-123 resource naming, and `mcp.v1.service.resources` when
 you need MCP-specific metadata such as `title`, `annotations`, or `icons`.
+
+### Media types
+
+`MCPResource.mime_type` is the single field that tells an MCP client how to
+present a resource. The same bytes are prose, markup, a table, an image, or a
+download depending only on what this field says:
+
+```protobuf
+resources: [
+  {uri: "gallery://docs/overview.md"   id: "overview"  mime_type: "text/markdown"},
+  {uri: "gallery://docs/report.html"   id: "report"    mime_type: "text/html"},
+  {uri: "gallery://data/manifest.json" id: "manifest"  mime_type: "application/json"},
+  {uri: "gallery://data/downloads.csv" id: "downloads" mime_type: "text/csv"},
+  {uri: "gallery://images/logo.png"    id: "logo"      mime_type: "image/png"},
+  {uri: "gallery://docs/spec.pdf"      id: "spec"      mime_type: "application/pdf"}
+]
+```
+
+**It is a free-form string, not an enum.** The IANA media type registry is
+open-ended and gains entries without this schema changing, so constraining it to
+a closed set would mean a breaking release every time a consumer needed a type we
+had not thought of. This follows [AIP-143](https://google.aip.dev/143), which
+reserves enums for closed sets and requires open registries to travel as strings.
+Any registered type works, including ones nothing here enumerates — `text/csv`
+above is exactly that case.
+
+The value also decides how content travels back from a read. Textual types are
+returned as text; binary types are returned as bytes and base64-encoded on the
+wire:
+
+| Media type | Returned as | Client typically renders |
+| --- | --- | --- |
+| `text/markdown` | text | prose |
+| `text/html` | text | a document (and the shape an MCP App UI takes) |
+| `application/json` | text | structured data the model can parse |
+| `text/csv` | text | a table |
+| `image/png` | base64 bytes | an inline image |
+| `application/pdf` | base64 bytes | a download |
+
+`MCPIcon.mime_type` is the same kind of value, narrowed by convention to image
+types — `image/svg+xml`, `image/png`, `image/webp`.
+
+A runnable example that serves one asset under each of these types, together
+with the MCP App UI resource, lives in [`examples/mime`](../examples/mime).
+
+> **Note:** `mcp/v1/mime_type.proto` still defines an `MCPMimeType` enum, kept
+> from an earlier revision where `mime_type` was enum-typed. Nothing references
+> it. Prefer the string; the enum is retained only because removing it from the
+> published module is a separate breaking change.
 
 ### Progress (server streaming)
 

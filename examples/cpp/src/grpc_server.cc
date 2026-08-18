@@ -4,6 +4,8 @@
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <google/protobuf/timestamp.pb.h>
 #include <iostream>
+#include <memory>
+#include <string>
 #include <thread>
 
 namespace todo {
@@ -109,13 +111,3 @@ void start_grpc_server(const std::string& addr) {
 
 }  // namespace v1
 }  // namespace todo
-
-namespace counter {
-namespace v1 {
-
-void start_grpc_server(const std::string& addr) {
-    ::todo::v1::start_grpc_server(addr);
-}
-
-}  // namespace v1
-}  // namespace counter

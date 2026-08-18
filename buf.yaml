@@ -1,0 +1,19 @@
+# Workspace spanning the MCP schema and the examples that consume it directly
+# from this repository rather than from the Buf Schema Registry.
+#
+# examples/ has its own workspace pinned to the published module, which is what
+# most consumers see. examples/mime is deliberately outside it: it uses schema
+# features (service-level resources, resource titles/sizes/annotations/icons)
+# that only exist here until the next `buf push`, so it has to resolve
+# mcp/v1/*.proto from protobuf/ instead.
+version: v2
+modules:
+  - path: protobuf
+  - path: examples/mime/proto
+lint:
+  use:
+    - STANDARD
+  except:
+    - ENUM_VALUE_PREFIX
+    - COMMENT_ENUM_VALUE
+    - COMMENT_ENUM

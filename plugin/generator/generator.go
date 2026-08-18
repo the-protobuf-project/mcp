@@ -20,7 +20,11 @@ const generatedFilenameExtension = ".pb.mcp.go"
 // ToolMeta holds the MCP tool name and description for a single RPC method.
 type ToolMeta struct {
 	Name        string
+	Title       string
 	Description string
+	Icons       []MCPIconOpts
+	// Hints is nil when the RPC declares no behavioural hints.
+	Hints *MCPToolHints
 }
 
 // MethodInfo carries the Go type identifiers needed by the code template.
@@ -41,7 +45,8 @@ type TplParams struct {
 	SourcePath        string
 	GoPackage         string
 	ExtraImports      []string          // e.g. `emptypb "google.golang.org/.../emptypb"`
-	SchemaJSON        map[string]string // key: ServiceName_MethodName -> schema JSON
+	SchemaJSON        map[string]string // key: ServiceName_MethodName -> input schema JSON
+	OutputSchemaJSON  map[string]string // key: ServiceName_MethodName -> output schema JSON
 	ToolMeta          map[string]ToolMeta
 	Services          map[string]map[string]MethodInfo
 	ServiceBasePaths  map[string]string          // key: ServiceName -> default base path e.g. "/todo/v1/TodoService"
@@ -120,6 +125,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 func (g *FileGenerator) buildParams() TplParams {
 	services := make(map[string]map[string]MethodInfo)
 	schemaJSON := make(map[string]string)
+	outputSchemaJSON := make(map[string]string)
 	toolMeta := make(map[string]ToolMeta)
 	serviceBasePaths := make(map[string]string)
 	serviceOpts := make(map[string]*MCPServiceOpts)
@@ -182,10 +188,30 @@ func (g *FileGenerator) buildParams() TplParams {
 			}
 			schemaJSON[key] = string(stdBytes)
 
-			toolMeta[key] = ToolMeta{
+			// outputSchema describes what the tool returns, and comes from the
+			// response message exactly as inputSchema comes from the request. For
+			// a streaming RPC that is the result arm of the progress oneof, not
+			// the chunk wrapper the client never sees.
+			outMsg := meth.Output.Desc
+			if streamProgress != nil && streamProgress.ResultMessage != nil {
+				outMsg = streamProgress.ResultMessage.Desc
+			}
+			outBytes, err := json.Marshal(messageSchema(outMsg, false, ""))
+			if err != nil {
+				panic(fmt.Sprintf("marshal output schema: %v", err))
+			}
+			outputSchemaJSON[key] = string(outBytes)
+
+			meta := ToolMeta{
 				Name:        toolName,
 				Description: toolDesc,
 			}
+			if methOpts != nil {
+				meta.Title = methOpts.ToolTitle
+				meta.Icons = methOpts.ToolIcons
+				meta.Hints = methOpts.Hints
+			}
+			toolMeta[key] = meta
 
 			responseType := resolveType(meth.Output.GoIdent)
 			if streamProgress != nil {
@@ -205,22 +231,28 @@ func (g *FileGenerator) buildParams() TplParams {
 		serviceBasePaths[svcName] = "/" + strings.ToLower(strings.ReplaceAll(string(svc.Desc.FullName()), ".", "/")) + "/mcp"
 
 		// Extract explicit MCP service options + auto-detect google.api.resource.
+		// Resources declared on the service win over an auto-detected resource
+		// with the same URI, so an author can annotate a response message and
+		// still override the generated title, icons, or annotations by hand.
 		svcOpt := ExtractServiceOptions(svc)
 		apiResources := ExtractGoogleAPIResources(svc)
 		if len(apiResources) > 0 {
 			if svcOpt == nil {
 				svcOpt = &MCPServiceOpts{}
 			}
-			svcOpt.Resources = apiResources
+			svcOpt.Resources = mergeResources(svcOpt.Resources, apiResources)
 		}
 		serviceOpts[svcName] = svcOpt
 	}
 
+	// Third-party imports go out as one sorted block. gofmt sorts within a block
+	// but never across blocks, so grouping the fixed imports separately from the
+	// per-file ones would emit unsorted output whenever a resolved proto package
+	// sorts before google.golang.org — which any github.com path does.
 	var extraImports []string
 	for importPath, alias := range extraImportMap {
 		extraImports = append(extraImports, alias+" "+`"`+string(importPath)+`"`)
 	}
-	sort.Strings(extraImports)
 
 	hasStreamProgress := false
 	hasAnyMethods := false
@@ -229,15 +261,19 @@ func (g *FileGenerator) buildParams() TplParams {
 			hasAnyMethods = true
 		}
 		for _, info := range methods {
-			if info.StreamProgress != nil {
-				hasStreamProgress = true
-				break
+			if info.StreamProgress == nil {
+				continue
 			}
-		}
-		if hasStreamProgress {
-			break
+			hasStreamProgress = true
 		}
 	}
+	if hasAnyMethods {
+		extraImports = append(extraImports,
+			`"google.golang.org/grpc"`,
+			`"google.golang.org/protobuf/encoding/protojson"`,
+		)
+	}
+	sort.Strings(extraImports)
 
 	return TplParams{
 		Version:           PluginVersion,
@@ -245,6 +281,7 @@ func (g *FileGenerator) buildParams() TplParams {
 		GoPackage:         string(g.f.GoPackageName),
 		ExtraImports:      extraImports,
 		SchemaJSON:        schemaJSON,
+		OutputSchemaJSON:  outputSchemaJSON,
 		ToolMeta:          toolMeta,
 		Services:          services,
 		ServiceBasePaths:  serviceBasePaths,

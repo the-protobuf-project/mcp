@@ -23,28 +23,25 @@ func toScreamingSnakeCase(s string) string {
 	return strings.ToUpper(naming.SnakeCase(s))
 }
 
-// pyStringLiteral wraps a string as a Python string literal, using triple-quotes for multiline.
-func pyStringLiteral(s string) string {
-	s = strings.TrimSpace(s)
-	s = strings.ReplaceAll(s, `\`, `\\`)
-	s = strings.ReplaceAll(s, `"`, `\"`)
-	if strings.Contains(s, "\n") {
-		return `"""` + s + `"""`
-	}
-	return `"` + s + `"`
-}
+// rsStringEscape escapes s for use inside a Rust "..." string literal.
+func rsStringEscape(s string) string { return literalEscape(s) }
 
-// rsStringEscape escapes backslashes and double quotes for use inside a Rust "..." string literal.
-func rsStringEscape(s string) string {
-	s = strings.ReplaceAll(s, `\`, `\\`)
-	s = strings.ReplaceAll(s, `"`, `\"`)
-	return s
-}
+// cppStringEscape escapes s for use inside a C++ "..." string literal.
+func cppStringEscape(s string) string { return literalEscape(s) }
 
-// cppStringEscape escapes backslashes and double quotes for use inside a C++ "..." string literal.
-func cppStringEscape(s string) string {
+// literalEscape escapes s for embedding between the double quotes of a Rust or
+// C++ string literal.
+//
+// The backslash pass runs first so the escapes introduced after it are not
+// escaped again. Line breaks and tabs are included because a proto option may
+// legitimately contain them and a raw newline would leave the literal
+// unterminated; \n, \r and \t mean the same thing in both languages.
+func literalEscape(s string) string {
 	s = strings.ReplaceAll(s, `\`, `\\`)
 	s = strings.ReplaceAll(s, `"`, `\"`)
+	s = strings.ReplaceAll(s, "\n", `\n`)
+	s = strings.ReplaceAll(s, "\r", `\r`)
+	s = strings.ReplaceAll(s, "\t", `\t`)
 	return s
 }
 
@@ -61,20 +58,4 @@ func cppTypeName(msg *protogen.Message, currentPkg string) string {
 	}
 	cppNs := "::" + strings.ReplaceAll(msgPkg, ".", "::")
 	return cppNs + "::" + cppLocal
-}
-
-// protoPyModule returns the Python module path for a protobuf message.
-// e.g. store.apps.todo.v1.Todo -> store.apps.todo.v1.todo_pb2
-func protoPyModule(msg *protogen.Message) string {
-	path := msg.Location.SourceFile
-	path = strings.TrimSuffix(path, ".proto")
-	path = strings.ReplaceAll(path, "/", ".")
-	return path + "_pb2"
-}
-
-// protoPyType returns the fully-qualified Python type for a protobuf message.
-// e.g. store.apps.todo.v1.Todo -> store.apps.todo.v1.todo_pb2.Todo
-func protoPyType(msg *protogen.Message) string {
-	module := protoPyModule(msg)
-	return module + "." + string(msg.Desc.Name())
 }

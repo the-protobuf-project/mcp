@@ -8,6 +8,7 @@ option java_outer_classname = "ServiceOptionsProto";
 option java_package = "com.mcp.v1";
 
 import "mcp/v1/app.proto";
+import "mcp/v1/cache.proto";
 import "mcp/v1/resource.proto";
 
 // MCPServiceOptions configures MCP behaviour for an entire gRPC service.
@@ -17,4 +18,9 @@ message MCPServiceOptions {
 
   // Resources exposed by this service.
   repeated MCPResource resources = 2;
+
+  // Default cache hint for this service's list results — tools, prompts,
+  // resources and resource templates. A resource may override it for its own
+  // read via MCPResource.cache.
+  optional MCPCacheHint cache = 3;
 }

@@ -1,0 +1,175 @@
+syntax = "proto3";
+
+package gallery.v1;
+
+import "gallery/v1/gallery.proto";
+import "mcp/v1/annotations.proto";
+
+option go_package = "github.com/the-protobuf-project/mcp/examples/mime/gen/go/gallery/v1;galleryv1";
+
+// GalleryService publishes a small set of assets, each under a different IANA
+// media type, so an MCP client has something concrete to render for every
+// common shape of content.
+//
+// The `mime_type` on each resource is a free-form IANA media type string, not an
+// enum: the media type registry is open-ended and grows without our schema
+// changing. See protobuf/README.md, "Media types".
+service GalleryService {
+  option (mcp.v1.service) = {
+    app: {
+      display_name: "Asset Gallery"
+      title: "The Asset Gallery"
+      version: "1.0.0"
+      description: "A gallery of assets served across the common MCP media types"
+      website_url: "https://example.com/gallery"
+      icons: [
+        {src: "https://example.com/icons/gallery.svg" mime_type: "image/svg+xml" sizes: ["any"]}
+      ]
+    }
+    // The gallery's listings are identical for every caller and change only
+    // when the server is redeployed, so they are safe to share and cache.
+    cache: {ttl: {seconds: 300} scope: MCP_CACHE_SCOPE_PUBLIC}
+    resources: [
+      // Markdown — rendered as prose by clients that support it.
+      {
+        uri: "gallery://docs/overview.md"
+        id: "overview"
+        title: "Gallery overview"
+        description: "Prose introduction to the gallery, in Markdown"
+        mime_type: "text/markdown"
+        size: 596
+        annotations: {
+          audience: [MCP_ROLE_USER, MCP_ROLE_ASSISTANT]
+          priority: 1.0
+          last_modified: "2026-08-17T09:00:00Z"
+        }
+        icons: [
+          {
+            src: "https://example.com/icons/markdown-light.svg"
+            mime_type: "image/svg+xml"
+            sizes: ["any"]
+            theme: MCP_ICON_THEME_LIGHT
+          },
+          {
+            src: "https://example.com/icons/markdown-dark.svg"
+            mime_type: "image/svg+xml"
+            sizes: ["any"]
+            theme: MCP_ICON_THEME_DARK
+          }
+        ]
+      },
+      // HTML — rendered as a document, and the shape an MCP App UI takes.
+      {
+        uri: "gallery://docs/report.html"
+        id: "report"
+        title: "Quarterly report"
+        description: "A styled HTML document"
+        mime_type: "text/html"
+        size: 552
+        annotations: {
+          audience: [MCP_ROLE_USER]
+          priority: 0.8
+        }
+      },
+      // JSON — structured data the model can parse directly.
+      {
+        uri: "gallery://data/manifest.json"
+        id: "manifest"
+        title: "Asset manifest"
+        description: "Machine-readable index of every asset"
+        mime_type: "application/json"
+        size: 374
+        annotations: {
+          audience: [MCP_ROLE_ASSISTANT]
+          priority: 0.6
+        }
+      },
+      // CSV — tabular data. Nothing in the schema enumerates this type; it works
+      // because mime_type is an open string.
+      {
+        uri: "gallery://data/downloads.csv"
+        id: "downloads"
+        // Download counts move constantly, so this one opts out of the
+        // service-wide cache its siblings use.
+        cache: {scope: MCP_CACHE_SCOPE_PRIVATE}
+        title: "Download counts"
+        description: "Per-asset download counts as CSV"
+        mime_type: "text/csv"
+        size: 118
+      },
+      // PNG — binary content, delivered base64-encoded over the wire.
+      {
+        uri: "gallery://images/logo.png"
+        id: "logo"
+        title: "The Protobuf Project logo"
+        description: "The project mark, 256x256, served as binary content"
+        mime_type: "image/png"
+        size: 10139
+        annotations: {
+          audience: [MCP_ROLE_USER]
+          priority: 0.5
+        }
+        icons: [
+          {
+            src: "https://example.com/icons/image.png"
+            mime_type: "image/png"
+            sizes: ["48x48", "96x96"]
+          }
+        ]
+      },
+      // PDF — binary content a client will typically offer as a download.
+      {
+        uri: "gallery://docs/spec.pdf"
+        id: "spec"
+        title: "Format specification"
+        description: "A PDF a client will offer for download rather than inline"
+        mime_type: "application/pdf"
+        size: 634
+      },
+      // A template covering every asset. The media type here is the one clients
+      // should assume for matches; assets whose type differs are listed above.
+      {
+        pattern: "gallery://assets/{asset}"
+        id: "asset"
+        title: "Any gallery asset"
+        description: "Template matching any asset by identifier"
+        mime_type: "application/octet-stream"
+      }
+    ]
+  };
+
+  // Lists the assets in the gallery, optionally filtered by media type.
+  rpc ListAssets(ListAssetsRequest) returns (ListAssetsResponse) {
+    option (mcp.v1.tool) = {
+      id: "list_assets"
+      title: "List assets"
+      description: "List gallery assets, optionally filtered by IANA media type."
+      icons: [
+        {src: "https://example.com/icons/list.svg" mime_type: "image/svg+xml" theme: MCP_ICON_THEME_LIGHT}
+      ]
+      // Listing reads the gallery and nothing else, so a client may call it
+      // without asking the user first.
+      read_only: true
+      idempotent: true
+      open_world: false
+    };
+    option (mcp.v1.prompt) = {
+      id: "summarize_gallery"
+      title: "Summarise the gallery"
+      description: "Summarise what the gallery holds, grouped by media type"
+      schema: "gallery.v1.ListAssetsRequest"
+      role: MCP_ROLE_ASSISTANT
+    };
+  }
+
+  // Fetches one asset's content along with the media type describing it.
+  rpc GetAsset(GetAssetRequest) returns (GetAssetResponse) {
+    option (mcp.v1.tool) = {
+      id: "get_asset"
+      description: "Fetch a single asset's content and its media type."
+      read_only: true
+      idempotent: true
+      open_world: false
+    };
+  }
+}

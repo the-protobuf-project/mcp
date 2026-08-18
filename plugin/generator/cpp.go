@@ -33,6 +33,7 @@ type CppTplParams struct {
 	IncludePath       string // e.g. "todo/v1/todo_service.mcp.h"
 	GrpcInclude       string // e.g. "todo/v1/todo_service.grpc.pb.h"
 	SchemaJSON        map[string]string
+	OutputSchemaJSON  map[string]string
 	ToolMeta          map[string]ToolMeta
 	Services          map[string]map[string]CppMethodInfo
 	ServiceBasePaths  map[string]string
@@ -101,6 +102,7 @@ func (g *CppFileGenerator) Generate(emitShared bool) {
 func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 	services := make(map[string]map[string]CppMethodInfo)
 	schemaJSON := make(map[string]string)
+	outputSchemaJSON := make(map[string]string)
 	toolMeta := make(map[string]ToolMeta)
 	serviceBasePaths := make(map[string]string)
 	serviceOpts := make(map[string]*MCPServiceOpts)
@@ -146,10 +148,24 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 				panic(fmt.Sprintf("marshal standard schema: %v", err))
 			}
 			schemaJSON[key] = string(stdBytes)
-			toolMeta[key] = ToolMeta{
+
+			// outputSchema comes from the response message, mirroring the input side.
+			outBytes, err := json.Marshal(messageSchema(meth.Output.Desc, false, ""))
+			if err != nil {
+				panic(fmt.Sprintf("marshal output schema: %v", err))
+			}
+			outputSchemaJSON[key] = string(outBytes)
+
+			meta := ToolMeta{
 				Name:        toolName,
 				Description: desc,
 			}
+			if methOpts != nil {
+				meta.Title = methOpts.ToolTitle
+				meta.Icons = methOpts.ToolIcons
+				meta.Hints = methOpts.Hints
+			}
+			toolMeta[key] = meta
 
 			methods[meth.GoName] = CppMethodInfo{
 				CppMethodName: toSnakeCase(meth.GoName),
@@ -172,7 +188,7 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 			if svcOpt == nil {
 				svcOpt = &MCPServiceOpts{}
 			}
-			svcOpt.Resources = apiResources
+			svcOpt.Resources = mergeResources(svcOpt.Resources, apiResources)
 		}
 		serviceOpts[svcName] = svcOpt
 	}
@@ -210,6 +226,7 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 		IncludePath:       filepath.Join(dir, stem+".mcp.h"),
 		GrpcInclude:       filepath.Join(dir, stem+".grpc.pb.h"),
 		SchemaJSON:        schemaJSON,
+		OutputSchemaJSON:  outputSchemaJSON,
 		ToolMeta:          toolMeta,
 		Services:          services,
 		ServiceBasePaths:  serviceBasePaths,

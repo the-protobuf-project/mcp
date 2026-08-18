@@ -41,13 +41,3 @@ void start_grpc_server(const std::string& addr);
 
 }  // namespace v1
 }  // namespace todo
-
-namespace counter {
-namespace v1 {
-
-// The generated C++ entrypoint may target CounterService when multiple services
-// are present; route it to the shared example gRPC server implementation.
-void start_grpc_server(const std::string& addr);
-
-}  // namespace v1
-}  // namespace counter

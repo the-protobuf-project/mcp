@@ -38,7 +38,7 @@ func main() {
 	lang := flags.String(
 		"lang",
 		"go",
-		`Target language for generated MCP code (go, python, rust, cpp, all).`,
+		`Target language for generated MCP code (go, rust, cpp, all).`,
 	)
 	packageSuffix := flags.String(
 		"package_suffix",

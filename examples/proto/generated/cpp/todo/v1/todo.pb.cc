@@ -1526,10 +1526,10 @@ const char descriptor_table_protodef_todo_2fv1_2ftodo_2eproto[] ABSL_ATTRIBUTE_S
     "\030%\n#High priority; should be done soon.\022"
     ",\n\017PRIORITY_URGENT\020\004\032\027\362\363\030\023\n\021Urgent; do f"
     "irst.\032%\352\363\030!\n\037Priority level for a todo i"
-    "tem.B\177\n\013com.todo.v1B\tTodoProtoP\001Zcgithub"
-    ".com/the-protobuf-project/grpc-mcp-gatew"
-    "ay/examples/proto/generated/go/todo/todo"
-    "pbv1;todopbv1b\006proto3"
+    "tem.Br\n\013com.todo.v1B\tTodoProtoP\001ZVgithub"
+    ".com/the-protobuf-project/mcp/examples/p"
+    "roto/generated/go/todo/todopbv1;todopbv1"
+    "b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_todo_2fv1_2ftodo_2eproto_deps[7] = {
@@ -1545,7 +1545,7 @@ static ::absl::once_flag descriptor_table_todo_2fv1_2ftodo_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_todo_2fv1_2ftodo_2eproto = {
     false,
     false,
-    2741,
+    2728,
     descriptor_table_protodef_todo_2fv1_2ftodo_2eproto,
     "todo/v1/todo.proto",
     &descriptor_table_todo_2fv1_2ftodo_2eproto_once,
