@@ -24,6 +24,10 @@ path = "src/bin/stdio.rs"
 name = "sse"
 path = "src/bin/sse.rs"
 
+[[bin]]
+name = "counter"
+path = "src/bin/counter.rs"
+
 [dependencies]
 async-trait = "0.1"
 prost = "0.14"

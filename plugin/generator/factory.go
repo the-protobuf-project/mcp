@@ -83,7 +83,7 @@ func (t Target) Generate(ctx factory.Ctx, m *Model, lang string) error {
 }
 
 // generateCpp emits C++ for every file that declares a service, in path order.
-// The shared files (rust/*, Makefile, main.cc) are emitted once, with the first
+// The shared files (rust/*, Makefile, main.cc) are emitted once, for a single
 // file, so that a multi-file request does not write them repeatedly.
 func (t Target) generateCpp(gen *protogen.Plugin, m *Model) {
 	files := make([]*protogen.File, 0, len(m.Files))
@@ -95,9 +95,40 @@ func (t Target) generateCpp(gen *protogen.Plugin, m *Model) {
 	sort.Slice(files, func(i, j int) bool {
 		return files[i].Desc.Path() < files[j].Desc.Path()
 	})
+	shared := cppSharedFileIndex(files)
 	for i, f := range files {
-		NewCppFileGenerator(f, gen).Generate(i == 0)
+		NewCppFileGenerator(f, gen).Generate(i == shared)
 	}
+}
+
+// cppSharedFileIndex picks which file the shared C++ outputs are generated
+// from: the first one, in path order, that yields at least one tool.
+//
+// The shared files define the whole MCP surface the C++ binary serves -- the
+// cxx bridge names one service, and main.cc starts that service and no other.
+// Taking files[0] unconditionally ties that choice to alphabetical order, which
+// silently produced an MCP server with an empty tool list here: the C++ target
+// does not support streaming RPCs (see buildCppParams), so counter/v1, whose
+// only RPC streams, contributes no tools -- yet it sorts before todo/v1 and so
+// claimed the bridge. Compiling and linking still succeeded, because "no tools"
+// is a valid program.
+//
+// Skipping past files that produce nothing keeps that failure from being
+// reachable by renaming a proto. It does not make C++ serve more than one
+// service; that limitation is unchanged, and a request whose files all lack
+// eligible RPCs still falls back to the first file so the shared outputs (and
+// the build that needs them) are emitted either way.
+func cppSharedFileIndex(files []*protogen.File) int {
+	for i, f := range files {
+		for _, svc := range f.Services {
+			for _, meth := range svc.Methods {
+				if !meth.Desc.IsStreamingClient() && !meth.Desc.IsStreamingServer() {
+					return i
+				}
+			}
+		}
+	}
+	return 0
 }
 
 // Registry returns the registry of sources and targets this plugin ships.

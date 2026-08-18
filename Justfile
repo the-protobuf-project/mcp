@@ -87,8 +87,20 @@ test-rust:
 test-cpp:
     cd examples/cpp && make
 
-# Run all tests (Go + Rust + C++)
-test-all: test test-rust test-cpp
+# Drive every built example server with a real MCP client (examples/conformance).
+#
+# Servers that are not built are skipped, so this is useful before the Rust and
+# C++ toolchains have run; use test-conformance-all to require all three.
+test-conformance:
+    cd examples && go test ./conformance/ -v
+
+# Build all three example servers, then hold each to the same MCP contract.
+test-conformance-all: build-cpp
+    cd examples/rust && cargo build --bins
+    cd examples && MCP_CONFORMANCE_REQUIRE=go,rust,cpp go test ./conformance/ -v
+
+# Run all tests (Go + Rust + C++), then the cross-language conformance suite
+test-all: test test-rust test-cpp test-conformance-all
 
 # Generate C++ proto stubs with local protoc (matches system libprotobuf)
 generate-cpp:

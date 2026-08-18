@@ -11,7 +11,14 @@ The examples include two proto services:
 | **TodoService** | `proto/todo/v1/`      | CRUD, prompts, elicitation, resources            |
 | **CounterService** | `proto/counter/v1/` | Server-streaming with MCP progress notifications |
 
-All languages share the same proto definitions and produce identical MCP tool surfaces. Each language example includes separate entrypoints for every supported transport:
+All languages share the same proto definitions and produce the same MCP **tool**
+surface — same names, same input and output schemas — which
+[`examples/conformance`](conformance/) verifies by driving each server with a
+real MCP client. The surrounding features differ: Go and Rust also emit prompts,
+resources, completion and elicitation, while the C++ target emits tools only.
+The conformance suite's *Known gaps* table is the current, tested list.
+
+Each language example includes separate entrypoints for every supported transport:
 
 | Transport | Description | Default Port |
 | ------------------- | ----------------------------------------- | ------------ |

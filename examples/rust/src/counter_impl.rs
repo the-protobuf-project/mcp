@@ -31,7 +31,9 @@ impl CounterServiceMcpServer for CounterServer {
                 .await;
         }
 
-        Ok(json!({ "total": to }))
+        // CountResponse declares a single `count` field, and the tool advertises
+        // that message as its outputSchema -- so the key here is not free-form.
+        Ok(json!({ "count": to }))
     }
 }
 
@@ -56,11 +58,14 @@ mod tests {
 
     // An inert sink stands in for a client that sent no progressToken; the RPC
     // must still run to completion and return its result.
+    // The shape matters as much as the value: the tool advertises CountResponse
+    // as its outputSchema, so a result keyed anything but `count` breaks the
+    // contract the client was handed at tools/list time.
     #[tokio::test]
-    async fn count_returns_its_total_without_a_progress_token() {
+    async fn count_returns_a_count_response_without_a_progress_token() {
         let sink = McpProgressSink::default();
         let out = CounterServer.count(json!({"to": 3}), sink).await.unwrap();
-        assert_eq!(out, json!({"total": 3}));
+        assert_eq!(out, json!({"count": 3}));
     }
 
     #[tokio::test]

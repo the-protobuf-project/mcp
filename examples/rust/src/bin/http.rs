@@ -19,8 +19,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .and_then(|v| v.parse().ok())
         .unwrap_or(8082);
 
-    // gRPC in background task (with reflection).
-    let grpc_addr: SocketAddr = "[::]:50051".parse()?;
+    // gRPC in background task (with reflection). The address is configurable so
+    // that more than one example server can run at once -- a hard-coded port
+    // makes the second one fail to bind.
+    let grpc_addr: SocketAddr = std::env::var("GRPC_ADDR")
+        .unwrap_or_else(|_| "[::]:50051".into())
+        .parse()?;
     let grpc_srv = srv.clone();
     tokio::spawn(async move {
         const FILE_DESCRIPTOR_SET: &[u8] =
@@ -45,7 +49,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             transport: "streamable-http".into(),
             host,
             port,
-            base_path: "/todo/v1/todoservice".into(),
+            // The proto-derived default, so this endpoint matches the Go and
+            // C++ examples rather than drifting a path segment away from them.
+            base_path: todo_service_mcp::TODO_SERVICE_MCP_DEFAULT_BASE_PATH.into(),
         },
     )
     .await

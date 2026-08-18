@@ -10,7 +10,14 @@ GEN_DIR := $(CPP_DIR)/../proto/generated/cpp
 RUST_DIR := $(GEN_DIR)/rust
 SRC_DIR := $(CPP_DIR)/src
 CXX_INCLUDE := $(RUST_DIR)/target/cxx_include
-RUST_LIB := $(firstword $(wildcard $(RUST_DIR)/target/release/lib*.a))
+# The crate is named after whichever service protoc-gen-mcp generated the
+# bridge for, so the library name is read from the generated Cargo.toml
+# rather than globbed. A glob picks the alphabetically first lib*.a, which
+# after the bridge is regenerated for a different service is the stale one
+# left behind in target/release -- and linking that produces a server that
+# builds cleanly while serving the previous service's (or no) tools.
+RUST_CRATE := $(shell sed -n 's/^name = "\(.*\)"/\1/p' $(RUST_DIR)/Cargo.toml | head -1)
+RUST_LIB := $(RUST_DIR)/target/release/lib$(RUST_CRATE).a
 
 GRPC_CFLAGS := $(shell pkg-config --cflags grpc++ protobuf 2>/dev/null || echo "")
 GRPC_LIBS := $(shell pkg-config --libs grpc++ protobuf 2>/dev/null || echo "") -lgrpc++_reflection
