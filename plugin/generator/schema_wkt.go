@@ -6,7 +6,9 @@ package generator
 import "google.golang.org/protobuf/reflect/protoreflect"
 
 // mapSchema handles protobuf map<K,V> fields.
-func mapSchema(fd protoreflect.FieldDescriptor, openAI bool) map[string]any {
+// mapSchemaPath carries the recursion path into the map's value type, which can
+// itself be a message that reaches back to an enclosing one.
+func mapSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, path map[protoreflect.FullName]bool) map[string]any {
 	keyConstraints := map[string]any{"type": "string"}
 	switch fd.MapKey().Kind() {
 	case protoreflect.BoolKind:
@@ -26,7 +28,7 @@ func mapSchema(fd protoreflect.FieldDescriptor, openAI bool) map[string]any {
 				"type": "object",
 				"properties": map[string]any{
 					"key":   map[string]any{"type": "string"},
-					"value": map[string]any{"type": fieldSchema(fd.MapValue(), openAI)["type"]},
+					"value": map[string]any{"type": fieldSchemaPath(fd.MapValue(), openAI, path)["type"]},
 				},
 				"required": []string{"key", "value"}, "additionalProperties": false,
 			},
@@ -34,12 +36,12 @@ func mapSchema(fd protoreflect.FieldDescriptor, openAI bool) map[string]any {
 	}
 	return map[string]any{
 		"type": "object", "propertyNames": keyConstraints,
-		"additionalProperties": fieldSchema(fd.MapValue(), openAI),
+		"additionalProperties": fieldSchemaPath(fd.MapValue(), openAI, path),
 	}
 }
 
 // messageFieldSchema handles message-typed fields including well-known types.
-func messageFieldSchema(fd protoreflect.FieldDescriptor, openAI bool) map[string]any {
+func messageFieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, path map[protoreflect.FullName]bool) map[string]any {
 	switch fullName := string(fd.Message().FullName()); fullName {
 	case "google.protobuf.Timestamp":
 		return map[string]any{"type": []string{"string", "null"}, "format": "date-time"}
@@ -91,6 +93,6 @@ func messageFieldSchema(fd protoreflect.FieldDescriptor, openAI bool) map[string
 		}
 		return s
 	default:
-		return messageSchema(fd.Message(), openAI, "")
+		return messageSchemaPath(fd.Message(), openAI, "", path)
 	}
 }

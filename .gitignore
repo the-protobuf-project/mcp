@@ -43,8 +43,10 @@ __pycache__/
 # Rust
 examples/rust/target/
 
-# C++ example build
-examples/proto/generated
+# Build artifacts. Generated *source* under examples/proto/generated is
+# committed on purpose — it is what a consumer sees the plugin produce — so it
+# must not be ignored, or a newly generated file is silently left untracked and
+# CI fails on a file that exists only on the author's machine.
 **/build
 **/target
 examples/cpp/server

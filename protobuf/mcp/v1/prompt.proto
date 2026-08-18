@@ -44,6 +44,28 @@ message MCPToolOptions {
   // execution. Requires a server-streaming RPC whose response has a oneof with
   // mcp.v1.MCPProgress and the result type.
   optional bool progress = 3;
+
+  // Behavioural hints, surfaced to clients as the tool's `annotations`. They
+  // drive whether a client may invoke the tool without asking the user first.
+  //
+  // Each is optional because absent means "unknown", which a client must treat
+  // as the unsafe answer. A default of false would assert something stronger
+  // than the schema knows.
+  // The tool does not modify its environment. Typical of Get, List and Search.
+  optional bool read_only = 4;
+
+  // The tool may perform destructive updates. Meaningful only when read_only is
+  // false. Typical of Delete, and of Update that replaces rather than merges.
+  optional bool destructive = 5;
+
+  // Calling the tool repeatedly with the same arguments has no additional
+  // effect. Meaningful only when read_only is false. Delete and Update are
+  // idempotent under AIP-134; Create generally is not.
+  optional bool idempotent = 6;
+
+  // The tool interacts with an open world of external entities — a third-party
+  // API, the public internet — rather than a closed, predictable domain.
+  optional bool open_world = 7;
 }
 
 // MCPRole specifies the intended recipient of a prompt message.

@@ -11,6 +11,9 @@ package {{ .GoPackage }}
        gofmt sorts within a block but never across them. */}}
 import (
 	"context"
+{{- if .HasAnyMethods }}
+	"encoding/json"
+{{- end }}
 {{- if .HasStreamProgress }}
 	"errors"
 	"fmt"
@@ -31,13 +34,62 @@ import (
 var {{ $key }}SchemaJSON = {{ safeRawString $val }}
 {{- end }}
 
+// JSON schemas for each RPC method's response, advertised as the tool's
+// outputSchema and satisfied by the structuredContent each handler returns.
+{{- range $key, $val := .OutputSchemaJSON }}
+var {{ $key }}OutputSchemaJSON = {{ safeRawString $val }}
+{{- end }}
+
 // MCP tool descriptors. Each pairs a schema with a tool name and description
 // so that LLM clients can discover and invoke the underlying RPCs.
 var (
 {{- range $key, $val := .SchemaJSON }}
-	{{ $key }}Tool = mcp.MustCreateTool("{{ (index $.ToolMeta $key).Name }}", {{ safeRawString (index $.ToolMeta $key).Description }}, {{ $key }}SchemaJSON)
+	{{ $key }}Tool = newTool("{{ (index $.ToolMeta $key).Name }}", {{ safeRawString (index $.ToolMeta $key).Description }}, {{ $key }}SchemaJSON, {{ $key }}OutputSchemaJSON,
+{{- with (index $.ToolMeta $key).Hints }} &mcp.ToolAnnotations{
+{{- if .ReadOnly }}
+		ReadOnlyHint: {{ .ReadOnly }},
+{{- end }}
+{{- with .Destructive }}
+		DestructiveHint: boolPtr({{ . }}),
+{{- end }}
+{{- if .Idempotent }}
+		IdempotentHint: {{ .Idempotent }},
+{{- end }}
+{{- with .OpenWorld }}
+		OpenWorldHint: boolPtr({{ . }}),
+{{- end }}
+	}{{ else }} nil{{ end }})
 {{- end }}
 )
+
+// newTool builds a tool descriptor carrying both schemas and the behavioural
+// hints a client uses to decide whether the call needs confirmation.
+// mcp.MustCreateTool covers the input side; the rest is set here so the runtime
+// keeps a stable signature.
+func newTool(name, description, inputSchemaJSON, outputSchemaJSON string, annotations *mcp.ToolAnnotations) *mcp.Tool {
+	tool := mcp.MustCreateTool(name, description, inputSchemaJSON)
+	tool.OutputSchema = mcp.MustParseSchema(outputSchemaJSON)
+	tool.Annotations = annotations
+	return tool
+}
+
+// boolPtr addresses a literal for the ToolAnnotations fields the SDK models as
+// *bool, where nil means the hint was not stated at all.
+func boolPtr(b bool) *bool { return &b }
+
+// structuredResult returns a tool result carrying the response both as text and
+// as the structured value the tool's outputSchema describes. A declared
+// outputSchema without structuredContent advertises a contract the result does
+// not meet, so the two are always produced together.
+//
+// The payload is already JSON, and the SDK marshals structuredContent without
+// inspecting it, so it is handed through as json.RawMessage. Decoding it into a
+// map first would re-parse and re-serialise every response for identical bytes.
+func structuredResult(payload []byte) (*mcp.CallToolResult, error) {
+	result := mcp.TextResult(string(payload))
+	result.StructuredContent = json.RawMessage(payload)
+	return result, nil
+}
 
 {{- range $svcName, $methods := .Services }}
 
@@ -300,7 +352,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			if err != nil {
 				return nil, err
 			}
-			return mcp.TextResult(string(out)), nil
+			return structuredResult(out)
 		})
 	}
 {{- end }}
@@ -592,7 +644,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 					if err != nil {
 						return nil, err
 					}
-					return mcp.TextResult(string(out)), nil
+					return structuredResult(out)
 				}
 			}
 {{- else }}
@@ -604,7 +656,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 			if err != nil {
 				return nil, err
 			}
-			return mcp.TextResult(string(out)), nil
+			return structuredResult(out)
 {{- end }}
 		})
 	}

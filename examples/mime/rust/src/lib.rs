@@ -44,6 +44,29 @@ mod tests {
         );
     }
 
+    // Behavioural hints tell a client whether a call needs confirmation. A hint
+    // the proto does not state must stay absent rather than default to false.
+    #[test]
+    fn tools_carry_behavioural_hints() {
+        let tools = GalleryServiceMcpHandler::<crate::tests::Stub>::tools();
+        let listed = tools
+            .iter()
+            .find(|t| t.name.as_ref() == "list_assets")
+            .expect("list_assets missing from tools()");
+
+        let ann = listed
+            .annotations
+            .as_ref()
+            .expect("list_assets has no annotations");
+        assert_eq!(ann.read_only_hint, Some(true));
+        assert_eq!(ann.idempotent_hint, Some(true));
+        assert_eq!(ann.open_world_hint, Some(false), "stated false must survive");
+        assert_eq!(
+            ann.destructive_hint, None,
+            "unstated hint must stay absent, not default"
+        );
+    }
+
     // The URI-template resource is listed separately from concrete resources.
     #[test]
     fn resource_template_is_registered() {

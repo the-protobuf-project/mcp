@@ -228,11 +228,10 @@ const char descriptor_table_protodef_counter_2fv1_2fcounter_5fservice_2eproto[] 
     " in _meta for progress notifications.\030\0010"
     "\001\032O\302\363\030K\nI\n\013Counter App\022\0051.0.0\0323A simple "
     "counter that streams progress as it coun"
-    "tsB\225\001\n\016com.counter.v1B\023CounterServicePro"
-    "toP\001Zlgithub.com/the-protobuf-project/gr"
-    "pc-mcp-gateway/examples/proto/generated/"
-    "go/counter/counterpbv1;counterpbv1b\006prot"
-    "o3"
+    "tsB\210\001\n\016com.counter.v1B\023CounterServicePro"
+    "toP\001Z_github.com/the-protobuf-project/mc"
+    "p/examples/proto/generated/go/counter/co"
+    "unterpbv1;counterpbv1b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_counter_2fv1_2fcounter_5fservice_2eproto_deps[3] = {
@@ -244,7 +243,7 @@ static ::absl::once_flag descriptor_table_counter_2fv1_2fcounter_5fservice_2epro
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_counter_2fv1_2fcounter_5fservice_2eproto = {
     false,
     false,
-    722,
+    709,
     descriptor_table_protodef_counter_2fv1_2fcounter_5fservice_2eproto,
     "counter/v1/counter_service.proto",
     &descriptor_table_counter_2fv1_2fcounter_5fservice_2eproto_once,

@@ -26,14 +26,14 @@ var File_gallery_v1_gallery_service_proto protoreflect.FileDescriptor
 const file_gallery_v1_gallery_service_proto_rawDesc = "" +
 	"\n" +
 	" gallery/v1/gallery_service.proto\x12\n" +
-	"gallery.v1\x1a\x18gallery/v1/gallery.proto\x1a\x18mcp/v1/annotations.proto2\xe5\f\n" +
-	"\x0eGalleryService\x12\x8d\x02\n" +
+	"gallery.v1\x1a\x18gallery/v1/gallery.proto\x1a\x18mcp/v1/annotations.proto2\xf1\f\n" +
+	"\x0eGalleryService\x12\x93\x02\n" +
 	"\n" +
-	"ListAssets\x12\x1d.gallery.v1.ListAssetsRequest\x1a\x1e.gallery.v1.ListAssetsResponse\"\xbf\x01\xca\xf3\x18K\n" +
-	"\vlist_assets\x12<List gallery assets, optionally filtered by IANA media type.\xd2\xf3\x18l\n" +
-	"\x11summarize_gallery\x127Summarise what the gallery holds, grouped by media type\x1a\x1cgallery.v1.ListAssetsRequest \x02\x12\x8a\x01\n" +
-	"\bGetAsset\x12\x1b.gallery.v1.GetAssetRequest\x1a\x1c.gallery.v1.GetAssetResponse\"C\xca\xf3\x18?\n" +
-	"\tget_asset\x122Fetch a single asset's content and its media type.\x1a\xb5\t\xc2\xf3\x18\xb0\t\n" +
+	"ListAssets\x12\x1d.gallery.v1.ListAssetsRequest\x1a\x1e.gallery.v1.ListAssetsResponse\"\xc5\x01\xca\xf3\x18Q\n" +
+	"\vlist_assets\x12<List gallery assets, optionally filtered by IANA media type. \x010\x018\x00\xd2\xf3\x18l\n" +
+	"\x11summarize_gallery\x127Summarise what the gallery holds, grouped by media type\x1a\x1cgallery.v1.ListAssetsRequest \x02\x12\x90\x01\n" +
+	"\bGetAsset\x12\x1b.gallery.v1.GetAssetRequest\x1a\x1c.gallery.v1.GetAssetResponse\"I\xca\xf3\x18E\n" +
+	"\tget_asset\x122Fetch a single asset's content and its media type. \x010\x018\x00\x1a\xb5\t\xc2\xf3\x18\xb0\t\n" +
 	"T\n" +
 	"\rAsset Gallery\x12\x051.0.0\x1a<A gallery of assets served across the common MCP media types\x12\xaa\x02\x1a\boverview\"\x10Gallery overview*.Prose introduction to the gallery, in Markdown2\rtext/markdown8\xd4\x04B#\n" +
 	"\x02\x01\x02\x12\x142026-08-17T09:00:00Z\x19\x00\x00\x00\x00\x00\x00\xf0?JD\n" +

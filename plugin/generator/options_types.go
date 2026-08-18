@@ -13,9 +13,22 @@ type MCPMethodOpts struct {
 	// Progress reports whether (mcp.v1.tool).progress was set. It is advisory:
 	// the streaming bridge is emitted based on the response message's shape (see
 	// DetectStreamProgress), so this only records the author's declared intent.
-	Progress    bool
+	Progress bool
+	// Hints is nil unless the RPC declares at least one behavioural hint.
+	Hints       *MCPToolHints
 	Prompt      *MCPPromptOpts
 	Elicitation *MCPElicitationOpts
+}
+
+// MCPToolHints mirrors the tool's behavioural hints for templates.
+//
+// Each is a pointer because the spec distinguishes "not stated" from "false",
+// and a client must treat the former as the unsafe answer.
+type MCPToolHints struct {
+	ReadOnly    *bool
+	Destructive *bool
+	Idempotent  *bool
+	OpenWorld   *bool
 }
 
 // MCPAppOpts mirrors MCPApp for templates.

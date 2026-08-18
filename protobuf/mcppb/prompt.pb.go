@@ -173,7 +173,19 @@ type MCPToolOptions struct {
 	// progressToken in params._meta; the server will send progress updates during
 	// execution. Requires a server-streaming RPC whose response has a oneof with
 	// mcp.v1.MCPProgress and the result type.
-	Progress      *bool `protobuf:"varint,3,opt,name=progress,proto3,oneof" json:"progress,omitempty"`
+	Progress *bool `protobuf:"varint,3,opt,name=progress,proto3,oneof" json:"progress,omitempty"`
+	// The tool does not modify its environment. Typical of Get, List and Search.
+	ReadOnly *bool `protobuf:"varint,4,opt,name=read_only,json=readOnly,proto3,oneof" json:"read_only,omitempty"`
+	// The tool may perform destructive updates. Meaningful only when read_only is
+	// false. Typical of Delete, and of Update that replaces rather than merges.
+	Destructive *bool `protobuf:"varint,5,opt,name=destructive,proto3,oneof" json:"destructive,omitempty"`
+	// Calling the tool repeatedly with the same arguments has no additional
+	// effect. Meaningful only when read_only is false. Delete and Update are
+	// idempotent under AIP-134; Create generally is not.
+	Idempotent *bool `protobuf:"varint,6,opt,name=idempotent,proto3,oneof" json:"idempotent,omitempty"`
+	// The tool interacts with an open world of external entities — a third-party
+	// API, the public internet — rather than a closed, predictable domain.
+	OpenWorld     *bool `protobuf:"varint,7,opt,name=open_world,json=openWorld,proto3,oneof" json:"open_world,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -229,6 +241,34 @@ func (x *MCPToolOptions) GetProgress() bool {
 	return false
 }
 
+func (x *MCPToolOptions) GetReadOnly() bool {
+	if x != nil && x.ReadOnly != nil {
+		return *x.ReadOnly
+	}
+	return false
+}
+
+func (x *MCPToolOptions) GetDestructive() bool {
+	if x != nil && x.Destructive != nil {
+		return *x.Destructive
+	}
+	return false
+}
+
+func (x *MCPToolOptions) GetIdempotent() bool {
+	if x != nil && x.Idempotent != nil {
+		return *x.Idempotent
+	}
+	return false
+}
+
+func (x *MCPToolOptions) GetOpenWorld() bool {
+	if x != nil && x.OpenWorld != nil {
+		return *x.OpenWorld
+	}
+	return false
+}
+
 var File_mcp_v1_prompt_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_prompt_proto_rawDesc = "" +
@@ -240,14 +280,26 @@ const file_mcp_v1_prompt_proto_rawDesc = "" +
 	"\x06schema\x18\x03 \x01(\tR\x06schema\x12#\n" +
 	"\x04role\x18\x04 \x01(\x0e2\x0f.mcp.v1.MCPRoleR\x04roleB\x05\n" +
 	"\x03_idB\x0e\n" +
-	"\f_description\"\x91\x01\n" +
+	"\f_description\"\xdf\x02\n" +
 	"\x0eMCPToolOptions\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x1f\n" +
-	"\bprogress\x18\x03 \x01(\bH\x02R\bprogress\x88\x01\x01B\x05\n" +
+	"\bprogress\x18\x03 \x01(\bH\x02R\bprogress\x88\x01\x01\x12 \n" +
+	"\tread_only\x18\x04 \x01(\bH\x03R\breadOnly\x88\x01\x01\x12%\n" +
+	"\vdestructive\x18\x05 \x01(\bH\x04R\vdestructive\x88\x01\x01\x12#\n" +
+	"\n" +
+	"idempotent\x18\x06 \x01(\bH\x05R\n" +
+	"idempotent\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"open_world\x18\a \x01(\bH\x06R\topenWorld\x88\x01\x01B\x05\n" +
 	"\x03_idB\x0e\n" +
 	"\f_descriptionB\v\n" +
-	"\t_progress*N\n" +
+	"\t_progressB\f\n" +
+	"\n" +
+	"_read_onlyB\x0e\n" +
+	"\f_destructiveB\r\n" +
+	"\v_idempotentB\r\n" +
+	"\v_open_world*N\n" +
 	"\aMCPRole\x12\x18\n" +
 	"\x14MCP_ROLE_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rMCP_ROLE_USER\x10\x01\x12\x16\n" +

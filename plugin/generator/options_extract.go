@@ -87,6 +87,7 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 		result.ToolName = toolExt.GetId()
 		result.ToolDescription = toolExt.GetDescription()
 		result.Progress = toolExt.GetProgress()
+		result.Hints = toolHints(toolExt)
 		hasAnything = true
 	}
 
@@ -120,4 +121,21 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 		return nil
 	}
 	return result
+}
+
+// toolHints collects the behavioural hints an RPC declares, or nil when it
+// declares none — an all-absent Hints and no Hints mean the same thing, and nil
+// lets templates skip the annotations block entirely.
+func toolHints(ext *mcppb.MCPToolOptions) *MCPToolHints {
+	hints := &MCPToolHints{
+		ReadOnly:    ext.ReadOnly,
+		Destructive: ext.Destructive,
+		Idempotent:  ext.Idempotent,
+		OpenWorld:   ext.OpenWorld,
+	}
+	if hints.ReadOnly == nil && hints.Destructive == nil &&
+		hints.Idempotent == nil && hints.OpenWorld == nil {
+		return nil
+	}
+	return hints
 }

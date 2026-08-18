@@ -21,6 +21,8 @@ const generatedFilenameExtension = ".pb.mcp.go"
 type ToolMeta struct {
 	Name        string
 	Description string
+	// Hints is nil when the RPC declares no behavioural hints.
+	Hints *MCPToolHints
 }
 
 // MethodInfo carries the Go type identifiers needed by the code template.
@@ -41,7 +43,8 @@ type TplParams struct {
 	SourcePath        string
 	GoPackage         string
 	ExtraImports      []string          // e.g. `emptypb "google.golang.org/.../emptypb"`
-	SchemaJSON        map[string]string // key: ServiceName_MethodName -> schema JSON
+	SchemaJSON        map[string]string // key: ServiceName_MethodName -> input schema JSON
+	OutputSchemaJSON  map[string]string // key: ServiceName_MethodName -> output schema JSON
 	ToolMeta          map[string]ToolMeta
 	Services          map[string]map[string]MethodInfo
 	ServiceBasePaths  map[string]string          // key: ServiceName -> default base path e.g. "/todo/v1/TodoService"
@@ -120,6 +123,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 func (g *FileGenerator) buildParams() TplParams {
 	services := make(map[string]map[string]MethodInfo)
 	schemaJSON := make(map[string]string)
+	outputSchemaJSON := make(map[string]string)
 	toolMeta := make(map[string]ToolMeta)
 	serviceBasePaths := make(map[string]string)
 	serviceOpts := make(map[string]*MCPServiceOpts)
@@ -182,10 +186,28 @@ func (g *FileGenerator) buildParams() TplParams {
 			}
 			schemaJSON[key] = string(stdBytes)
 
-			toolMeta[key] = ToolMeta{
+			// outputSchema describes what the tool returns, and comes from the
+			// response message exactly as inputSchema comes from the request. For
+			// a streaming RPC that is the result arm of the progress oneof, not
+			// the chunk wrapper the client never sees.
+			outMsg := meth.Output.Desc
+			if streamProgress != nil && streamProgress.ResultMessage != nil {
+				outMsg = streamProgress.ResultMessage.Desc
+			}
+			outBytes, err := json.Marshal(messageSchema(outMsg, false, ""))
+			if err != nil {
+				panic(fmt.Sprintf("marshal output schema: %v", err))
+			}
+			outputSchemaJSON[key] = string(outBytes)
+
+			meta := ToolMeta{
 				Name:        toolName,
 				Description: toolDesc,
 			}
+			if methOpts != nil {
+				meta.Hints = methOpts.Hints
+			}
+			toolMeta[key] = meta
 
 			responseType := resolveType(meth.Output.GoIdent)
 			if streamProgress != nil {
@@ -255,6 +277,7 @@ func (g *FileGenerator) buildParams() TplParams {
 		GoPackage:         string(g.f.GoPackageName),
 		ExtraImports:      extraImports,
 		SchemaJSON:        schemaJSON,
+		OutputSchemaJSON:  outputSchemaJSON,
 		ToolMeta:          toolMeta,
 		Services:          services,
 		ServiceBasePaths:  serviceBasePaths,

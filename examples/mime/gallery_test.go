@@ -194,3 +194,95 @@ func TestListAssetsFiltersByMediaType(t *testing.T) {
 		t.Error("filtering on an absent media type: got nil error, want one")
 	}
 }
+
+// MCP 2026-07-28 tools carry an outputSchema describing what they return, and a
+// result satisfies it through structuredContent. Declaring one without the other
+// would advertise a contract the result does not meet, so both are checked here.
+func TestToolsDeclareAnOutputSchema(t *testing.T) {
+	session, ctx := connect(t)
+
+	res, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+	if len(res.Tools) == 0 {
+		t.Fatal("no tools listed")
+	}
+	for _, tool := range res.Tools {
+		if tool.OutputSchema == nil {
+			t.Errorf("tool %q has no outputSchema", tool.Name)
+		}
+	}
+}
+
+func TestToolResultCarriesStructuredContent(t *testing.T) {
+	session, ctx := connect(t)
+
+	out, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "get_asset",
+		Arguments: map[string]any{"id": "overview"},
+	})
+	if err != nil {
+		t.Fatalf("CallTool: %v", err)
+	}
+	if out.IsError {
+		t.Fatalf("tool reported an error: %+v", out.Content)
+	}
+	if out.StructuredContent == nil {
+		t.Fatal("result has no structuredContent, so its declared outputSchema is unsatisfied")
+	}
+	// The structured value must be the response message, not the text blob.
+	obj, ok := out.StructuredContent.(map[string]any)
+	if !ok {
+		t.Fatalf("structuredContent is %T, want an object", out.StructuredContent)
+	}
+	asset, ok := obj["asset"].(map[string]any)
+	if !ok {
+		t.Fatalf("structuredContent has no asset object: %v", obj)
+	}
+	if asset["mime_type"] != "text/markdown" {
+		t.Errorf("asset.mime_type = %v, want text/markdown", asset["mime_type"])
+	}
+}
+
+// Behavioural hints tell a client whether a call can be auto-approved. They are
+// only useful if they survive to the wire, and the distinction between "stated
+// false" and "not stated" has to survive with them.
+func TestToolsCarryBehaviouralHints(t *testing.T) {
+	session, ctx := connect(t)
+
+	res, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+	byName := make(map[string]*mcp.Tool, len(res.Tools))
+	for _, tool := range res.Tools {
+		byName[tool.Name] = tool
+	}
+
+	listed, ok := byName["list_assets"]
+	if !ok {
+		t.Fatal("list_assets missing from tools/list")
+	}
+	if listed.Annotations == nil {
+		t.Fatal("list_assets has no annotations, so a client cannot tell it is safe")
+	}
+	if !listed.Annotations.ReadOnlyHint {
+		t.Error("readOnlyHint = false, want true for a listing tool")
+	}
+	if !listed.Annotations.IdempotentHint {
+		t.Error("idempotentHint = false, want true")
+	}
+	// open_world: false is stated in the proto, so it must arrive as a non-nil
+	// false rather than as an absent hint.
+	if listed.Annotations.OpenWorldHint == nil {
+		t.Error("openWorldHint is absent, but the proto states it explicitly")
+	} else if *listed.Annotations.OpenWorldHint {
+		t.Error("openWorldHint = true, want false")
+	}
+	// destructive is not stated, and must stay absent rather than default.
+	if listed.Annotations.DestructiveHint != nil {
+		t.Errorf("destructiveHint = %v, want absent — the proto does not state it",
+			*listed.Annotations.DestructiveHint)
+	}
+}

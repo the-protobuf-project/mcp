@@ -87,11 +87,10 @@ const char descriptor_table_protodef_todo_2fv1_2ftodo_5fservice_2eproto[] ABSL_A
     "irmation\202\323\344\223\002\034*\032/v1/{name=users/*/todos/"
     "*}\032`\312A the-protobuf-project.app.todo.v1\302"
     "\363\0309\n7\n\010Todo App\022\0051.0.0\032$A simple todo ma"
-    "nagement applicationB\206\001\n\013com.todo.v1B\020To"
-    "doServiceProtoP\001Zcgithub.com/the-protobu"
-    "f-project/grpc-mcp-gateway/examples/prot"
-    "o/generated/go/todo/todopbv1;todopbv1b\006p"
-    "roto3"
+    "nagement applicationBy\n\013com.todo.v1B\020Tod"
+    "oServiceProtoP\001ZVgithub.com/the-protobuf"
+    "-project/mcp/examples/proto/generated/go"
+    "/todo/todopbv1;todopbv1b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_todo_2fv1_2ftodo_5fservice_2eproto_deps[6] = {
@@ -106,7 +105,7 @@ static ::absl::once_flag descriptor_table_todo_2fv1_2ftodo_5fservice_2eproto_onc
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_todo_2fv1_2ftodo_5fservice_2eproto = {
     false,
     false,
-    2085,
+    2071,
     descriptor_table_protodef_todo_2fv1_2ftodo_5fservice_2eproto,
     "todo/v1/todo_service.proto",
     &descriptor_table_todo_2fv1_2ftodo_5fservice_2eproto_once,

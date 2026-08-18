@@ -842,11 +842,10 @@ const char descriptor_table_protodef_todo_2fv1_2ftodo_5fmcp_2eproto[] ABSL_ATTRI
     "RIORITIZATION_STRATEGY_UNSPECIFIED\020\000\022#\n\037"
     "PRIORITIZATION_STRATEGY_URGENCY\020\001\022$\n PRI"
     "ORITIZATION_STRATEGY_DEADLINE\020\002\022\"\n\036PRIOR"
-    "ITIZATION_STRATEGY_EFFORT\020\003B\206\001\n\013com.todo"
-    ".v1B\020TodoServiceProtoP\001Zcgithub.com/the-"
-    "protobuf-project/grpc-mcp-gateway/exampl"
-    "es/proto/generated/go/todo/todopbv1;todo"
-    "pbv1b\006proto3"
+    "ITIZATION_STRATEGY_EFFORT\020\003By\n\013com.todo."
+    "v1B\020TodoServiceProtoP\001ZVgithub.com/the-p"
+    "rotobuf-project/mcp/examples/proto/gener"
+    "ated/go/todo/todopbv1;todopbv1b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_todo_2fv1_2ftodo_5fmcp_2eproto_deps[6] = {
@@ -861,7 +860,7 @@ static ::absl::once_flag descriptor_table_todo_2fv1_2ftodo_5fmcp_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_todo_2fv1_2ftodo_5fmcp_2eproto = {
     false,
     false,
-    972,
+    958,
     descriptor_table_protodef_todo_2fv1_2ftodo_5fmcp_2eproto,
     "todo/v1/todo_mcp.proto",
     &descriptor_table_todo_2fv1_2ftodo_5fmcp_2eproto_once,

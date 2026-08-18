@@ -27,7 +27,8 @@ type RsMethodInfo struct {
 type RsTplParams struct {
 	Version          string
 	SourcePath       string
-	SchemaJSON       map[string]string                  // key: ServiceName_MethodName -> schema JSON
+	SchemaJSON       map[string]string                  // key: ServiceName_MethodName -> input schema JSON
+	OutputSchemaJSON map[string]string                  // key: ServiceName_MethodName -> output schema JSON
 	ToolMeta         map[string]ToolMeta                // key: ServiceName_MethodName
 	Services         map[string]map[string]RsMethodInfo // key: ServiceName -> MethodName -> info
 	ServiceBasePaths map[string]string                  // key: ServiceName -> default base path
@@ -73,6 +74,7 @@ func (g *RustFileGenerator) Generate() {
 func (g *RustFileGenerator) buildRsParams() RsTplParams {
 	services := make(map[string]map[string]RsMethodInfo)
 	schemaJSON := make(map[string]string)
+	outputSchemaJSON := make(map[string]string)
 	toolMeta := make(map[string]ToolMeta)
 	serviceBasePaths := make(map[string]string)
 	serviceOpts := make(map[string]*MCPServiceOpts)
@@ -127,10 +129,27 @@ func (g *RustFileGenerator) buildRsParams() RsTplParams {
 				panic(fmt.Sprintf("marshal standard schema: %v", err))
 			}
 			schemaJSON[key] = string(stdBytes)
-			toolMeta[key] = ToolMeta{
+
+			// outputSchema comes from the response message — the result arm of the
+			// progress oneof for a streaming RPC, not the chunk wrapper.
+			outMsg := meth.Output.Desc
+			if streamProgress != nil && streamProgress.ResultMessage != nil {
+				outMsg = streamProgress.ResultMessage.Desc
+			}
+			outBytes, err := json.Marshal(messageSchema(outMsg, false, ""))
+			if err != nil {
+				panic(fmt.Sprintf("marshal output schema: %v", err))
+			}
+			outputSchemaJSON[key] = string(outBytes)
+
+			meta := ToolMeta{
 				Name:        toolName,
 				Description: desc,
 			}
+			if methOpts != nil {
+				meta.Hints = methOpts.Hints
+			}
+			toolMeta[key] = meta
 
 			reqType := string(meth.Input.Desc.Name())
 			respType := string(meth.Output.Desc.Name())
@@ -171,6 +190,7 @@ func (g *RustFileGenerator) buildRsParams() RsTplParams {
 		Version:          PluginVersion,
 		SourcePath:       g.f.Desc.Path(),
 		SchemaJSON:       schemaJSON,
+		OutputSchemaJSON: outputSchemaJSON,
 		ToolMeta:         toolMeta,
 		Services:         services,
 		ServiceBasePaths: serviceBasePaths,

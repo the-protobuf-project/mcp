@@ -43,12 +43,16 @@ go_test(
         "escape_test.go",
         "factory_test.go",
         "options_enums_test.go",
+        "schema_recursion_test.go",
     ],
     embed = [":generator"],
     deps = [
         "//protobuf/mcppb",
         "@com_github_the_protobuf_project_protokit//factory",
         "@org_golang_google_protobuf//compiler/protogen",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//reflect/protodesc",
         "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//types/descriptorpb",
     ],
 )

@@ -94,6 +94,29 @@ func extractValidateConstraints(fd protoreflect.FieldDescriptor) map[string]any 
 // messageSchema converts a protobuf message descriptor into a JSON Schema map.
 // If schemaDesc is non-empty, it is set as the root-level description (per MCP inputSchema convention).
 func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string) map[string]any {
+	return messageSchemaPath(md, openAI, schemaDesc, map[protoreflect.FullName]bool{})
+}
+
+// messageSchemaPath is messageSchema carrying the set of message types already
+// open on the current branch.
+//
+// A self-referential message — `Node { repeated Node children }`, the shape of
+// every tree and linked list — would otherwise recurse until the stack gives
+// out. JSON Schema cannot express an infinitely nested object literally, so at
+// the point the cycle closes the walk stops and emits a permissive object,
+// which is true (the value is an object) without claiming to enumerate it.
+func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string, path map[protoreflect.FullName]bool) map[string]any {
+	if path[md.FullName()] {
+		return map[string]any{
+			"type":                 "object",
+			"additionalProperties": true,
+			"description": fmt.Sprintf(
+				"Recursive reference to %s; nested occurrences are not expanded.", md.FullName()),
+		}
+	}
+	path[md.FullName()] = true
+	defer delete(path, md.FullName())
+
 	required, props := []string{}, map[string]any{}
 	oneOfGroups := map[string][]map[string]any{}
 	for i := 0; i < md.Fields().Len(); i++ {
@@ -103,10 +126,10 @@ func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc st
 			if !openAI {
 				key := string(oo.Name())
 				oneOfGroups[key] = append(oneOfGroups[key], map[string]any{
-					"properties": map[string]any{name: fieldSchema(fd, openAI)}, "required": []string{name},
+					"properties": map[string]any{name: fieldSchemaPath(fd, openAI, path)}, "required": []string{name},
 				})
 			} else {
-				s := fieldSchema(fd, openAI)
+				s := fieldSchemaPath(fd, openAI, path)
 				if t, ok := s["type"].(string); ok {
 					s["type"] = []string{t, "null"}
 				}
@@ -115,7 +138,7 @@ func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc st
 				required = append(required, name)
 			}
 		} else {
-			props[name] = fieldSchema(fd, openAI)
+			props[name] = fieldSchemaPath(fd, openAI, path)
 			if isFieldRequired(fd) || openAI {
 				required = append(required, name)
 			}
@@ -208,15 +231,17 @@ func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any
 	}
 }
 
-// fieldSchema converts a single protobuf field descriptor to a JSON Schema map.
-func fieldSchema(fd protoreflect.FieldDescriptor, openAI bool) map[string]any {
+// fieldSchemaPath converts a single protobuf field descriptor to a JSON Schema
+// map, carrying the set of message types already open on this branch so a
+// recursive field can be cut rather than followed.
+func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, path map[protoreflect.FullName]bool) map[string]any {
 	if fd.IsMap() {
-		return mapSchema(fd, openAI)
+		return mapSchemaPath(fd, openAI, path)
 	}
 	var schema map[string]any
 	switch fd.Kind() {
 	case protoreflect.MessageKind:
-		schema = messageFieldSchema(fd, openAI)
+		schema = messageFieldSchemaPath(fd, openAI, path)
 	case protoreflect.EnumKind:
 		schema = enumSchema(fd)
 	default:

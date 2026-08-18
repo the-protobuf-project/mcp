@@ -80,7 +80,12 @@ jobs:
     name: Build (C++)
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
+      # This job only compiles: make, cargo and protoc need no Git
+      # authentication, so the checkout token is not persisted into the
+      # repository's Git config where a build step could reach it.
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.93.0
       # The C++ server links a static library built from the generated Rust
       # bridge, so this job needs both toolchains plus gRPC/protobuf headers.
@@ -90,7 +95,33 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libgrpc++-dev libprotobuf-dev protobuf-compiler-grpc pkg-config
+            libgrpc++-dev libprotobuf-dev protobuf-compiler \
+            protobuf-compiler-grpc pkg-config
+      - uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+      # The committed .pb.h files are produced by whatever protoc the developer
+      # ran, and a header from a newer protobuf than the libprotobuf being
+      # linked will not compile — protoc 27+ emits an include for
+      # runtime_version.h, which the distro package does not ship. Regenerating
+      # here with the runner's own protoc keeps the headers and the library on
+      # one version.
+      - name: Regenerate protobuf stubs against the installed protobuf
+        run: |
+          cd examples && buf export proto -o /tmp/proto_export
+          cd ..
+          rm -rf examples/proto/generated/cpp/todo \
+                 examples/proto/generated/cpp/counter \
+                 examples/proto/generated/cpp/google \
+                 examples/proto/generated/cpp/mcp
+          protoc -I /tmp/proto_export \
+            --cpp_out=examples/proto/generated/cpp \
+            --grpc_out=examples/proto/generated/cpp \
+            --plugin=protoc-gen-grpc="$(which grpc_cpp_plugin)" \
+            /tmp/proto_export/mcp/protobuf/*.proto \
+            /tmp/proto_export/google/api/*.proto \
+            /tmp/proto_export/todo/v1/*.proto \
+            /tmp/proto_export/counter/v1/*.proto
       - name: Cache cargo (Rust bridge)
         uses: actions/cache@v4
         with:

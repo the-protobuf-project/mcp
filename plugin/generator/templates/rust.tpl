@@ -9,19 +9,31 @@ use async_trait::async_trait;
 use rmcp::{ErrorData as McpError, RoleServer, ServerHandler, ServiceExt, model::*, service::{Peer, RequestContext}};
 use serde_json::{self, json, Value};
 
-fn make_tool(name: &str, description: &str, schema_json: &str) -> Tool {
-    serde_json::from_value(json!({
+fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value) -> Tool {
+    let mut tool = json!({
         "name": name, "description": description,
         "inputSchema": serde_json::from_str::<Value>(schema_json).unwrap(),
-    })).expect("generated tool schema must be valid")
+        "outputSchema": serde_json::from_str::<Value>(output_schema_json).unwrap(),
+    });
+    // A hint the proto does not state stays absent: to a client, "unknown" is
+    // not the same as "false".
+    if !annotations.is_null() {
+        tool["annotations"] = annotations;
+    }
+    serde_json::from_value(tool).expect("generated tool schema must be valid")
 }
 
-fn make_tool_with_app_meta(name: &str, description: &str, schema_json: &str, app_resource_uri: &str) -> Tool {
-    serde_json::from_value(json!({
+fn make_tool_with_app_meta(name: &str, description: &str, schema_json: &str, output_schema_json: &str, annotations: Value, app_resource_uri: &str) -> Tool {
+    let mut tool = json!({
         "name": name, "description": description,
         "inputSchema": serde_json::from_str::<Value>(schema_json).unwrap(),
+        "outputSchema": serde_json::from_str::<Value>(output_schema_json).unwrap(),
         "_meta": { "ui": { "resourceUri": app_resource_uri } }
-    })).expect("generated tool schema must be valid")
+    });
+    if !annotations.is_null() {
+        tool["annotations"] = annotations;
+    }
+    serde_json::from_value(tool).expect("generated tool schema must be valid")
 }
 
 fn app_resource_uri(service_name: &str) -> String {
@@ -76,6 +88,7 @@ fn default_app_html(app_name: &str, version: &str, description: &str) -> String 
 {{- if and $svcOpts $svcOpts.App }}{{ $hasResources = true }}{{ end }}
 {{- range $methName, $info := $methods }}
 const {{ $info.ConstName }}_SCHEMA_JSON: &str = r##"{{ index $.SchemaJSON (printf "%s_%s" $svcName $methName) }}"##;
+const {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON: &str = r##"{{ index $.OutputSchemaJSON (printf "%s_%s" $svcName $methName) }}"##;
 {{- end }}
 
 #[async_trait]
@@ -107,9 +120,9 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         vec![
         {{- range $methName, $info := $methods }}
 {{- if and $svcOpts $svcOpts.App }}
-            make_tool_with_app_meta("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, &app_uri),
+            make_tool_with_app_meta("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}, &app_uri),
 {{- else }}
-            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON),
+            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, {{ $info.ConstName }}_OUTPUT_SCHEMA_JSON, {{ template "rsToolAnnotations" (index $.ToolMeta (printf "%s_%s" $svcName $methName)).Hints }}),
 {{- end }}
         {{- end }}
         ]
@@ -444,5 +457,17 @@ pub async fn serve_{{ $svcName | snakeCase }}_mcp<T: {{ $svcName }}McpServer>(
                     {"src": "{{ .Src | rsEscape }}"{{ if .MimeType }}, "mimeType": "{{ .MimeType | rsEscape }}"{{ end }}{{ if .Sizes }}, "sizes": [{{ range $j, $s := .Sizes }}{{ if $j }}, {{ end }}"{{ $s | rsEscape }}"{{ end }}]{{ end }}{{ if .Theme }}, "theme": "{{ .Theme | rsEscape }}"{{ end }}},
                     {{- end }}
                 ],
+{{- end }}
+{{- end }}
+
+{{- define "rsToolAnnotations" }}
+{{- if . }}json!({
+{{- $first := true }}
+{{- with .ReadOnly }}"readOnlyHint": {{ . }}{{ $first = false }}{{ end }}
+{{- with .Destructive }}{{ if not $first }}, {{ end }}"destructiveHint": {{ . }}{{ $first = false }}{{ end }}
+{{- with .Idempotent }}{{ if not $first }}, {{ end }}"idempotentHint": {{ . }}{{ $first = false }}{{ end }}
+{{- with .OpenWorld }}{{ if not $first }}, {{ end }}"openWorldHint": {{ . }}{{ end }}
+})
+{{- else }}Value::Null
 {{- end }}
 {{- end }}
