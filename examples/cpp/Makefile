@@ -12,10 +12,17 @@ SRC_DIR := $(CPP_DIR)/src
 CXX_INCLUDE := $(RUST_DIR)/target/cxx_include
 # The crate is named after whichever service protoc-gen-mcp generated the
 # bridge for, so the library name is read from the generated Cargo.toml
-# rather than globbed. A glob picks the alphabetically first lib*.a, which
-# after the bridge is regenerated for a different service is the stale one
-# left behind in target/release -- and linking that produces a server that
-# builds cleanly while serving the previous service's (or no) tools.
+# rather than globbed.
+#
+# Globbing was wrong twice over. `:=` expands at parse time, before the `rust`
+# target has run cargo, so on a clean checkout the glob matched nothing, this
+# variable was empty, and the link silently dropped the bridge -- every
+# cxxbridge symbol then came back as an undefined reference. And when a stale
+# lib*.a from a previously generated service did happen to be present, the glob
+# picked that instead, linking a server that built cleanly while serving the
+# wrong service's (or no) tools. Deriving the name from a file that is always
+# committed avoids both: it is a pure path computation that does not care
+# whether cargo has run yet.
 RUST_CRATE := $(shell sed -n 's/^name = "\(.*\)"/\1/p' $(RUST_DIR)/Cargo.toml | head -1)
 RUST_LIB := $(RUST_DIR)/target/release/lib$(RUST_CRATE).a
 
@@ -55,6 +62,14 @@ else
 endif
 
 $(BINARY): rust $(OBJS)
+	@test -n "$(RUST_CRATE)" || { \
+	    echo "error: no crate name in $(RUST_DIR)/Cargo.toml -- regenerate with 'buf generate'"; \
+	    exit 1; }
+	@test -f "$(RUST_LIB)" || { \
+	    echo "error: bridge library $(RUST_LIB) is missing after 'cargo build --release'"; \
+	    echo "       Linking without it fails with dozens of undefined rust::cxxbridge1::*"; \
+	    echo "       references that name the symptom rather than this cause."; \
+	    exit 1; }
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(RUST_LIB) $(GRPC_LIBS) $(RUST_LDFLAGS) -lpthread -ldl
 
 $(OBJ_DIR)/gen/%.o: $(GEN_DIR)/%.cc
