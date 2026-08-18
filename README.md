@@ -69,7 +69,7 @@ Open-sourced by **The Protobuf Project**.
 - **Published Protos** — Import the MCP annotations from [`buf.build/the-protobuf-project/mcp`](https://buf.build/the-protobuf-project/mcp) and generate the types in your own client
 
 | Language   | Generated File                     | Example                              |
-| ---------- | ---------------------------------- |
+|------------|------------------------------------|--------------------------------------|
 | **Go**     | `*_service.pb.mcp.go`              | [`examples/go`](examples/go)         |
 | **Rust**   | `*_service.mcp.rs`                 | [`examples/rust`](examples/rust)     |
 | **C++**    | `*_service.mcp.h/cc` + Rust bridge | [`examples/cpp`](examples/cpp)       |
@@ -446,7 +446,7 @@ themes, and audience/priority annotations.
 
 ## Project Structure
 
-```
+```text
 mcp/
 ├── go.mod                     # Root Go module (plugin)
 ├── go.work                    # Workspace (root + examples)
@@ -473,7 +473,7 @@ module, and the Go runtime comes from
 ## Plugin Options
 
 | Option           | Values                        | Description                                              |
-| ---------------- | ----------------------------- |
+|------------------|-------------------------------|----------------------------------------------------------|
 | `lang`           | `go`, `rust`, `cpp`           | Target language for generated code                       |
 | `module`         | Go module path                | Go module prefix for output path resolution              |
 | `package_suffix` | any string (Go only)          | Sub-package suffix for generated `.pb.mcp.go` files      |
@@ -509,7 +509,7 @@ The tool's `inputSchema` is derived from the protobuf request message:
 ### Supported transports
 
 | Transport       | Value             | Protocol                      | Use Case                            |
-| --------------- | ----------------- | ----------------------------------- |
+|-----------------|-------------------|-------------------------------|-------------------------------------|
 | stdio           | `stdio`           | stdin/stdout pipes            | Local tools, IDE integrations       |
 | SSE (legacy)    | `sse`             | HTTP + Server-Sent Events     | Browser clients, legacy MCP clients |
 | Streamable HTTP | `streamable-http` | HTTP + bidirectional JSON-RPC | Production deployments, modern SDKs |
@@ -526,7 +526,7 @@ MCP_TRANSPORT=stdio,streamable-http cargo run --bin http
 ### Environment variables
 
 | Variable        | Default     | Description                                        |
-| --------------- | ----------- |
+|-----------------|-------------|----------------------------------------------------|
 | `MCP_TRANSPORT` | per-example | Comma-separated: `stdio`, `sse`, `streamable-http` |
 | `MCP_HOST`      | `0.0.0.0`   | Bind address for HTTP transports                   |
 | `MCP_PORT`      | `8082`      | Listen port for HTTP transports                    |
@@ -556,6 +556,23 @@ cfg := &mcp.MCPServerConfig{
 todopbv1.ServeTodoServiceMCP(ctx, server, cfg)
 ```
 
+### Rust progress streaming
+
+A server-streaming RPC's generated trait method receives an `McpProgressSink`
+alongside its arguments. Report progress through it and return the final result;
+when the client sent no `progressToken` the sink is inert, so there is nothing
+to branch on:
+
+```rust
+async fn count(&self, args: Value, progress: McpProgressSink) -> Result<Value, McpError> {
+    let to = args.get("to").and_then(Value::as_i64).unwrap_or(0);
+    for n in 1..=to {
+        progress.send(n as f64, Some(to as f64), Some(format!("counted {n}"))).await;
+    }
+    Ok(json!({ "total": to }))
+}
+```
+
 ### Rust configuration
 
 ```rust
@@ -573,12 +590,12 @@ serve_todo_service_mcp(server, config).await?;
 The [`examples/`](examples/) directory contains **TodoService** (CRUD, prompts, elicitation) and **CounterService** (progress streaming) implementations:
 
 | Service            | Proto                 | Description                                      |
-| ------------------ | --------------------- |
+|--------------------|-----------------------|--------------------------------------------------|
 | **TodoService**    | `proto/todo/v1/`      | CRUD, prompts, elicitation, resources            |
 | **CounterService** | `proto/counter/v1/`   | Server-streaming with MCP progress notifications |
 
 | Language | Directory                             | Transports                     | Test                                    |
-| -------- | ------------------------------------- | --------------------------------------- |
+|----------|---------------------------------------|--------------------------------|-----------------------------------------|
 | Go       | [`examples/go/`](examples/go)         | http, stdio, sse, grpc-gateway, counter | `go test ./examples/go/...`      |
 | Rust     | [`examples/rust/`](examples/rust)     | http, stdio, sse               | `cargo check`                           |
 | C++      | [`examples/cpp/`](examples/cpp)       | streamable-http, stdio         | `make`                                  |

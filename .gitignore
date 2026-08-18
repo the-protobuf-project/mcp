@@ -47,6 +47,7 @@ examples/rust/target/
 examples/proto/generated
 **/build
 **/target
+examples/cpp/server
 
 # Bazel Ignore
 bazel-*

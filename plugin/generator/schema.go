@@ -194,12 +194,17 @@ func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any
 	}
 	// An explicit type overrides the one inferred from the proto field, for
 	// fields whose wire type does not match their intended schema type (e.g. an
-	// int64 that should appear as "string" in JSON). Replacing the type makes
-	// any inferred numeric bounds meaningless, so drop them with it.
+	// int64 that should appear as "string" in JSON).
+	//
+	// Inferred numeric bounds survive a numeric-to-numeric override, where they
+	// still describe the value; they are dropped only when the value stops being
+	// a number, because "minimum" against a string is meaningless.
 	if typ := fieldTypeKeyword(opts.GetType()); typ != "" && schema["type"] != typ {
 		schema["type"] = typ
-		delete(schema, "minimum")
-		delete(schema, "maximum")
+		if typ != "integer" && typ != "number" {
+			delete(schema, "minimum")
+			delete(schema, "maximum")
+		}
 	}
 }
 

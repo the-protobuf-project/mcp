@@ -23,17 +23,25 @@ func toScreamingSnakeCase(s string) string {
 	return strings.ToUpper(naming.SnakeCase(s))
 }
 
-// rsStringEscape escapes backslashes and double quotes for use inside a Rust "..." string literal.
-func rsStringEscape(s string) string {
-	s = strings.ReplaceAll(s, `\`, `\\`)
-	s = strings.ReplaceAll(s, `"`, `\"`)
-	return s
-}
+// rsStringEscape escapes s for use inside a Rust "..." string literal.
+func rsStringEscape(s string) string { return literalEscape(s) }
 
-// cppStringEscape escapes backslashes and double quotes for use inside a C++ "..." string literal.
-func cppStringEscape(s string) string {
+// cppStringEscape escapes s for use inside a C++ "..." string literal.
+func cppStringEscape(s string) string { return literalEscape(s) }
+
+// literalEscape escapes s for embedding between the double quotes of a Rust or
+// C++ string literal.
+//
+// The backslash pass runs first so the escapes introduced after it are not
+// escaped again. Line breaks and tabs are included because a proto option may
+// legitimately contain them and a raw newline would leave the literal
+// unterminated; \n, \r and \t mean the same thing in both languages.
+func literalEscape(s string) string {
 	s = strings.ReplaceAll(s, `\`, `\\`)
 	s = strings.ReplaceAll(s, `"`, `\"`)
+	s = strings.ReplaceAll(s, "\n", `\n`)
+	s = strings.ReplaceAll(s, "\r", `\r`)
+	s = strings.ReplaceAll(s, "\t", `\t`)
 	return s
 }
 

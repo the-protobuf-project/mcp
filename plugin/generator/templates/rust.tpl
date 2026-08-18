@@ -6,7 +6,7 @@
 
 use std::sync::Arc;
 use async_trait::async_trait;
-use rmcp::{ErrorData as McpError, RoleServer, ServerHandler, ServiceExt, model::*, service::RequestContext};
+use rmcp::{ErrorData as McpError, RoleServer, ServerHandler, ServiceExt, model::*, service::{Peer, RequestContext}};
 use serde_json::{self, json, Value};
 
 fn make_tool(name: &str, description: &str, schema_json: &str) -> Tool {
@@ -28,6 +28,44 @@ fn app_resource_uri(service_name: &str) -> String {
     format!("ui://{}/app.html", service_name.to_lowercase())
 }
 
+/// Sends MCP progress notifications for one tool call.
+///
+/// A server-streaming RPC reports incremental progress through this. When the
+/// client sent no progressToken there is nothing to correlate a notification
+/// with, so every send is a no-op and an implementation never has to check.
+///
+/// The `Default` sink is exactly that inert one, which is what a unit test for a
+/// streaming RPC wants.
+#[derive(Clone, Default)]
+pub struct McpProgressSink {
+    peer: Option<Peer<RoleServer>>,
+    token: Option<ProgressToken>,
+}
+
+impl McpProgressSink {
+    fn new(peer: Option<Peer<RoleServer>>, token: Option<ProgressToken>) -> Self {
+        Self { peer, token }
+    }
+
+    /// Reports progress. `total` is the expected final value when known.
+    pub async fn send(&self, progress: f64, total: Option<f64>, message: Option<String>) {
+        let (Some(peer), Some(token)) = (self.peer.as_ref(), self.token.as_ref()) else {
+            return;
+        };
+        // ProgressNotificationParam is #[non_exhaustive], so it is built through
+        // its constructor rather than a struct literal.
+        let mut param = ProgressNotificationParam::new(token.clone(), progress);
+        if let Some(total) = total {
+            param = param.with_total(total);
+        }
+        if let Some(message) = message {
+            param = param.with_message(message);
+        }
+        // A dropped client should not fail the tool call it is no longer watching.
+        let _ = peer.notify_progress(param).await;
+    }
+}
+
 fn default_app_html(app_name: &str, version: &str, description: &str) -> String {
     format!("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>{app_name}</title></head><body><h1>{app_name}</h1><p>v{version}</p><p>{description}</p><p>This is a generated MCP App placeholder. Replace this resource with your own UI.</p></body></html>")
 }
@@ -43,7 +81,11 @@ const {{ $info.ConstName }}_SCHEMA_JSON: &str = r##"{{ index $.SchemaJSON (print
 #[async_trait]
 pub trait {{ $svcName }}McpServer: Send + Sync + 'static {
 {{- range $methName, $info := $methods }}
-{{- if not $info.StreamProgress }}
+{{- if $info.StreamProgress }}
+    /// Server-streaming RPC: report incremental progress through `progress`,
+    /// then return the final result.
+    async fn {{ $info.RsMethodName }}(&self, args: Value, progress: McpProgressSink) -> std::result::Result<Value, McpError>;
+{{- else }}
     async fn {{ $info.RsMethodName }}(&self, args: Value) -> std::result::Result<Value, McpError>;
 {{- end }}
 {{- end }}
@@ -64,31 +106,15 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
 {{- end }}
         vec![
         {{- range $methName, $info := $methods }}
-        {{- if not $info.StreamProgress }}
 {{- if and $svcOpts $svcOpts.App }}
             make_tool_with_app_meta("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, &app_uri),
 {{- else }}
             make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON),
 {{- end }}
-        {{- end }}
         {{- end }}
         ]
     }
 
-    pub fn all_tools() -> Vec<Tool> {
-{{- if and $svcOpts $svcOpts.App }}
-        let app_uri = app_resource_uri("{{ $svcName }}");
-{{- end }}
-        vec![
-        {{- range $methName, $info := $methods }}
-{{- if and $svcOpts $svcOpts.App }}
-            make_tool_with_app_meta("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON, &app_uri),
-{{- else }}
-            make_tool("{{ $info.ToolName }}", "{{ $info.Description | rsEscape }}", {{ $info.ConstName }}_SCHEMA_JSON),
-{{- end }}
-        {{- end }}
-        ]
-    }
 {{- $hasPrompts := false }}
 {{- $hasPromptCompletions := false }}
 {{- range $methName, $info := $methods }}
@@ -110,7 +136,7 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
                 "description": "{{ $info.MethodOpts.Prompt.Description | rsEscape }}",
                 "arguments": [
                 {{- range $info.MethodOpts.Prompt.Arguments }}
-                    {"name": "{{ .Name }}", "description": "{{ .Description | rsEscape }}", "required": {{ if .Required }}true{{ else }}false{{ end }}},
+                    {"name": "{{ .Name | rsEscape }}", "description": "{{ .Description | rsEscape }}", "required": {{ if .Required }}true{{ else }}false{{ end }}},
                 {{- end }}
                 ]
             })).expect("generated prompt must be valid"),
@@ -146,7 +172,7 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         {{- range $svcOpts.Resources }}
         {{- if .URI }}
             serde_json::from_value(json!({
-                "uri": "{{ .URI }}", "name": "{{ .Name }}",
+                "uri": "{{ .URI | rsEscape }}", "name": "{{ .Name | rsEscape }}",
                 {{- if .Title }}
                 "title": "{{ .Title | rsEscape }}",
                 {{- end }}
@@ -154,7 +180,7 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
                 "size": {{ .Size }},
                 {{- end }}
                 {{- template "rsResourceExtras" . }}
-                "description": "{{ .Description | rsEscape }}", "mimeType": "{{ .MimeType }}"
+                "description": "{{ .Description | rsEscape }}", "mimeType": "{{ .MimeType | rsEscape }}"
             })).expect("generated resource must be valid"),
         {{- end }}
         {{- end }}
@@ -173,12 +199,12 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
         {{- range $svcOpts.Resources }}
         {{- if .URITemplate }}
             serde_json::from_value(json!({
-                "uriTemplate": "{{ .URITemplate }}", "name": "{{ .Name }}",
+                "uriTemplate": "{{ .URITemplate | rsEscape }}", "name": "{{ .Name | rsEscape }}",
                 {{- if .Title }}
                 "title": "{{ .Title | rsEscape }}",
                 {{- end }}
                 {{- template "rsResourceExtras" . }}
-                "description": "{{ .Description | rsEscape }}", "mimeType": "{{ .MimeType }}"
+                "description": "{{ .Description | rsEscape }}", "mimeType": "{{ .MimeType | rsEscape }}"
             })).expect("generated resource template must be valid"),
         {{- end }}
         {{- end }}
@@ -210,17 +236,18 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
         Ok(ListToolsResult::with_all_items(Self::tools()))
     }
 
-{{- /* context is only read to raise an elicitation, so bind it as unused when
-       no method on this service declares one — generated code must not warn. */}}
+{{- /* context is read to raise an elicitation and to reach the peer and
+       progress token for a streaming RPC. Bind it as unused when this service
+       does neither — generated code must not warn. */}}
 {{- $usesContext := false }}
 {{- range $methName, $info := $methods }}
 {{- if and $info.MethodOpts $info.MethodOpts.Elicitation }}{{ $usesContext = true }}{{ end }}
+{{- if $info.StreamProgress }}{{ $usesContext = true }}{{ end }}
 {{- end }}
     async fn call_tool(&self, request: CallToolRequestParams, {{ if $usesContext }}context{{ else }}_context{{ end }}: RequestContext<RoleServer>) -> std::result::Result<CallToolResponse, McpError> {
         let args = request.arguments.map_or_else(|| Value::Object(Default::default()), Value::Object);
         match request.name.as_ref() {
         {{- range $methName, $info := $methods }}
-        {{- if not $info.StreamProgress }}
             "{{ $info.ToolName }}" => {
 {{- if and $info.MethodOpts $info.MethodOpts.Elicitation }}
                 if let Ok(schema) = ElicitationSchema::from_json_schema(
@@ -228,10 +255,10 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
                         "type": "object",
                         "properties": {
                         {{- range $info.MethodOpts.Elicitation.Fields }}
-                            "{{ .Name }}": {"type": "{{ .Type }}", "description": "{{ .Description }}"{{ if .EnumValues }}, "enum": [{{ range .EnumValues }}"{{ . }}", {{ end }}]{{ end }}},
+                            "{{ .Name | rsEscape }}": {"type": "{{ .Type }}", "description": "{{ .Description | rsEscape }}"{{ if .EnumValues }}, "enum": [{{ range .EnumValues }}"{{ . }}", {{ end }}]{{ end }}},
                         {{- end }}
                         },
-                        "required": [{{ range $info.MethodOpts.Elicitation.Fields }}{{ if .Required }}"{{ .Name }}", {{ end }}{{ end }}]
+                        "required": [{{ range $info.MethodOpts.Elicitation.Fields }}{{ if .Required }}"{{ .Name | rsEscape }}", {{ end }}{{ end }}]
                     })).unwrap()
                 ) {
                     let params = ElicitRequestParams::FormElicitationParams {
@@ -247,12 +274,21 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
                     }
                 }
 {{- end }}
+{{- if $info.StreamProgress }}
+                // Progress notifications correlate through the token the client
+                // sent in _meta; without one the sink silently does nothing.
+                let sink = McpProgressSink::new(
+                    Some(context.peer.clone()),
+                    context.meta.get_progress_token(),
+                );
+                let result = self.inner.{{ $info.RsMethodName }}(args, sink).await?;
+{{- else }}
                 let result = self.inner.{{ $info.RsMethodName }}(args).await?;
+{{- end }}
                 let text = serde_json::to_string(&result)
                     .map_err(|e| McpError::internal_error(format!("serialize response: {e}"), None))?;
                 Ok(CallToolResult::success(vec![ContentBlock::text(text)]).into())
             }
-        {{- end }}
         {{- end }}
             _ => Err(McpError::internal_error(format!("unknown tool: {}", request.name), None)),
         }
@@ -395,7 +431,7 @@ pub async fn serve_{{ $svcName | snakeCase }}_mcp<T: {{ $svcName }}McpServer>(
                     "audience": [{{ range $i, $a := .Audience }}{{ if $i }}, {{ end }}"{{ $a }}"{{ end }}],
                     {{- end }}
                     {{- if .LastModified }}
-                    "lastModified": "{{ .LastModified }}",
+                    "lastModified": "{{ .LastModified | rsEscape }}",
                     {{- end }}
                     {{- if .HasPriority }}
                     "priority": {{ .Priority }}
@@ -405,7 +441,7 @@ pub async fn serve_{{ $svcName | snakeCase }}_mcp<T: {{ $svcName }}McpServer>(
 {{- if .Icons }}
                 "icons": [
                     {{- range .Icons }}
-                    {"src": "{{ .Src }}"{{ if .MimeType }}, "mimeType": "{{ .MimeType }}"{{ end }}{{ if .Sizes }}, "sizes": [{{ range $j, $s := .Sizes }}{{ if $j }}, {{ end }}"{{ $s }}"{{ end }}]{{ end }}{{ if .Theme }}, "theme": "{{ .Theme }}"{{ end }}},
+                    {"src": "{{ .Src | rsEscape }}"{{ if .MimeType }}, "mimeType": "{{ .MimeType | rsEscape }}"{{ end }}{{ if .Sizes }}, "sizes": [{{ range $j, $s := .Sizes }}{{ if $j }}, {{ end }}"{{ $s | rsEscape }}"{{ end }}]{{ end }}{{ if .Theme }}, "theme": "{{ .Theme | rsEscape }}"{{ end }}},
                     {{- end }}
                 ],
 {{- end }}

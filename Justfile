@@ -79,9 +79,9 @@ test-cover:
     go test -coverprofile=coverage.out ./...
     go tool cover -func=coverage.out
 
-# Run Rust check
+# Run Rust tests (covers the generated streaming/progress path via CounterService)
 test-rust:
-    cd examples/rust && cargo check --all-targets
+    cd examples/rust && cargo test
 
 # Run C++ example build (Make)
 test-cpp:

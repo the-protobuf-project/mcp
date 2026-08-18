@@ -7,6 +7,10 @@ rust-version = "1.93.0"
 [lib]
 name = "todo_mcp_example"
 path = "src/lib.rs"
+# The generated mcp module carries the proto's doc comments verbatim, and those
+# contain indented protobuf/JSON snippets that rustdoc parses as Rust doctests.
+# This crate documents nothing of its own, so there is no doctest to lose.
+doctest = false
 
 [[bin]]
 name = "http"

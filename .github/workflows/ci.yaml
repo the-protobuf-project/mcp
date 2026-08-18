@@ -76,6 +76,34 @@ jobs:
       - name: Bazel test
         run: bazel test //... --repo_env=ANDROID_HOME= --test_output=errors
 
+  cpp:
+    name: Build (C++)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@1.93.0
+      # The C++ server links a static library built from the generated Rust
+      # bridge, so this job needs both toolchains plus gRPC/protobuf headers.
+      # libgrpc++-dev pulls in libprotobuf-dev and the pkg-config files the
+      # Makefile probes for.
+      - name: Install gRPC and protobuf
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgrpc++-dev libprotobuf-dev protobuf-compiler-grpc pkg-config
+      - name: Cache cargo (Rust bridge)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            examples/proto/generated/cpp/rust/target
+          key: cpp-bridge-${{ hashFiles('examples/proto/generated/cpp/rust/Cargo.toml') }}
+          restore-keys: cpp-bridge-
+      - name: Make
+        working-directory: examples/cpp
+        run: make
+
   rust:
     name: Check (Rust)
     runs-on: blacksmith-4vcpu-ubuntu-2404

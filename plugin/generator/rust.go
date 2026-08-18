@@ -162,7 +162,7 @@ func (g *RustFileGenerator) buildRsParams() RsTplParams {
 			if svcOpt == nil {
 				svcOpt = &MCPServiceOpts{}
 			}
-			svcOpt.Resources = apiResources
+			svcOpt.Resources = mergeResources(svcOpt.Resources, apiResources)
 		}
 		serviceOpts[svcName] = svcOpt
 	}

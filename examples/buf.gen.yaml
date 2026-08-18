@@ -34,8 +34,13 @@ plugins:
       - lang=go
       - module=github.com/the-protobuf-project/mcp/examples/proto/generated/go
   # --- Rust ---
+  # include_imports emits the mcp package's Rust types alongside the examples'.
+  # CounterService's stream chunk holds an mcp.MCPProgress, and prost renders
+  # that as a path into a sibling `mcp` module — without this the generated
+  # counter code names a module that does not exist and cannot compile.
   - remote: buf.build/community/neoeinstein-prost
     out: proto/generated/rust
+    include_imports: true
   - remote: buf.build/community/neoeinstein-tonic
     out: proto/generated/rust
   - local: protoc-gen-mcp

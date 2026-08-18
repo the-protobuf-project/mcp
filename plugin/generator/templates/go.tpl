@@ -96,7 +96,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
 			elicitFields := []mcp.ElicitField{
 			{{- range $tool.MethodOpts.Elicitation.Fields }}
-				{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
+				{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
 			{{- end }}
 			}
 			if cfg.ElicitHook != nil {
@@ -219,7 +219,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
 			elicitFields := []mcp.ElicitField{
 			{{- range $tool.MethodOpts.Elicitation.Fields }}
-				{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
+				{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
 			{{- end }}
 			}
 			if cfg.ElicitHook != nil {
@@ -310,13 +310,13 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- range $svcOpts.Resources }}
 {{- if .URI }}
 	s.AddResource(&mcp.Resource{
-		URI:         "{{ .URI }}",
-		Name:        "{{ .Name }}",
+		URI:         "{{ escapeQuotes .URI }}",
+		Name:        "{{ escapeQuotes .Name }}",
 {{- if .Title }}
 		Title:       "{{ escapeQuotes .Title }}",
 {{- end }}
 		Description: "{{ escapeQuotes .Description }}",
-		MIMEType:    "{{ .MimeType }}",
+		MIMEType:    "{{ escapeQuotes .MimeType }}",
 {{- if .HasSize }}
 		Size:        {{ .Size }},
 {{- end }}
@@ -326,7 +326,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			Audience:     []mcp.Role{ {{- range .Audience }}"{{ . }}", {{ end }}},
 {{- end }}
 {{- if .LastModified }}
-			LastModified: "{{ .LastModified }}",
+			LastModified: "{{ escapeQuotes .LastModified }}",
 {{- end }}
 {{- if .HasPriority }}
 			Priority:     {{ .Priority }},
@@ -336,28 +336,28 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- if .Icons }}
 		Icons: []mcp.Icon{
 {{- range .Icons }}
-			{Source: "{{ .Src }}"{{ if .MimeType }}, MIMEType: "{{ .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ .Theme }}"{{ end }}},
+			{Source: "{{ escapeQuotes .Src }}"{{ if .MimeType }}, MIMEType: "{{ escapeQuotes .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ escapeQuotes . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ escapeQuotes .Theme }}"{{ end }}},
 {{- end }}
 		},
 {{- end }}
-	}, mcp.ResourceHandlerFor(cfg, "{{ .URI }}", mcp.DefaultResourceHandler()))
+	}, mcp.ResourceHandlerFor(cfg, "{{ escapeQuotes .URI }}", mcp.DefaultResourceHandler()))
 {{- end }}
 {{- if .URITemplate }}
 	s.AddResourceTemplate(&mcp.ResourceTemplate{
-		URITemplate: "{{ .URITemplate }}",
-		Name:        "{{ .Name }}",
+		URITemplate: "{{ escapeQuotes .URITemplate }}",
+		Name:        "{{ escapeQuotes .Name }}",
 {{- if .Title }}
 		Title:       "{{ escapeQuotes .Title }}",
 {{- end }}
 		Description: "{{ escapeQuotes .Description }}",
-		MIMEType:    "{{ .MimeType }}",
+		MIMEType:    "{{ escapeQuotes .MimeType }}",
 {{- with .Annotations }}
 		Annotations: &mcp.Annotations{
 {{- if .Audience }}
 			Audience:     []mcp.Role{ {{- range .Audience }}"{{ . }}", {{ end }}},
 {{- end }}
 {{- if .LastModified }}
-			LastModified: "{{ .LastModified }}",
+			LastModified: "{{ escapeQuotes .LastModified }}",
 {{- end }}
 {{- if .HasPriority }}
 			Priority:     {{ .Priority }},
@@ -367,11 +367,11 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- if .Icons }}
 		Icons: []mcp.Icon{
 {{- range .Icons }}
-			{Source: "{{ .Src }}"{{ if .MimeType }}, MIMEType: "{{ .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ .Theme }}"{{ end }}},
+			{Source: "{{ escapeQuotes .Src }}"{{ if .MimeType }}, MIMEType: "{{ escapeQuotes .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ escapeQuotes . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ escapeQuotes .Theme }}"{{ end }}},
 {{- end }}
 		},
 {{- end }}
-	}, mcp.ResourceHandlerFor(cfg, "{{ .URITemplate }}", mcp.DefaultResourceHandler()))
+	}, mcp.ResourceHandlerFor(cfg, "{{ escapeQuotes .URITemplate }}", mcp.DefaultResourceHandler()))
 {{- end }}
 {{- end }}
 {{- end }}
@@ -388,7 +388,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 		Description: "{{ $tool.MethodOpts.Prompt.Description }}",
 		Arguments: []*mcp.PromptArgument{
 		{{- range $tool.MethodOpts.Prompt.Arguments }}
-			{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
+			{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
 		{{- end }}
 		},
 	}, func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
@@ -496,7 +496,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
 			elicitFields := []mcp.ElicitField{
 			{{- range $tool.MethodOpts.Elicitation.Fields }}
-				{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
+				{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}, Type: "{{ .Type }}"{{- if .EnumValues }}, EnumValues: []string{ {{- range .EnumValues }}"{{ . }}", {{ end }}}{{- end }}{{- if .EnumProtoNames }}, ProtoValues: []string{ {{- range .EnumProtoNames }}"{{ . }}", {{ end }}}{{- end }}},
 			{{- end }}
 			}
 			if cfg.ElicitHook != nil {
@@ -614,13 +614,13 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- range $svcOpts.Resources }}
 {{- if .URI }}
 	s.AddResource(&mcp.Resource{
-		URI:         "{{ .URI }}",
-		Name:        "{{ .Name }}",
+		URI:         "{{ escapeQuotes .URI }}",
+		Name:        "{{ escapeQuotes .Name }}",
 {{- if .Title }}
 		Title:       "{{ escapeQuotes .Title }}",
 {{- end }}
 		Description: "{{ escapeQuotes .Description }}",
-		MIMEType:    "{{ .MimeType }}",
+		MIMEType:    "{{ escapeQuotes .MimeType }}",
 {{- if .HasSize }}
 		Size:        {{ .Size }},
 {{- end }}
@@ -630,7 +630,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 			Audience:     []mcp.Role{ {{- range .Audience }}"{{ . }}", {{ end }}},
 {{- end }}
 {{- if .LastModified }}
-			LastModified: "{{ .LastModified }}",
+			LastModified: "{{ escapeQuotes .LastModified }}",
 {{- end }}
 {{- if .HasPriority }}
 			Priority:     {{ .Priority }},
@@ -640,28 +640,28 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- if .Icons }}
 		Icons: []mcp.Icon{
 {{- range .Icons }}
-			{Source: "{{ .Src }}"{{ if .MimeType }}, MIMEType: "{{ .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ .Theme }}"{{ end }}},
+			{Source: "{{ escapeQuotes .Src }}"{{ if .MimeType }}, MIMEType: "{{ escapeQuotes .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ escapeQuotes . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ escapeQuotes .Theme }}"{{ end }}},
 {{- end }}
 		},
 {{- end }}
-	}, mcp.ResourceHandlerFor(cfg, "{{ .URI }}", mcp.DefaultResourceHandler()))
+	}, mcp.ResourceHandlerFor(cfg, "{{ escapeQuotes .URI }}", mcp.DefaultResourceHandler()))
 {{- end }}
 {{- if .URITemplate }}
 	s.AddResourceTemplate(&mcp.ResourceTemplate{
-		URITemplate: "{{ .URITemplate }}",
-		Name:        "{{ .Name }}",
+		URITemplate: "{{ escapeQuotes .URITemplate }}",
+		Name:        "{{ escapeQuotes .Name }}",
 {{- if .Title }}
 		Title:       "{{ escapeQuotes .Title }}",
 {{- end }}
 		Description: "{{ escapeQuotes .Description }}",
-		MIMEType:    "{{ .MimeType }}",
+		MIMEType:    "{{ escapeQuotes .MimeType }}",
 {{- with .Annotations }}
 		Annotations: &mcp.Annotations{
 {{- if .Audience }}
 			Audience:     []mcp.Role{ {{- range .Audience }}"{{ . }}", {{ end }}},
 {{- end }}
 {{- if .LastModified }}
-			LastModified: "{{ .LastModified }}",
+			LastModified: "{{ escapeQuotes .LastModified }}",
 {{- end }}
 {{- if .HasPriority }}
 			Priority:     {{ .Priority }},
@@ -671,11 +671,11 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- if .Icons }}
 		Icons: []mcp.Icon{
 {{- range .Icons }}
-			{Source: "{{ .Src }}"{{ if .MimeType }}, MIMEType: "{{ .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ .Theme }}"{{ end }}},
+			{Source: "{{ escapeQuotes .Src }}"{{ if .MimeType }}, MIMEType: "{{ escapeQuotes .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ escapeQuotes . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ escapeQuotes .Theme }}"{{ end }}},
 {{- end }}
 		},
 {{- end }}
-	}, mcp.ResourceHandlerFor(cfg, "{{ .URITemplate }}", mcp.DefaultResourceHandler()))
+	}, mcp.ResourceHandlerFor(cfg, "{{ escapeQuotes .URITemplate }}", mcp.DefaultResourceHandler()))
 {{- end }}
 {{- end }}
 {{- end }}
@@ -692,7 +692,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 		Description: "{{ $tool.MethodOpts.Prompt.Description }}",
 		Arguments: []*mcp.PromptArgument{
 		{{- range $tool.MethodOpts.Prompt.Arguments }}
-			{Name: "{{ .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
+			{Name: "{{ escapeQuotes .Name }}", Description: "{{ escapeQuotes .Description }}", Required: {{ .Required }}},
 		{{- end }}
 		},
 	}, func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {

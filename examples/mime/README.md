@@ -26,10 +26,15 @@ inline and offers the other as a download is `mime_type`. `readAsset` in
 [`main.go`](main.go) picks `ResourceContents.Text` or `.Blob` from
 `isTextual(mimeType)` and nothing else.
 
-**Metadata stays in the proto.** The example supplies only content, via
-`mcp.WithResourceHandler(uri, handler)`. Title, media type, size, annotations
-and icons are never restated in Go, so there is one source of truth for what a
-resource *is*.
+**Resource metadata stays in the proto.** The example supplies only content, via
+`mcp.WithResourceHandler(uri, handler)` — the title, media type, size,
+annotations and icons a client sees in `resources/list` come from the proto and
+are never restated in Go.
+
+The table in [`assets.go`](assets.go) does repeat each asset's title, URI and
+media type, but for a different surface: it backs the `list_assets` and
+`get_asset` *tool* responses, which are ordinary RPC payloads rather than
+resource registrations.
 
 **It is a free-form string, not an enum.** `text/csv` is in the gallery
 specifically because nothing in the schema enumerates it. See
@@ -46,7 +51,7 @@ what a client treats as an app UI rather than a document.
 
 ## Layout
 
-```
+```text
 proto/gallery/v1/     the schema — resources, tools, prompt
 content/              the bytes served for each asset
 gen/go|rust/          generated code (`just generate-mime`)
