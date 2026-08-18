@@ -110,9 +110,12 @@ jobs:
         run: |
           cd examples && buf export proto -o /tmp/proto_export
           cd ..
-          rm -rf examples/proto/generated/cpp/todo \
-                 examples/proto/generated/cpp/counter \
-                 examples/proto/generated/cpp/google \
+          # Only the dependency stubs are cleared. The service directories hold
+          # the committed *.mcp.cc/*.mcp.h alongside the *.pb.* files, and those
+          # come from protoc-gen-mcp, not protoc — deleting them here would
+          # leave the cxx bridge without the header it includes. protoc
+          # overwrites the *.pb.* files in place, so nothing else needs removing.
+          rm -rf examples/proto/generated/cpp/google \
                  examples/proto/generated/cpp/mcp
           protoc -I /tmp/proto_export \
             --cpp_out=examples/proto/generated/cpp \

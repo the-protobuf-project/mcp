@@ -94,7 +94,10 @@ test-all: test test-rust test-cpp
 generate-cpp:
     cd examples && buf export proto -o /tmp/proto_export
     mkdir -p examples/proto/generated/cpp
-    rm -rf examples/proto/generated/cpp/todo examples/proto/generated/cpp/google examples/proto/generated/cpp/mcp
+    # Only the dependency stubs are cleared: the service directories also hold
+    # the *.mcp.cc/*.mcp.h that protoc-gen-mcp produced, and protoc will not put
+    # them back. protoc overwrites the *.pb.* files in place.
+    rm -rf examples/proto/generated/cpp/google examples/proto/generated/cpp/mcp
     protoc -I /tmp/proto_export \
         --cpp_out=examples/proto/generated/cpp \
         --grpc_out=examples/proto/generated/cpp \
