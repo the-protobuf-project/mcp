@@ -4,6 +4,8 @@
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <google/protobuf/timestamp.pb.h>
 #include <iostream>
+#include <memory>
+#include <string>
 #include <thread>
 
 namespace todo {

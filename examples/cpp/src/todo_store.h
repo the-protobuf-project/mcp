@@ -1,12 +1,14 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace todo {
 namespace v1 {
