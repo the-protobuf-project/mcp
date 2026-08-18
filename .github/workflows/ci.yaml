@@ -137,7 +137,7 @@ jobs:
             /tmp/proto_export/todo/v1/*.proto \
             /tmp/proto_export/counter/v1/*.proto
       - name: Cache cargo (Rust bridge)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
