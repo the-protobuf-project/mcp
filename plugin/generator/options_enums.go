@@ -74,3 +74,26 @@ func elicitationMode(m mcppb.MCPElicitationMode, url string) string {
 		return elicitModeForm
 	}
 }
+
+// cacheScopeNames maps MCPCacheScope to the wire value. UNSPECIFIED maps to ""
+// so an undeclared scope stays absent rather than asserting "public".
+var cacheScopeNames = map[mcppb.MCPCacheScope]string{
+	mcppb.MCPCacheScope_MCP_CACHE_SCOPE_PUBLIC:  "public",
+	mcppb.MCPCacheScope_MCP_CACHE_SCOPE_PRIVATE: "private",
+}
+
+// cacheHint converts a declared hint for templates, or nil when none is set.
+//
+// The schema states the TTL as a Duration because it is an elapsed span; MCP
+// puts milliseconds on the wire, so the conversion happens here. Rounding is
+// toward zero, so a sub-millisecond TTL becomes 0 — immediately stale — rather
+// than being rounded up into a cache window the author did not ask for.
+func cacheHint(h *mcppb.MCPCacheHint) *MCPCacheOpts {
+	if h == nil {
+		return nil
+	}
+	return &MCPCacheOpts{
+		TTLMs: h.GetTtl().AsDuration().Milliseconds(),
+		Scope: cacheScopeNames[h.GetScope()],
+	}
+}

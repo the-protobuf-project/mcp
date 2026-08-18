@@ -124,7 +124,10 @@ type MCPResource struct {
 	// Optional annotations describing intended audience and priority.
 	Annotations *MCPAnnotations `protobuf:"bytes,8,opt,name=annotations,proto3,oneof" json:"annotations,omitempty"`
 	// Icons representing the resource in client UIs.
-	Icons         []*MCPIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
+	Icons []*MCPIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
+	// Cache hint for reading this resource, overriding the service default.
+	// A volatile resource can opt out of caching that its siblings allow.
+	Cache         *MCPCacheHint `protobuf:"bytes,10,opt,name=cache,proto3,oneof" json:"cache,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -233,6 +236,13 @@ func (x *MCPResource) GetIcons() []*MCPIcon {
 	return nil
 }
 
+func (x *MCPResource) GetCache() *MCPCacheHint {
+	if x != nil {
+		return x.Cache
+	}
+	return nil
+}
+
 type isMCPResource_UriOrPattern interface {
 	isMCPResource_UriOrPattern()
 }
@@ -256,13 +266,13 @@ var File_mcp_v1_resource_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_resource_proto_rawDesc = "" +
 	"\n" +
-	"\x15mcp/v1/resource.proto\x12\x06mcp.v1\x1a\x11mcp/v1/icon.proto\x1a\x13mcp/v1/prompt.proto\"\xa7\x01\n" +
+	"\x15mcp/v1/resource.proto\x12\x06mcp.v1\x1a\x12mcp/v1/cache.proto\x1a\x11mcp/v1/icon.proto\x1a\x13mcp/v1/prompt.proto\"\xa7\x01\n" +
 	"\x0eMCPAnnotations\x12+\n" +
 	"\baudience\x18\x01 \x03(\x0e2\x0f.mcp.v1.MCPRoleR\baudience\x12(\n" +
 	"\rlast_modified\x18\x02 \x01(\tH\x00R\flastModified\x88\x01\x01\x12\x1f\n" +
 	"\bpriority\x18\x03 \x01(\x01H\x01R\bpriority\x88\x01\x01B\x10\n" +
 	"\x0e_last_modifiedB\v\n" +
-	"\t_priority\"\xf0\x02\n" +
+	"\t_priority\"\xab\x03\n" +
 	"\vMCPResource\x12\x12\n" +
 	"\x03uri\x18\x01 \x01(\tH\x00R\x03uri\x12\x1a\n" +
 	"\apattern\x18\x02 \x01(\tH\x00R\apattern\x12\x0e\n" +
@@ -272,12 +282,15 @@ const file_mcp_v1_resource_proto_rawDesc = "" +
 	"\tmime_type\x18\x06 \x01(\tR\bmimeType\x12\x17\n" +
 	"\x04size\x18\a \x01(\x03H\x03R\x04size\x88\x01\x01\x12=\n" +
 	"\vannotations\x18\b \x01(\v2\x16.mcp.v1.MCPAnnotationsH\x04R\vannotations\x88\x01\x01\x12%\n" +
-	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\x10\n" +
+	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.MCPIconR\x05icons\x12/\n" +
+	"\x05cache\x18\n" +
+	" \x01(\v2\x14.mcp.v1.MCPCacheHintH\x05R\x05cache\x88\x01\x01B\x10\n" +
 	"\x0euri_or_patternB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\a\n" +
 	"\x05_sizeB\x0e\n" +
-	"\f_annotationsBQ\n" +
+	"\f_annotationsB\b\n" +
+	"\x06_cacheBQ\n" +
 	"\n" +
 	"com.mcp.v1B\rResourceProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
 
@@ -299,16 +312,18 @@ var file_mcp_v1_resource_proto_goTypes = []any{
 	(*MCPResource)(nil),    // 1: mcp.v1.MCPResource
 	(MCPRole)(0),           // 2: mcp.v1.MCPRole
 	(*MCPIcon)(nil),        // 3: mcp.v1.MCPIcon
+	(*MCPCacheHint)(nil),   // 4: mcp.v1.MCPCacheHint
 }
 var file_mcp_v1_resource_proto_depIdxs = []int32{
 	2, // 0: mcp.v1.MCPAnnotations.audience:type_name -> mcp.v1.MCPRole
 	0, // 1: mcp.v1.MCPResource.annotations:type_name -> mcp.v1.MCPAnnotations
 	3, // 2: mcp.v1.MCPResource.icons:type_name -> mcp.v1.MCPIcon
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 3: mcp.v1.MCPResource.cache:type_name -> mcp.v1.MCPCacheHint
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_mcp_v1_resource_proto_init() }
@@ -316,6 +331,7 @@ func file_mcp_v1_resource_proto_init() {
 	if File_mcp_v1_resource_proto != nil {
 		return
 	}
+	file_mcp_v1_cache_proto_init()
 	file_mcp_v1_icon_proto_init()
 	file_mcp_v1_prompt_proto_init()
 	file_mcp_v1_resource_proto_msgTypes[0].OneofWrappers = []any{}

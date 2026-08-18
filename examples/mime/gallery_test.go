@@ -352,3 +352,42 @@ func TestDisplayMetadataReachesTheClient(t *testing.T) {
 	}
 	t.Errorf("app resource %s missing", appURI)
 }
+
+// Protocol revision 2026-07-28 made list and read results cacheable. The hints
+// are only useful if they survive to the wire.
+func TestCacheHintsReachTheClient(t *testing.T) {
+	session, ctx := connect(t)
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+	if tools.TTLMs != 300000 {
+		t.Errorf("tools/list TTLMs = %d, want 300000", tools.TTLMs)
+	}
+	if tools.CacheScope != "public" {
+		t.Errorf("tools/list CacheScope = %q, want public", tools.CacheScope)
+	}
+
+	// A resource that opts out must not inherit the service-wide TTL, or a
+	// volatile response gets cached for five minutes.
+	volatile, err := session.ReadResource(ctx, &mcp.ReadResourceParams{URI: "gallery://data/downloads.csv"})
+	if err != nil {
+		t.Fatalf("ReadResource: %v", err)
+	}
+	if volatile.TTLMs != 0 {
+		t.Errorf("opted-out resource TTLMs = %d, want 0", volatile.TTLMs)
+	}
+	if volatile.CacheScope != "private" {
+		t.Errorf("opted-out resource CacheScope = %q, want private", volatile.CacheScope)
+	}
+
+	// One without its own hint still gets the service default.
+	stable, err := session.ReadResource(ctx, &mcp.ReadResourceParams{URI: "gallery://docs/overview.md"})
+	if err != nil {
+		t.Fatalf("ReadResource: %v", err)
+	}
+	if stable.TTLMs != 300000 {
+		t.Errorf("default resource TTLMs = %d, want 300000", stable.TTLMs)
+	}
+}

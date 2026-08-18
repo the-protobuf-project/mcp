@@ -27,7 +27,11 @@ type MCPServiceOptions struct {
 	// App-level metadata surfaced to MCP clients.
 	App *MCPApp `protobuf:"bytes,1,opt,name=app,proto3" json:"app,omitempty"`
 	// Resources exposed by this service.
-	Resources     []*MCPResource `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
+	Resources []*MCPResource `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
+	// Default cache hint for this service's list results — tools, prompts,
+	// resources and resource templates. A resource may override it for its own
+	// read via MCPResource.cache.
+	Cache         *MCPCacheHint `protobuf:"bytes,3,opt,name=cache,proto3,oneof" json:"cache,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -76,14 +80,23 @@ func (x *MCPServiceOptions) GetResources() []*MCPResource {
 	return nil
 }
 
+func (x *MCPServiceOptions) GetCache() *MCPCacheHint {
+	if x != nil {
+		return x.Cache
+	}
+	return nil
+}
+
 var File_mcp_v1_service_options_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_service_options_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmcp/v1/service_options.proto\x12\x06mcp.v1\x1a\x10mcp/v1/app.proto\x1a\x15mcp/v1/resource.proto\"h\n" +
+	"\x1cmcp/v1/service_options.proto\x12\x06mcp.v1\x1a\x10mcp/v1/app.proto\x1a\x12mcp/v1/cache.proto\x1a\x15mcp/v1/resource.proto\"\xa3\x01\n" +
 	"\x11MCPServiceOptions\x12 \n" +
 	"\x03app\x18\x01 \x01(\v2\x0e.mcp.v1.MCPAppR\x03app\x121\n" +
-	"\tresources\x18\x02 \x03(\v2\x13.mcp.v1.MCPResourceR\tresourcesBW\n" +
+	"\tresources\x18\x02 \x03(\v2\x13.mcp.v1.MCPResourceR\tresources\x12/\n" +
+	"\x05cache\x18\x03 \x01(\v2\x14.mcp.v1.MCPCacheHintH\x00R\x05cache\x88\x01\x01B\b\n" +
+	"\x06_cacheBW\n" +
 	"\n" +
 	"com.mcp.v1B\x13ServiceOptionsProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
 
@@ -104,15 +117,17 @@ var file_mcp_v1_service_options_proto_goTypes = []any{
 	(*MCPServiceOptions)(nil), // 0: mcp.v1.MCPServiceOptions
 	(*MCPApp)(nil),            // 1: mcp.v1.MCPApp
 	(*MCPResource)(nil),       // 2: mcp.v1.MCPResource
+	(*MCPCacheHint)(nil),      // 3: mcp.v1.MCPCacheHint
 }
 var file_mcp_v1_service_options_proto_depIdxs = []int32{
 	1, // 0: mcp.v1.MCPServiceOptions.app:type_name -> mcp.v1.MCPApp
 	2, // 1: mcp.v1.MCPServiceOptions.resources:type_name -> mcp.v1.MCPResource
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 2: mcp.v1.MCPServiceOptions.cache:type_name -> mcp.v1.MCPCacheHint
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_mcp_v1_service_options_proto_init() }
@@ -121,7 +136,9 @@ func file_mcp_v1_service_options_proto_init() {
 		return
 	}
 	file_mcp_v1_app_proto_init()
+	file_mcp_v1_cache_proto_init()
 	file_mcp_v1_resource_proto_init()
+	file_mcp_v1_service_options_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -26,6 +26,9 @@ service GalleryService {
         {src: "https://example.com/icons/gallery.svg" mime_type: "image/svg+xml" sizes: ["any"]}
       ]
     }
+    // The gallery's listings are identical for every caller and change only
+    // when the server is redeployed, so they are safe to share and cache.
+    cache: {ttl: {seconds: 300} scope: MCP_CACHE_SCOPE_PUBLIC}
     resources: [
       // Markdown — rendered as prose by clients that support it.
       {
@@ -86,6 +89,9 @@ service GalleryService {
       {
         uri: "gallery://data/downloads.csv"
         id: "downloads"
+        // Download counts move constantly, so this one opts out of the
+        // service-wide cache its siblings use.
+        cache: {scope: MCP_CACHE_SCOPE_PRIVATE}
         title: "Download counts"
         description: "Per-asset download counts as CSV"
         mime_type: "text/csv"

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package mcp.v1;
 
+import "mcp/v1/cache.proto";
 import "mcp/v1/icon.proto";
 import "mcp/v1/prompt.proto";
 
@@ -70,4 +71,8 @@ message MCPResource {
 
   // Icons representing the resource in client UIs.
   repeated MCPIcon icons = 9;
+
+  // Cache hint for reading this resource, overriding the service default.
+  // A volatile resource can opt out of caching that its siblings allow.
+  optional MCPCacheHint cache = 10;
 }

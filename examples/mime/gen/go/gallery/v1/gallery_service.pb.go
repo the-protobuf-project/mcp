@@ -26,7 +26,7 @@ var File_gallery_v1_gallery_service_proto protoreflect.FileDescriptor
 const file_gallery_v1_gallery_service_proto_rawDesc = "" +
 	"\n" +
 	" gallery/v1/gallery_service.proto\x12\n" +
-	"gallery.v1\x1a\x18gallery/v1/gallery.proto\x1a\x18mcp/v1/annotations.proto2\xbc\x0e\n" +
+	"gallery.v1\x1a\x18gallery/v1/gallery.proto\x1a\x18mcp/v1/annotations.proto2\xc9\x0e\n" +
 	"\x0eGalleryService\x12\xf0\x02\n" +
 	"\n" +
 	"ListAssets\x12\x1d.gallery.v1.ListAssetsRequest\x1a\x1e.gallery.v1.ListAssetsResponse\"\xa2\x02\xca\xf3\x18\x95\x01\n" +
@@ -34,8 +34,8 @@ const file_gallery_v1_gallery_service_proto_rawDesc = "" +
 	"\"https://example.com/icons/list.svg\x12\rimage/svg+xml \x01\xd2\xf3\x18\x83\x01\n" +
 	"\x11summarize_gallery\x127Summarise what the gallery holds, grouped by media type\x1a\x1cgallery.v1.ListAssetsRequest \x02*\x15Summarise the gallery\x12\x90\x01\n" +
 	"\bGetAsset\x12\x1b.gallery.v1.GetAssetRequest\x1a\x1c.gallery.v1.GetAssetResponse\"I\xca\xf3\x18E\n" +
-	"\tget_asset\x122Fetch a single asset's content and its media type. \x010\x018\x00\x1a\xa3\n" +
-	"\xc2\xf3\x18\x9e\n" +
+	"\tget_asset\x122Fetch a single asset's content and its media type. \x010\x018\x00\x1a\xb0\n" +
+	"\xc2\xf3\x18\xab\n" +
 	"\n" +
 	"\xc1\x01\n" +
 	"\rAsset Gallery\x12\x051.0.0\x1a<A gallery of assets served across the common MCP media types\"\x11The Asset Gallery*\x1bhttps://example.com/gallery2;\n" +
@@ -47,12 +47,13 @@ const file_gallery_v1_gallery_service_proto_rawDesc = "" +
 	"\x01\x01\x19\x9a\x99\x99\x99\x99\x99\xe9?\n" +
 	"\x1agallery://docs/report.html\x12\x82\x01\x1a\bmanifest\"\x0eAsset manifest*%Machine-readable index of every asset2\x10application/json8\xf6\x02B\f\n" +
 	"\x01\x02\x19333333\xe3?\n" +
-	"\x1cgallery://data/manifest.json\x12h\x1a\tdownloads\"\x0fDownload counts* Per-asset download counts as CSV2\btext/csv8v\n" +
+	"\x1cgallery://data/manifest.json\x12l\x1a\tdownloads\"\x0fDownload counts* Per-asset download counts as CSV2\btext/csv8vR\x02\x10\x02\n" +
 	"\x1cgallery://data/downloads.csv\x12\xcd\x01\x1a\x04logo\"\x19The Protobuf Project logo*3The project mark, 256x256, served as binary content2\timage/png8\x9bOB\f\n" +
 	"\x01\x01\x19\x00\x00\x00\x00\x00\x00\xe0?J>\n" +
 	"#https://example.com/icons/image.png\x12\timage/png\x1a\x0548x48\x1a\x0596x96\n" +
 	"\x19gallery://images/logo.png\x12\x84\x01\x1a\x04spec\"\x14Format specification*9A PDF a client will offer for download rather than inline2\x0fapplication/pdf8\xfa\x04\n" +
-	"\x17gallery://docs/spec.pdf\x12y\x1a\x05asset\"\x11Any gallery asset*)Template matching any asset by identifier2\x18application/octet-stream\x12\x18gallery://assets/{asset}BOZMgithub.com/the-protobuf-project/mcp/examples/mime/gen/go/gallery/v1;galleryv1b\x06proto3"
+	"\x17gallery://docs/spec.pdf\x12y\x1a\x05asset\"\x11Any gallery asset*)Template matching any asset by identifier2\x18application/octet-stream\x12\x18gallery://assets/{asset}\x1a\a\n" +
+	"\x03\b\xac\x02\x10\x01BOZMgithub.com/the-protobuf-project/mcp/examples/mime/gen/go/gallery/v1;galleryv1b\x06proto3"
 
 var file_gallery_v1_gallery_service_proto_goTypes = []any{
 	(*ListAssetsRequest)(nil),  // 0: gallery.v1.ListAssetsRequest

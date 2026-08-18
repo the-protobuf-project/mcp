@@ -481,6 +481,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- end }}
 	}, mcp.ResourceHandlerFor(cfg, appResourceURI, mcp.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}")))
 {{- end }}
+{{- template "goCacheHints" $svcOpts }}
 }
 {{- end }}
 
@@ -797,6 +798,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- end }}
 	}, mcp.ResourceHandlerFor(cfg, appResourceURI, mcp.DefaultAppResourceHandler("{{ escapeQuotes $svcOpts.App.Name }}", "{{ $svcOpts.App.Version }}", "{{ escapeQuotes $svcOpts.App.Description }}")))
 {{- end }}
+{{- template "goCacheHints" $svcOpts }}
 }
 {{- end }}
 
@@ -804,5 +806,34 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- if . }}[]mcp.Icon{
 {{- range . }}{Source: "{{ escapeQuotes .Src }}"{{ if .MimeType }}, MIMEType: "{{ escapeQuotes .MimeType }}"{{ end }}{{ if .Sizes }}, Sizes: []string{ {{- range .Sizes }}"{{ escapeQuotes . }}", {{ end }}}{{ end }}{{ if .Theme }}, Theme: "{{ escapeQuotes .Theme }}"{{ end }}}, {{ end }}}
 {{- else }}nil
+{{- end }}
+{{- end }}
+
+{{- define "goCacheHints" }}
+{{- if . }}
+{{- /* A read is addressed by concrete URI, so only a fixed resource can carry
+       its own hint; a template's matches fall back to the service default. */}}
+{{- $resourceHints := false }}
+{{- range .Resources }}{{ if and .Cache .URI }}{{ $resourceHints = true }}{{ end }}{{ end }}
+{{- if or .Cache $resourceHints }}
+
+	// Protocol revision 2026-07-28 made list and read results cacheable. The SDK
+	// builds those results itself, so the hints are stamped on by middleware.
+	mcp.ApplyCacheHints(s, mcp.CacheHints{
+{{- with .Cache }}
+		List: &mcp.CacheHint{TTLMs: {{ .TTLMs }}, Scope: "{{ .Scope }}"},
+{{- end }}
+{{- if $resourceHints }}
+		Resources: map[string]mcp.CacheHint{
+{{- range .Resources }}
+{{- $uri := .URI }}
+{{- if and .Cache $uri }}
+			"{{ escapeQuotes $uri }}": {TTLMs: {{ .Cache.TTLMs }}, Scope: "{{ .Cache.Scope }}"},
+{{- end }}
+{{- end }}
+		},
+{{- end }}
+	})
+{{- end }}
 {{- end }}
 {{- end }}

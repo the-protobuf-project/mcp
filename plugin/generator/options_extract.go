@@ -27,6 +27,7 @@ func ExtractServiceOptions(svc *protogen.Service) *MCPServiceOpts {
 			Icons:       convertIcons(app.GetIcons()),
 		}
 	}
+	result.Cache = cacheHint(ext.GetCache())
 	for _, res := range ext.GetResources() {
 		result.Resources = append(result.Resources, convertResource(res))
 	}
@@ -63,6 +64,7 @@ func convertResource(res *mcppb.MCPResource) MCPResourceOpts {
 		out.Annotations = converted
 	}
 	out.Icons = convertIcons(res.GetIcons())
+	out.Cache = cacheHint(res.GetCache())
 	return out
 }
 

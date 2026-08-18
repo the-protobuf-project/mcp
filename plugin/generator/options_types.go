@@ -4,6 +4,15 @@ package generator
 type MCPServiceOpts struct {
 	App       *MCPAppOpts
 	Resources []MCPResourceOpts
+	// Cache is the service-wide hint for list results, nil when undeclared.
+	Cache *MCPCacheOpts
+}
+
+// MCPCacheOpts mirrors MCPCacheHint for templates.
+type MCPCacheOpts struct {
+	TTLMs int64
+	// Scope is "public", "private", or "" when unstated.
+	Scope string
 }
 
 // MCPMethodOpts is the language-neutral view of per-RPC MCP options for templates.
@@ -82,6 +91,8 @@ type MCPResourceOpts struct {
 	HasSize     bool
 	Annotations *MCPAnnotationsOpts
 	Icons       []MCPIconOpts
+	// Cache overrides the service hint for this resource's read.
+	Cache *MCPCacheOpts
 }
 
 // MCPAnnotationsOpts mirrors MCPAnnotations for templates.
