@@ -15,16 +15,24 @@ fn main() {
     build.warnings(false);
     build.flag_if_supported("-Wno-deprecated-declarations");
 
-    for entry in glob::glob(&format!("{gen_root}/**/*.pb.cc")).expect("glob") {
-        if let Ok(path) = entry {
-            let path_str = path.to_string_lossy();
-            let is_grpc = path_str.ends_with(".grpc.pb.cc");
-            // Only compile gRPC implementation files for service protos.
-            // Many support protos generate empty *.grpc.pb.cc units and trigger ranlib "no symbols" warnings.
-            let keep = !is_grpc || path_str.ends_with("_service.grpc.pb.cc");
-            if keep {
-                build.file(&path);
-            }
+    // The crate (and usually its target dir) lives inside gen_root, and
+    // cxx-build leaves a symlink from each OUT_DIR back to the crate. A
+    // symlink-following glob therefore recurses through every OUT_DIR in the
+    // target dir, which grows exponentially once a restored cache holds more
+    // than one. Walk without following symlinks and skip the crate itself.
+    let mut pb_cc = Vec::new();
+    let gen_root_dir = std::fs::canonicalize(&gen_root).expect("canonicalize gen_root");
+    let crate_dir = std::fs::canonicalize(&manifest_dir).expect("canonicalize manifest dir");
+    collect_pb_cc(&gen_root_dir, &crate_dir, &mut pb_cc);
+    pb_cc.sort();
+    for path in pb_cc {
+        let path_str = path.to_string_lossy();
+        let is_grpc = path_str.ends_with(".grpc.pb.cc");
+        // Only compile gRPC implementation files for service protos.
+        // Many support protos generate empty *.grpc.pb.cc units and trigger ranlib "no symbols" warnings.
+        let keep = !is_grpc || path_str.ends_with("_service.grpc.pb.cc");
+        if keep {
+            build.file(&path);
         }
     }
 
@@ -60,6 +68,26 @@ fn main() {
 
     println!("cargo:rerun-if-changed=lib.rs");
     println!("cargo:rerun-if-changed=mcp_handler.rs");
+}
+
+fn collect_pb_cc(dir: &std::path::Path, skip: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        // file_type() does not follow symlinks, so symlinked dirs are never entered.
+        let Ok(ty) = entry.file_type() else {
+            continue;
+        };
+        if ty.is_dir() {
+            if path != skip {
+                collect_pb_cc(&path, skip, out);
+            }
+        } else if ty.is_file() && path.to_string_lossy().ends_with(".pb.cc") {
+            out.push(path);
+        }
+    }
 }
 
 fn copy_dir_all(src: &str, dst: &str) -> std::io::Result<()> {

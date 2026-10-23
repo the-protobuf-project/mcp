@@ -24,5 +24,4 @@ tokio = { version = "1", features = ["full"] }
 
 [build-dependencies]
 cxx-build = "1"
-glob = "0.3"
 pkg-config = "0.3"

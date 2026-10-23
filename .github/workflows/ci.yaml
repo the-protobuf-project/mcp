@@ -90,6 +90,10 @@ jobs:
   cpp:
     name: Build (C++)
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    # A green build takes ~2 minutes. Without a cap, a hung build script sits
+    # until GitHub's 6-hour default, which is how a recursive glob in build.rs
+    # went unnoticed for two months.
+    timeout-minutes: 20
     steps:
       # This job only compiles: make, cargo and protoc need no Git
       # authentication, so the checkout token is not persisted into the
@@ -143,7 +147,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             examples/proto/generated/cpp/rust/target
-          key: cpp-bridge-${{ hashFiles('examples/proto/generated/cpp/rust/Cargo.toml') }}
+          # Cargo.lock is part of the key so a dependency bump saves a fresh
+          # cache instead of every later run rebuilding on top of a stale one.
+          key: cpp-bridge-${{ hashFiles('examples/proto/generated/cpp/rust/Cargo.toml', 'examples/proto/generated/cpp/rust/Cargo.lock') }}
           restore-keys: cpp-bridge-
       - name: Make
         working-directory: examples/cpp
