@@ -46,10 +46,48 @@ func isFieldRequired(fd protoreflect.FieldDescriptor) bool {
 	return false
 }
 
+// walk is one schema walk's state: the message types open on the current
+// branch (see messageSchemaPath), and whether the schema describes a tool's
+// input -- what a caller sends, which leaves out the fields a server sets.
+type walk struct {
+	open  map[protoreflect.FullName]bool
+	input bool
+}
+
 // messageSchema converts a protobuf message descriptor into a JSON Schema map.
 // If schemaDesc is non-empty, it is set as the root-level description (per MCP inputSchema convention).
 func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string) map[string]any {
-	return messageSchemaPath(md, openAI, schemaDesc, map[protoreflect.FullName]bool{})
+	return messageSchemaPath(md, openAI, schemaDesc, &walk{open: map[protoreflect.FullName]bool{}})
+}
+
+// inputSchema is messageSchema for a tool's input: OUTPUT_ONLY fields -- a
+// name, an etag, a state, the timestamps a server sets -- are left out at any
+// depth, since a caller sending them is ignored or refused. A resource name is
+// often OUTPUT_ONLY on create yet the identifier elsewhere; it is left out
+// only where its own field says OUTPUT_ONLY.
+func inputSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string) map[string]any {
+	return messageSchemaPath(md, openAI, schemaDesc, &walk{open: map[protoreflect.FullName]bool{}, input: true})
+}
+
+// isOutputOnly reports a field the server sets: google.api.field_behavior
+// OUTPUT_ONLY.
+func isOutputOnly(fd protoreflect.FieldDescriptor) bool {
+	if !proto.HasExtension(fd.Options(), annotations.E_FieldBehavior) {
+		return false
+	}
+	for _, b := range proto.GetExtension(fd.Options(), annotations.E_FieldBehavior).([]annotations.FieldBehavior) {
+		if b == annotations.FieldBehavior_OUTPUT_ONLY {
+			return true
+		}
+	}
+	return false
+}
+
+// fieldComment is fd's leading comment, cleaned, when the descriptor carries
+// its source (a generator's always does), for a field without (mcp.field).
+func fieldComment(fd protoreflect.FieldDescriptor) string {
+	loc := fd.ParentFile().SourceLocations().ByDescriptor(fd)
+	return CleanComment(loc.LeadingComments)
 }
 
 // messageSchemaPath is messageSchema carrying the set of message types already
@@ -60,8 +98,8 @@ func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc st
 // out. JSON Schema cannot express an infinitely nested object literally, so at
 // the point the cycle closes the walk stops and emits a permissive object,
 // which is true (the value is an object) without claiming to enumerate it.
-func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string, path map[protoreflect.FullName]bool) map[string]any {
-	if path[md.FullName()] {
+func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string, w *walk) map[string]any {
+	if w.open[md.FullName()] {
 		return map[string]any{
 			"type":                 "object",
 			"additionalProperties": true,
@@ -69,22 +107,25 @@ func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDes
 				"Recursive reference to %s; nested occurrences are not expanded.", md.FullName()),
 		}
 	}
-	path[md.FullName()] = true
-	defer delete(path, md.FullName())
+	w.open[md.FullName()] = true
+	defer delete(w.open, md.FullName())
 
 	required, props := []string{}, map[string]any{}
 	oneOfGroups := map[string][]map[string]any{}
 	for i := 0; i < md.Fields().Len(); i++ {
 		fd := md.Fields().Get(i)
+		if w.input && isOutputOnly(fd) {
+			continue
+		}
 		name := string(fd.Name())
 		if oo := fd.ContainingOneof(); oo != nil && !oo.IsSynthetic() {
 			if !openAI {
 				key := string(oo.Name())
 				oneOfGroups[key] = append(oneOfGroups[key], map[string]any{
-					"properties": map[string]any{name: fieldSchemaPath(fd, openAI, path)}, "required": []string{name},
+					"properties": map[string]any{name: fieldSchemaPath(fd, openAI, w)}, "required": []string{name},
 				})
 			} else {
-				s := fieldSchemaPath(fd, openAI, path)
+				s := fieldSchemaPath(fd, openAI, w)
 				if t, ok := s["type"].(string); ok {
 					s["type"] = []string{t, "null"}
 				}
@@ -93,7 +134,7 @@ func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDes
 				required = append(required, name)
 			}
 		} else {
-			props[name] = fieldSchemaPath(fd, openAI, path)
+			props[name] = fieldSchemaPath(fd, openAI, w)
 			if isFieldRequired(fd) || openAI {
 				required = append(required, name)
 			}
@@ -189,9 +230,9 @@ func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any
 // fieldSchemaPath converts a single protobuf field descriptor to a JSON Schema
 // map, carrying the set of message types already open on this branch so a
 // recursive field can be cut rather than followed.
-func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, path map[protoreflect.FullName]bool) map[string]any {
+func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, w *walk) map[string]any {
 	if fd.IsMap() {
-		schema := mapSchemaPath(fd, openAI, path)
+		schema := mapSchemaPath(fd, openAI, w)
 		if !openAI {
 			applyContainerRules(fd, schema, false)
 		}
@@ -200,7 +241,7 @@ func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, path map[prot
 	var schema map[string]any
 	switch fd.Kind() {
 	case protoreflect.MessageKind:
-		schema = messageFieldSchemaPath(fd, openAI, path)
+		schema = messageFieldSchemaPath(fd, openAI, w)
 	case protoreflect.EnumKind:
 		schema = enumSchema(fd)
 	default:
@@ -208,11 +249,11 @@ func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, path map[prot
 	}
 	if !fd.IsList() {
 		applyValidateRules(fd, schema, openAI)
-		applyMCPFieldOptions(fd, schema, "")
+		applyMCPFieldOptions(fd, schema, fieldComment(fd))
 		return schema
 	}
 	applyRules(fd, itemRules(fd), schema, openAI)
-	applyMCPFieldOptions(fd, schema, "")
+	applyMCPFieldOptions(fd, schema, fieldComment(fd))
 	array := map[string]any{"type": "array", "items": schema}
 	applyContainerRules(fd, array, openAI)
 	return array

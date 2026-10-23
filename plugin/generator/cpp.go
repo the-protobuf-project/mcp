@@ -145,7 +145,7 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 			}
 
 			// Standard schema (root description = tool description, per MCP inputSchema convention)
-			stdSchema := messageSchema(meth.Input.Desc, false, desc)
+			stdSchema := inputSchema(meth.Input.Desc, false, desc)
 			stdBytes, err := json.Marshal(stdSchema)
 			if err != nil {
 				panic(fmt.Sprintf("marshal standard schema: %v", err))

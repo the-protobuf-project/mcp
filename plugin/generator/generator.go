@@ -209,7 +209,7 @@ func (g *FileGenerator) buildParams() TplParams {
 			}
 
 			// Standard schema (root description = tool description, per MCP inputSchema convention)
-			stdSchema := messageSchema(meth.Input.Desc, false, toolDesc)
+			stdSchema := inputSchema(meth.Input.Desc, false, toolDesc)
 			stdBytes, err := json.Marshal(stdSchema)
 			if err != nil {
 				panic(fmt.Sprintf("marshal standard schema: %v", err))
