@@ -506,6 +506,7 @@ The tool's `inputSchema` is derived from the protobuf request message:
   - enum: `const`, `in`, `not_in` narrow the listed values; bool: `const`
   - repeated: `min_items`, `max_items`, `unique`, and `items` rules on each element; map: `min_pairs`, `max_pairs` → `minProperties`, `maxProperties`
   - `IGNORE_IF_ZERO_VALUE` keeps the zero value valid through `anyOf`; `IGNORE_ALWAYS` drops the field's rules
+  - In an input schema, a message, repeated message or message map field with `IGNORE_ALWAYS` — typically the resource of an AIP-134 partial update — also drops everything beneath it: no `buf.validate` keywords and no `required`, not even from REQUIRED `field_behavior`. The field's own `required` is unchanged
   - CEL expressions, predefined rules, 64-bit integer bounds (JSON strings) and exclusive-outside ranges (`gt` > `lt`) are left to server-side validation
   - OpenAI-compatible schemas keep only the strict Structured Outputs subset: `const` becomes a one-value `enum`; `minLength`, `maxLength`, `uniqueItems` and unsupported formats are dropped; `IGNORE_IF_ZERO_VALUE` fields stay unconstrained
 - Well-known types (Timestamp, Duration, FieldMask, Struct, Any, wrappers) → appropriate JSON Schema

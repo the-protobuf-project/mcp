@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	mcppb "github.com/the-protobuf-project/mcp/protobuf/mcppb"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
@@ -47,11 +48,14 @@ func isFieldRequired(fd protoreflect.FieldDescriptor) bool {
 }
 
 // walk is one schema walk's state: the message types open on the current
-// branch (see messageSchemaPath), and whether the schema describes a tool's
-// input -- what a caller sends, which leaves out the fields a server sets.
+// branch (see messageSchemaPath), whether the schema describes a tool's
+// input -- what a caller sends, which leaves out the fields a server sets --
+// and whether the walk is beneath an input field whose rules are switched off
+// with IGNORE_ALWAYS (see unruledInput).
 type walk struct {
-	open  map[protoreflect.FullName]bool
-	input bool
+	open    map[protoreflect.FullName]bool
+	input   bool
+	unruled bool
 }
 
 // messageSchema converts a protobuf message descriptor into a JSON Schema map.
@@ -135,7 +139,7 @@ func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDes
 			}
 		} else {
 			props[name] = fieldSchemaPath(fd, openAI, w)
-			if isFieldRequired(fd) || openAI {
+			if (isFieldRequired(fd) && !w.unruled) || openAI {
 				required = append(required, name)
 			}
 		}
@@ -231,9 +235,13 @@ func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any
 // map, carrying the set of message types already open on this branch so a
 // recursive field can be cut rather than followed.
 func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, w *walk) map[string]any {
+	if !w.unruled && unruledInput(fd, w) {
+		w.unruled = true
+		defer func() { w.unruled = false }()
+	}
 	if fd.IsMap() {
 		schema := mapSchemaPath(fd, openAI, w)
-		if !openAI {
+		if !openAI && !w.unruled {
 			applyContainerRules(fd, schema, false)
 		}
 		return schema
@@ -248,15 +256,48 @@ func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, w *walk) map[
 		schema = scalarSchema(fd, openAI)
 	}
 	if !fd.IsList() {
-		applyValidateRules(fd, schema, openAI)
+		if !w.unruled {
+			applyValidateRules(fd, schema, openAI)
+		}
 		applyMCPFieldOptions(fd, schema, fieldComment(fd))
 		return schema
 	}
-	applyRules(fd, itemRules(fd), schema, openAI)
+	if !w.unruled {
+		applyRules(fd, itemRules(fd), schema, openAI)
+	}
 	applyMCPFieldOptions(fd, schema, fieldComment(fd))
 	array := map[string]any{"type": "array", "items": schema}
-	applyContainerRules(fd, array, openAI)
+	if !w.unruled {
+		applyContainerRules(fd, array, openAI)
+	}
 	return array
+}
+
+// unruledInput reports an input field of message type -- singular, repeated
+// or a map of messages -- carrying (buf.validate.field).ignore = IGNORE_ALWAYS.
+//
+// protovalidate then checks nothing on the field or inside the message it
+// holds, so the message's own contract is not this request's: the canonical
+// case is an AIP-134 Update, whose resource carries only the fields the mask
+// names and so cannot be held to what a create must send. Beneath such a
+// field the schema states no buf.validate keyword and no required field --
+// neither (buf.validate.field).required nor google.api.field_behavior
+// REQUIRED, which describes the resource, not this partial copy of it. The
+// field's own required-ness is unchanged: it is decided by the enclosing
+// message.
+func unruledInput(fd protoreflect.FieldDescriptor, w *walk) bool {
+	if !w.input || !proto.HasExtension(fd.Options(), validate.E_Field) {
+		return false
+	}
+	value := fd
+	if fd.IsMap() {
+		value = fd.MapValue()
+	}
+	if value.Kind() != protoreflect.MessageKind {
+		return false
+	}
+	rules, _ := proto.GetExtension(fd.Options(), validate.E_Field).(*validate.FieldRules)
+	return rules.GetIgnore() == validate.Ignore_IGNORE_ALWAYS
 }
 
 // enumDescriptions holds enum-level and per-value descriptions for schema output.
