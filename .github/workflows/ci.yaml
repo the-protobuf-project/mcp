@@ -70,7 +70,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           # Cache the bazelisk download, the repository cache (external deps),
           # and the disk cache (build outputs) keyed per workflow.
