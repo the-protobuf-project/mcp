@@ -4,7 +4,6 @@
 package generator
 
 import (
-	"strings"
 	"testing"
 
 	"google.golang.org/protobuf/proto"
@@ -73,13 +72,15 @@ func TestMessageSchemaHandlesDirectRecursion(t *testing.T) {
 	if !ok {
 		t.Fatalf("children has no items: %v", children)
 	}
-	// The cycle must be cut with something honest rather than expanded.
-	desc, _ := items["description"].(string)
-	if !strings.Contains(desc, "Recursive reference") {
-		t.Errorf("recursive field was expanded or unlabelled: %v", items)
+	// The cycle is closed by a reference rather than expanded: Node is
+	// written once under $defs, and refers to itself there.
+	if items["$ref"] != "#/$defs/recursion.v1.Node" {
+		t.Fatalf("recursive field is not a $ref to Node: %v", items)
 	}
-	if items["type"] != "object" {
-		t.Errorf("recursive cut-off type = %v, want object", items["type"])
+	def := deref(schema, items)
+	inner := def["properties"].(map[string]any)["children"].(map[string]any)["items"].(map[string]any)
+	if inner["$ref"] != "#/$defs/recursion.v1.Node" {
+		t.Errorf("Node's definition does not refer to itself: %v", inner)
 	}
 }
 
@@ -104,7 +105,8 @@ func TestMessageSchemaHandlesMutualRecursion(t *testing.T) {
 }
 
 // A message reachable twice by different paths is not a cycle, and must still be
-// expanded both times rather than being suppressed as if it were one.
+// described in full at both -- once, under $defs, that both refer to --
+// rather than being suppressed as if it were one.
 func TestMessageSchemaExpandsRepeatedNonCyclicUse(t *testing.T) {
 	root := buildMessage(t,
 		&descriptorpb.DescriptorProto{
@@ -125,13 +127,14 @@ func TestMessageSchemaExpandsRepeatedNonCyclicUse(t *testing.T) {
 		},
 	)
 
-	props := messageSchema(root, false, "")["properties"].(map[string]any)
+	schema := messageSchema(root, false, "")
+	props := schema["properties"].(map[string]any)
 	for _, side := range []string{"left", "right"} {
 		leaf, ok := props[side].(map[string]any)
 		if !ok {
 			t.Fatalf("%s missing: %v", side, props)
 		}
-		sub, ok := leaf["properties"].(map[string]any)
+		sub, ok := deref(schema, leaf)["properties"].(map[string]any)
 		if !ok || sub["value"] == nil {
 			t.Errorf("%s was not expanded, but it is not part of a cycle: %v", side, leaf)
 		}

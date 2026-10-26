@@ -139,24 +139,26 @@ func TestInputSchemaIgnoreAlwaysDropsNestedRules(t *testing.T) {
 	props := in["properties"].(map[string]any)
 	reservation := props["reservation"].(map[string]any)
 	unruled := `{"properties":{"hold":{"type":"string"},"slot":{"properties":{"id":{"type":"string"}},"required":[],"type":"object"},"tags":{"items":{"type":"string"},"type":"array"}},"required":[],"type":"object"}`
-	if got := asJSON(reservation); got != unruled {
+	if got := asJSON(deref(in, reservation)); got != unruled {
 		t.Errorf("IGNORE_ALWAYS reservation = %s, want %s", got, unruled)
 	}
-	if got := asJSON(props["history"].(map[string]any)["items"]); got != unruled {
+	if got := asJSON(deref(in, props["history"].(map[string]any)["items"].(map[string]any))); got != unruled {
 		t.Errorf("IGNORE_ALWAYS repeated items = %s, want %s", got, unruled)
 	}
-	if got := asJSON(props["by_key"].(map[string]any)["additionalProperties"]); got != unruled {
+	if got := asJSON(deref(in, props["by_key"].(map[string]any)["additionalProperties"].(map[string]any))); got != unruled {
 		t.Errorf("IGNORE_ALWAYS map values = %s, want %s", got, unruled)
 	}
 	ruled := `{"properties":{"hold":{"pattern":"^holds/[^/]+$","type":"string"},"slot":{"properties":{"id":{"type":"string"}},"required":["id"],"type":"object"},"tags":{"items":{"type":"string"},"minItems":1,"type":"array"}},"required":["hold","slot"],"type":"object"}`
-	if got := asJSON(props["original"]); got != ruled {
+	if got := asJSON(deref(in, props["original"].(map[string]any))); got != ruled {
 		t.Errorf("ruled reservation = %s, want %s", got, ruled)
 	}
-	if got := asJSON(messageSchema(md, false, "")["properties"].(map[string]any)["reservation"]); got != ruled {
+	out := messageSchema(md, false, "")
+	if got := asJSON(deref(out, out["properties"].(map[string]any)["reservation"].(map[string]any))); got != ruled {
 		t.Errorf("output reservation = %s, want %s", got, ruled)
 	}
 	// OpenAI strict mode lists every property as required whatever the rules.
-	strict := inputSchema(md, true, "")["properties"].(map[string]any)["reservation"].(map[string]any)
+	strictRoot := inputSchema(md, true, "")
+	strict := deref(strictRoot, strictRoot["properties"].(map[string]any)["reservation"].(map[string]any))
 	if got, want := asJSON(strict["required"]), `["hold","slot","tags"]`; got != want {
 		t.Errorf("OpenAI reservation required = %s, want %s", got, want)
 	}

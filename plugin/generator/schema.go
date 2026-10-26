@@ -50,18 +50,21 @@ func isFieldRequired(fd protoreflect.FieldDescriptor) bool {
 // walk is one schema walk's state: the message types open on the current
 // branch (see messageSchemaPath), whether the schema describes a tool's
 // input -- what a caller sends, which leaves out the fields a server sets --
-// and whether the walk is beneath an input field whose rules are switched off
-// with IGNORE_ALWAYS (see unruledInput).
+// whether the walk is beneath an input field whose rules are switched off
+// with IGNORE_ALWAYS (see unruledInput), and the messages written once under
+// the root's $defs (see schema_defs.go): which ones, and those written so far.
 type walk struct {
 	open    map[protoreflect.FullName]bool
 	input   bool
 	unruled bool
+	shared  map[defKey]bool
+	defs    map[string]any
 }
 
 // messageSchema converts a protobuf message descriptor into a JSON Schema map.
 // If schemaDesc is non-empty, it is set as the root-level description (per MCP inputSchema convention).
 func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string) map[string]any {
-	return messageSchemaPath(md, openAI, schemaDesc, &walk{open: map[protoreflect.FullName]bool{}})
+	return rootSchema(md, openAI, schemaDesc, false)
 }
 
 // inputSchema is messageSchema for a tool's input: OUTPUT_ONLY fields -- a
@@ -70,7 +73,38 @@ func messageSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc st
 // often OUTPUT_ONLY on create yet the identifier elsewhere; it is left out
 // only where its own field says OUTPUT_ONLY.
 func inputSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string) map[string]any {
-	return messageSchemaPath(md, openAI, schemaDesc, &walk{open: map[protoreflect.FullName]bool{}, input: true})
+	return rootSchema(md, openAI, schemaDesc, true)
+}
+
+// rootSchema is md's schema, inline at the root, with the messages it shares
+// among its fields under $defs.
+func rootSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string, input bool) map[string]any {
+	w := &walk{open: map[protoreflect.FullName]bool{}, input: input, shared: sharedDefs(md, input), defs: map[string]any{}}
+	schema := messageSchemaPath(md, openAI, schemaDesc, w)
+	if len(w.defs) > 0 {
+		schema["$defs"] = w.defs
+	}
+	return schema
+}
+
+// sharedRef is the $ref to md as the walk renders it here, writing its
+// definition first if this is its first use; ok is false for a message
+// rendered inline.
+func sharedRef(md protoreflect.MessageDescriptor, openAI bool, w *walk) (map[string]any, bool) {
+	k := defKey{name: md.FullName(), unruled: w.unruled}
+	if !w.shared[k] {
+		return nil, false
+	}
+	if _, done := w.defs[k.ref()]; !done {
+		w.defs[k.ref()] = nil // claimed: a cycle back to md refers rather than recurses
+		// A definition renders whole wherever it is first reached: the
+		// branch's open set is not its own.
+		open := w.open
+		w.open = map[protoreflect.FullName]bool{}
+		w.defs[k.ref()] = messageSchemaPath(md, openAI, "", w)
+		w.open = open
+	}
+	return map[string]any{"$ref": "#/$defs/" + k.ref()}, true
 }
 
 // isOutputOnly reports a field the server sets: google.api.field_behavior

@@ -31,7 +31,7 @@ func mapSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, w *walk) map[st
 				"type": "object",
 				"properties": map[string]any{
 					"key":   map[string]any{"type": "string"},
-					"value": map[string]any{"type": fieldSchemaPath(fd.MapValue(), openAI, w)["type"]},
+					"value": map[string]any{"type": valueType(fieldSchemaPath(fd.MapValue(), openAI, w))},
 				},
 				"required": []string{"key", "value"}, "additionalProperties": false,
 			},
@@ -96,6 +96,19 @@ func messageFieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, w *wal
 		}
 		return s
 	default:
+		if ref, ok := sharedRef(fd.Message(), openAI, w); ok {
+			return ref
+		}
 		return messageSchemaPath(fd.Message(), openAI, "", w)
 	}
+}
+
+// valueType is the JSON type of a map value's schema for the key-value-pair
+// form: a message written once under $defs is a $ref with no type of its
+// own, and is an object.
+func valueType(schema map[string]any) any {
+	if t, ok := schema["type"]; ok {
+		return t
+	}
+	return "object"
 }
