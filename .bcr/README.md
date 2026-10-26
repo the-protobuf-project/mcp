@@ -42,9 +42,9 @@ Save it as a repository or organization secret named **`BCR_PUBLISH_TOKEN`**
 
 ### 3. Verify the presubmit matrix
 
-[`presubmit.yml`](presubmit.yml) currently tests Bazel `7.x` and `8.x`. Our
-repo pins Bazel `9.1.1` (see [`.bazelversion`](../.bazelversion)) and uses
-`protobuf 35.0-rc1`. If the proto target ever needs a newer Bazel than the
+[`presubmit.yml`](presubmit.yml) currently tests Bazel `8.x` and `9.x`. Our
+repo pins Bazel `9.3.0` (see [`.bazelversion`](../.bazelversion)) and uses
+`protobuf 36.2`. If the proto target ever needs a newer Bazel than the
 matrix lists, the BCR PR's CI will fail — bump the `bazel:` list in
 `presubmit.yml` accordingly.
 

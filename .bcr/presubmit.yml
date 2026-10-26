@@ -3,7 +3,7 @@
 # so consumers can only build the proto targets — that is what we verify here.
 matrix:
   platform: ["debian10", "macos", "ubuntu2004", "windows"]
-  bazel: ["7.x", "8.x"]
+  bazel: ["8.x", "9.x"]
 tasks:
   verify_targets:
     name: Verify build targets
