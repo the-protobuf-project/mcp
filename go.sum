@@ -2,8 +2,8 @@ buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-202608252041
 buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-20260825204119-511051f7f437.2/go.mod h1:TCt1lluMFnctISJXvkIQ4x3ABrPuUKCWKyjKdkJNBpw=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
-github.com/the-protobuf-project/protokit v1.3.1 h1:Ky0aSjZAem4qDWbsWjaJihI9iqXN0piav9uxnBJLSUg=
-github.com/the-protobuf-project/protokit v1.3.1/go.mod h1:HODRJtLQhT39oud+Hc7hIxK4PQlhaJ6y8qU11dBpPn4=
+github.com/the-protobuf-project/protokit v1.3.2 h1:OdLmPIIh3NmbuzQmvHo/WqDKsNxYH7HqUgFLyNuE24U=
+github.com/the-protobuf-project/protokit v1.3.2/go.mod h1:352liY5RpOxbfEUjZ20P25j81WCWgCi5OH/lrBttbk4=
 google.golang.org/genproto/googleapis/api v0.0.0-20260810153831-ec0a7760b754 h1:dWeMvEJ3JhYgqSCAHUZZJgMUyfniiiCvDc72x5EqJP0=
 google.golang.org/genproto/googleapis/api v0.0.0-20260810153831-ec0a7760b754/go.mod h1:q/3oV3jAi5vwelxsVAprMBC8BcM2zmNe+IjRGd+9/ks=
 google.golang.org/protobuf v1.36.12 h1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=
