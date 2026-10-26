@@ -139,11 +139,7 @@ func (g *RustFileGenerator) buildRsParams() RsTplParams {
 			if streamProgress != nil && streamProgress.ResultMessage != nil {
 				outMsg = streamProgress.ResultMessage.Desc
 			}
-			outBytes, err := json.Marshal(messageSchema(outMsg, false, ""))
-			if err != nil {
-				panic(fmt.Sprintf("marshal output schema: %v", err))
-			}
-			outputSchemaJSON[key] = string(outBytes)
+			outputSchemaJSON[key] = outputSchemaFor(outMsg)
 
 			meta := ToolMeta{
 				Name:        toolName,

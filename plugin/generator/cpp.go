@@ -153,11 +153,7 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 			schemaJSON[key] = string(stdBytes)
 
 			// outputSchema comes from the response message, mirroring the input side.
-			outBytes, err := json.Marshal(messageSchema(meth.Output.Desc, false, ""))
-			if err != nil {
-				panic(fmt.Sprintf("marshal output schema: %v", err))
-			}
-			outputSchemaJSON[key] = string(outBytes)
+			outputSchemaJSON[key] = outputSchemaFor(meth.Output.Desc)
 
 			meta := ToolMeta{
 				Name:        toolName,

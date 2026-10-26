@@ -59,6 +59,16 @@ type walk struct {
 	unruled bool
 	shared  map[defKey]bool
 	defs    map[string]any
+	// depth is how many messages deep the walk is (the request is 0), and
+	// inDef whether it is writing a $defs entry: with ShortDescriptions,
+	// what is past shortDepth or shared keeps a description's first sentence.
+	depth int
+	inDef bool
+}
+
+// short reports whether descriptions here keep only their first sentence.
+func (w *walk) short() bool {
+	return Schemas.ShortDescriptions && (w.inDef || w.depth >= shortDepth)
 }
 
 // messageSchema converts a protobuf message descriptor into a JSON Schema map.
@@ -79,7 +89,7 @@ func inputSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc stri
 // rootSchema is md's schema, inline at the root, with the messages it shares
 // among its fields under $defs.
 func rootSchema(md protoreflect.MessageDescriptor, openAI bool, schemaDesc string, input bool) map[string]any {
-	w := &walk{open: map[protoreflect.FullName]bool{}, input: input, shared: sharedDefs(md, input), defs: map[string]any{}}
+	w := &walk{open: map[protoreflect.FullName]bool{}, input: input, shared: sharedDefs(md, input), defs: map[string]any{}, depth: -1}
 	schema := messageSchemaPath(md, openAI, schemaDesc, w)
 	if len(w.defs) > 0 {
 		schema["$defs"] = w.defs
@@ -99,10 +109,10 @@ func sharedRef(md protoreflect.MessageDescriptor, openAI bool, w *walk) (map[str
 		w.defs[k.ref()] = nil // claimed: a cycle back to md refers rather than recurses
 		// A definition renders whole wherever it is first reached: the
 		// branch's open set is not its own.
-		open := w.open
-		w.open = map[protoreflect.FullName]bool{}
+		open, inDef := w.open, w.inDef
+		w.open, w.inDef = map[protoreflect.FullName]bool{}, true
 		w.defs[k.ref()] = messageSchemaPath(md, openAI, "", w)
-		w.open = open
+		w.open, w.inDef = open, inDef
 	}
 	return map[string]any{"$ref": "#/$defs/" + k.ref()}, true
 }
@@ -147,6 +157,10 @@ func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDes
 	}
 	w.open[md.FullName()] = true
 	defer delete(w.open, md.FullName())
+	// The request's fields are at depth 0 (a walk starts at -1), a held
+	// message's fields at 1, and so on.
+	defer func(depth int) { w.depth = depth }(w.depth)
+	w.depth++
 
 	required, props := []string{}, map[string]any{}
 	oneOfGroups := map[string][]map[string]any{}
@@ -285,21 +299,29 @@ func fieldSchemaPath(fd protoreflect.FieldDescriptor, openAI bool, w *walk) map[
 	case protoreflect.MessageKind:
 		schema = messageFieldSchemaPath(fd, openAI, w)
 	case protoreflect.EnumKind:
-		schema = enumSchema(fd)
+		if ref, ok := sharedEnum(fd, w); ok {
+			schema = ref
+		} else {
+			schema = enumSchema(fd)
+		}
 	default:
 		schema = scalarSchema(fd, openAI)
+	}
+	desc := fieldComment(fd)
+	if w.short() {
+		desc = firstSentence(desc)
 	}
 	if !fd.IsList() {
 		if !w.unruled {
 			applyValidateRules(fd, schema, openAI)
 		}
-		applyMCPFieldOptions(fd, schema, fieldComment(fd))
+		applyMCPFieldOptions(fd, schema, desc)
 		return schema
 	}
 	if !w.unruled {
 		applyRules(fd, itemRules(fd), schema, openAI)
 	}
-	applyMCPFieldOptions(fd, schema, fieldComment(fd))
+	applyMCPFieldOptions(fd, schema, desc)
 	array := map[string]any{"type": "array", "items": schema}
 	if !w.unruled {
 		applyContainerRules(fd, array, openAI)
@@ -367,6 +389,9 @@ func enumSchema(fd protoreflect.FieldDescriptor) map[string]any {
 	vals := make([]string, ed.Values().Len())
 	for i := range vals {
 		vals[i] = string(ed.Values().Get(i).Name())
+	}
+	if Schemas.MaxEnumValues > 0 && len(vals) > Schemas.MaxEnumValues {
+		return largeEnumSchema(string(ed.FullName()), vals)
 	}
 	schema := map[string]any{"type": "string", "enum": vals}
 	descs := getEnumDescriptions(ed)

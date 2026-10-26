@@ -20,12 +20,15 @@ import (
 )
 
 // newTool builds a tool descriptor carrying both schemas and the behavioural
-// hints a client uses to decide whether the call needs confirmation.
+// hints a client uses to decide whether the call needs confirmation. An empty
+// outputSchemaJSON declares none (protoc-gen-mcp's output_schema=false).
 // mcp.MustCreateTool covers the input side; the rest is set here so the runtime
 // keeps a stable signature.
 func newTool(name, description, inputSchemaJSON, outputSchemaJSON string, annotations *mcp.ToolAnnotations, title string, icons []mcp.Icon) *mcp.Tool {
 	tool := mcp.MustCreateTool(name, description, inputSchemaJSON)
-	tool.OutputSchema = mcp.MustParseSchema(outputSchemaJSON)
+	if outputSchemaJSON != "" {
+		tool.OutputSchema = mcp.MustParseSchema(outputSchemaJSON)
+	}
 	tool.Annotations = annotations
 	tool.Title = title
 	tool.Icons = icons

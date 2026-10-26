@@ -479,6 +479,16 @@ module, and the Go runtime comes from
 | `module`         | Go module path                | Go module prefix for output path resolution              |
 | `package_suffix` | any string (Go only)          | Sub-package suffix for generated `.pb.mcp.go` files      |
 | `paths`          | `source_relative`             | Place output relative to the proto source (Rust)         |
+| `max_enum_values` | integer, default `0` (all)   | Enums with more values become a pattern on their common prefix, with examples |
+| `short_descriptions` | `true`, default `false`   | Below the request and the messages it holds, a field description keeps its first sentence |
+| `output_schema`  | `false`, default `true`       | Declare each tool's `outputSchema` (optional in MCP)     |
+
+A tool's schema writes a message or enum used by several fields once, under
+its `$defs`, and refers to it from each (`$ref`); a message on a cycle is a
+`$ref` to itself. The last three options trade completeness for size, for
+vocabularies with large code lists and long documentation: an agent reads
+every tool's schema into its context. The server validates every request in
+full whatever the schema states.
 
 ## Generated Code
 

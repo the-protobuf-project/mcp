@@ -49,11 +49,34 @@ func main() {
 		"(Go only) Sub-package suffix for generated files (empty = same package as .pb.go files).",
 	)
 
+	// Size trade-offs for the tools' schemas, all off by default; see
+	// plugin/generator/schema_options.go.
+	maxEnumValues := flags.Int(
+		"max_enum_values",
+		0,
+		"Enums with more values are described by a pattern on their common prefix, with examples (0 = list every value).",
+	)
+	shortDescriptions := flags.Bool(
+		"short_descriptions",
+		false,
+		"Below the request and the messages it holds, keep each field description's first sentence.",
+	)
+	outputSchema := flags.Bool(
+		"output_schema",
+		true,
+		"Declare each tool's outputSchema (optional in MCP).",
+	)
+
 	generator.PluginVersion = resolveVersion()
 
 	protogen.Options{
 		ParamFunc: flags.Set,
 	}.Run(func(gen *protogen.Plugin) error {
+		generator.Schemas = generator.SchemaOptions{
+			MaxEnumValues:     *maxEnumValues,
+			ShortDescriptions: *shortDescriptions,
+			NoOutputSchema:    !*outputSchema,
+		}
 		return generator.Generate(gen, *lang, *packageSuffix)
 	})
 }

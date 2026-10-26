@@ -20,6 +20,11 @@ package generator
 // The same message renders two ways inside an input: normally, and beneath
 // an IGNORE_ALWAYS field (see unruledInput) with no rules and no required
 // fields. Each way is its own definition.
+//
+// Enums are shared the same way -- a code list of hundreds of values held by
+// several fields is written once -- unless the list is shorter than the $ref
+// that would replace it. A field's own enum rules (in, not_in) stay beside
+// its $ref, where JSON Schema applies both.
 
 import "google.golang.org/protobuf/reflect/protoreflect"
 
@@ -95,6 +100,12 @@ func (a *analysis) visit(k defKey, md protoreflect.MessageDescriptor) {
 		if fd.IsMap() {
 			held = fd.MapValue()
 		}
+		if held.Kind() == protoreflect.EnumKind {
+			if ed := held.Enum(); enumWorthSharing(ed) {
+				a.sites[defKey{name: ed.FullName()}]++
+			}
+			continue
+		}
 		if held.Kind() != protoreflect.MessageKind || wellKnown[held.Message().FullName()] {
 			continue
 		}
@@ -102,4 +113,27 @@ func (a *analysis) visit(k defKey, md protoreflect.MessageDescriptor) {
 		a.sites[child]++
 		a.visit(child, held.Message())
 	}
+}
+
+// enumWorthSharing reports whether ed's list is longer than a $ref to it:
+// a small enum is cheaper inline wherever it is used.
+func enumWorthSharing(ed protoreflect.EnumDescriptor) bool {
+	size := 0
+	for i := 0; i < ed.Values().Len(); i++ {
+		size += len(ed.Values().Get(i).Name()) + 3 // quotes and comma
+	}
+	return size > len(`{"$ref":"#/$defs/"}`)+len(ed.FullName())
+}
+
+// sharedEnum is the $ref to enum fd holds, writing its definition first if
+// this is its first use; ok is false for an enum written inline.
+func sharedEnum(fd protoreflect.FieldDescriptor, w *walk) (map[string]any, bool) {
+	k := defKey{name: fd.Enum().FullName()}
+	if !w.shared[k] {
+		return nil, false
+	}
+	if _, done := w.defs[k.ref()]; !done {
+		w.defs[k.ref()] = enumSchema(fd)
+	}
+	return map[string]any{"$ref": "#/$defs/" + k.ref()}, true
 }

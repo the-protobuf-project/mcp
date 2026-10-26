@@ -16,8 +16,11 @@ fn make_tool(name: &str, description: &str, schema_json: &str, output_schema_jso
     let mut tool = json!({
         "name": name, "description": description,
         "inputSchema": serde_json::from_str::<Value>(schema_json).unwrap(),
-        "outputSchema": serde_json::from_str::<Value>(output_schema_json).unwrap(),
     });
+    // An empty output schema declares none (protoc-gen-mcp's output_schema=false).
+    if !output_schema_json.is_empty() {
+        tool["outputSchema"] = serde_json::from_str::<Value>(output_schema_json).unwrap();
+    }
     // A hint the proto does not state stays absent: to a client, "unknown" is
     // not the same as "false".
     if !annotations.is_null() {
