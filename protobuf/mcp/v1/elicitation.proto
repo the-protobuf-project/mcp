@@ -56,6 +56,10 @@ message MCPElicitation {
   // attempted but failures are silently ignored and the tool proceeds with
   // the original LLM-provided arguments.
   bool required = 6;
+  // [Form mode] Ask only the fields the tool's arguments do not already carry
+  // (absent, null or empty), and skip the elicitation when they carry them
+  // all: a caller who said everything is not asked again.
+  bool ask_missing_only = 7;
 }
 
 // MCPElicitationMode selects how the user provides input.

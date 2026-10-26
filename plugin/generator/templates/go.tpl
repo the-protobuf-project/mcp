@@ -160,6 +160,31 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- end }}
 			}
 {{- else }}
+{{- if $tool.MethodOpts.Elicitation.AskMissingOnly }}
+			// ask_missing_only: ask only what the arguments do not carry, and
+			// not at all when they carry everything.
+			elicitFields = mcp.MissingElicitFields(req.Params.Arguments, elicitFields)
+			var elicitResult *mcp.ElicitResult
+			if len(elicitFields) > 0 {
+				var elicitPending *mcp.CallToolResult
+				var elicitErr error
+				elicitResult, elicitPending, elicitErr = mcp.RunElicitation(req, "{{ escapeQuotes $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+				if elicitErr != nil {
+					return nil, elicitErr
+				}
+				if elicitPending != nil {
+					return elicitPending, nil
+				}
+				if elicitResult.Action != "accept" {
+{{- if $tool.MethodOpts.Elicitation.Required }}
+					return mcp.TextResult("Action cancelled by user."), nil
+{{- else }}
+					// required is false: proceed with the LLM-provided arguments.
+					elicitResult = nil
+{{- end }}
+				}
+			}
+{{- else }}
 			elicitResult, elicitPending, elicitErr := mcp.RunElicitation(req, "{{ escapeQuotes $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
@@ -177,6 +202,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			}
 {{- end }}
 {{- end }}
+{{- end }}
 			var pbReq {{ $tool.RequestType }}
 			args, ctx := mcp.ExtractExtras(ctx, req.Params.Arguments, cfg)
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
@@ -184,6 +210,12 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 				args = mcp.MergeElicitResult(args, elicitResult.Content, elicitFields)
 			}
 {{- end }}
+			// Answers to questions the service raised (mcp.Ask) on an earlier
+			// pass of this call.
+			args, declined := mcp.MergeAnswers(req, args)
+			if declined {
+				return mcp.TextResult("Cancelled by the user."), nil
+			}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(args, &pbReq); err != nil {
 				return nil, err
 			}
@@ -283,6 +315,31 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 {{- end }}
 			}
 {{- else }}
+{{- if $tool.MethodOpts.Elicitation.AskMissingOnly }}
+			// ask_missing_only: ask only what the arguments do not carry, and
+			// not at all when they carry everything.
+			elicitFields = mcp.MissingElicitFields(req.Params.Arguments, elicitFields)
+			var elicitResult *mcp.ElicitResult
+			if len(elicitFields) > 0 {
+				var elicitPending *mcp.CallToolResult
+				var elicitErr error
+				elicitResult, elicitPending, elicitErr = mcp.RunElicitation(req, "{{ escapeQuotes $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+				if elicitErr != nil {
+					return nil, elicitErr
+				}
+				if elicitPending != nil {
+					return elicitPending, nil
+				}
+				if elicitResult.Action != "accept" {
+{{- if $tool.MethodOpts.Elicitation.Required }}
+					return mcp.TextResult("Action cancelled by user."), nil
+{{- else }}
+					// required is false: proceed with the LLM-provided arguments.
+					elicitResult = nil
+{{- end }}
+				}
+			}
+{{- else }}
 			elicitResult, elicitPending, elicitErr := mcp.RunElicitation(req, "{{ escapeQuotes $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
@@ -300,6 +357,7 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			}
 {{- end }}
 {{- end }}
+{{- end }}
 			var pbReq {{ $tool.RequestType }}
 			args, ctx := mcp.ExtractExtras(ctx, req.Params.Arguments, cfg)
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
@@ -307,6 +365,12 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 				args = mcp.MergeElicitResult(args, elicitResult.Content, elicitFields)
 			}
 {{- end }}
+			// Answers to questions the service raised (mcp.Ask) on an earlier
+			// pass of this call.
+			args, declined := mcp.MergeAnswers(req, args)
+			if declined {
+				return mcp.TextResult("Cancelled by the user."), nil
+			}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(args, &pbReq); err != nil {
 				return nil, err
 			}
@@ -315,6 +379,9 @@ func Register{{ $svcName }}MCPHandler(s *mcp.Server, srv {{ $svcName }}MCPServer
 			rawResp, err := mcp.InvokeUnary(ctx, cfg.UnaryInterceptor, "{{ $tool.FullMethod }}", srv, &pbReq, func(ctx context.Context, req any) (any, error) {
 				return srv.{{ $methName }}(ctx, req.(*{{ $tool.RequestType }}))
 			})
+			if pending, asked := mcp.AskPending(req, err); asked {
+				return pending, nil // the service asked a question; put it to the client
+			}
 			if err != nil {
 				return mcp.HandleError(err)
 			}
@@ -573,6 +640,31 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 {{- end }}
 			}
 {{- else }}
+{{- if $tool.MethodOpts.Elicitation.AskMissingOnly }}
+			// ask_missing_only: ask only what the arguments do not carry, and
+			// not at all when they carry everything.
+			elicitFields = mcp.MissingElicitFields(req.Params.Arguments, elicitFields)
+			var elicitResult *mcp.ElicitResult
+			if len(elicitFields) > 0 {
+				var elicitPending *mcp.CallToolResult
+				var elicitErr error
+				elicitResult, elicitPending, elicitErr = mcp.RunElicitation(req, "{{ escapeQuotes $tool.MethodOpts.Elicitation.Message }}", elicitFields)
+				if elicitErr != nil {
+					return nil, elicitErr
+				}
+				if elicitPending != nil {
+					return elicitPending, nil
+				}
+				if elicitResult.Action != "accept" {
+{{- if $tool.MethodOpts.Elicitation.Required }}
+					return mcp.TextResult("Action cancelled by user."), nil
+{{- else }}
+					// required is false: proceed with the LLM-provided arguments.
+					elicitResult = nil
+{{- end }}
+				}
+			}
+{{- else }}
 			elicitResult, elicitPending, elicitErr := mcp.RunElicitation(req, "{{ escapeQuotes $tool.MethodOpts.Elicitation.Message }}", elicitFields)
 			if elicitErr != nil {
 				return nil, elicitErr
@@ -590,6 +682,7 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 			}
 {{- end }}
 {{- end }}
+{{- end }}
 			var pbReq {{ $tool.RequestType }}
 			args, ctx := mcp.ExtractExtras(ctx, req.Params.Arguments, cfg)
 {{- if and $tool.MethodOpts $tool.MethodOpts.Elicitation }}
@@ -597,6 +690,12 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 				args = mcp.MergeElicitResult(args, elicitResult.Content, elicitFields)
 			}
 {{- end }}
+			// Answers to questions the service raised (mcp.Ask) on an earlier
+			// pass of this call.
+			args, declined := mcp.MergeAnswers(req, args)
+			if declined {
+				return mcp.TextResult("Cancelled by the user."), nil
+			}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(args, &pbReq); err != nil {
 				return nil, err
 			}
@@ -633,6 +732,9 @@ func ForwardTo{{ $svcName }}MCPClient(s *mcp.Server, client {{ $svcName }}MCPCli
 			}
 {{- else }}
 			resp, err := client.{{ $methName }}(ctx, &pbReq)
+			if pending, asked := mcp.AskPending(req, err); asked {
+				return pending, nil // the server asked a question; put it to the client
+			}
 			if err != nil {
 				return mcp.HandleError(err)
 			}

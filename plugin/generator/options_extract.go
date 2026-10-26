@@ -112,12 +112,13 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	elicitExt, ok := proto.GetExtension(opts, mcppb.E_Elicitation).(*mcppb.MCPElicitation)
 	if ok && elicitExt != nil {
 		result.Elicitation = &MCPElicitationOpts{
-			Message:       elicitExt.GetMessage(),
-			Schema:        elicitExt.GetSchema(),
-			Mode:          elicitationMode(elicitExt.GetMode(), elicitExt.GetUrl()),
-			URL:           elicitExt.GetUrl(),
-			ElicitationID: elicitExt.GetElicitationId(),
-			Required:      elicitExt.GetRequired(),
+			Message:        elicitExt.GetMessage(),
+			Schema:         elicitExt.GetSchema(),
+			Mode:           elicitationMode(elicitExt.GetMode(), elicitExt.GetUrl()),
+			URL:            elicitExt.GetUrl(),
+			ElicitationID:  elicitExt.GetElicitationId(),
+			AskMissingOnly: elicitExt.GetAskMissingOnly(),
+			Required:       elicitExt.GetRequired(),
 		}
 		hasAnything = true
 	}

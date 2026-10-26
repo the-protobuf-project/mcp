@@ -121,9 +121,13 @@ type MCPElicitation struct {
 	// the client does not support elicitation. Default false: elicitation is
 	// attempted but failures are silently ignored and the tool proceeds with
 	// the original LLM-provided arguments.
-	Required      bool `protobuf:"varint,6,opt,name=required,proto3" json:"required,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Required bool `protobuf:"varint,6,opt,name=required,proto3" json:"required,omitempty"`
+	// [Form mode] Ask only the fields the tool's arguments do not already carry
+	// (absent, null or empty), and skip the elicitation when they carry them
+	// all: a caller who said everything is not asked again.
+	AskMissingOnly bool `protobuf:"varint,7,opt,name=ask_missing_only,json=askMissingOnly,proto3" json:"ask_missing_only,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *MCPElicitation) Reset() {
@@ -198,18 +202,26 @@ func (x *MCPElicitation) GetRequired() bool {
 	return false
 }
 
+func (x *MCPElicitation) GetAskMissingOnly() bool {
+	if x != nil {
+		return x.AskMissingOnly
+	}
+	return false
+}
+
 var File_mcp_v1_elicitation_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_elicitation_proto_rawDesc = "" +
 	"\n" +
-	"\x18mcp/v1/elicitation.proto\x12\x06mcp.v1\"\xc7\x01\n" +
+	"\x18mcp/v1/elicitation.proto\x12\x06mcp.v1\"\xf1\x01\n" +
 	"\x0eMCPElicitation\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x16\n" +
 	"\x06schema\x18\x02 \x01(\tR\x06schema\x12.\n" +
 	"\x04mode\x18\x03 \x01(\x0e2\x1a.mcp.v1.MCPElicitationModeR\x04mode\x12\x10\n" +
 	"\x03url\x18\x04 \x01(\tR\x03url\x12%\n" +
 	"\x0eelicitation_id\x18\x05 \x01(\tR\relicitationId\x12\x1a\n" +
-	"\brequired\x18\x06 \x01(\bR\brequired*w\n" +
+	"\brequired\x18\x06 \x01(\bR\brequired\x12(\n" +
+	"\x10ask_missing_only\x18\a \x01(\bR\x0easkMissingOnly*w\n" +
 	"\x12MCPElicitationMode\x12$\n" +
 	" MCP_ELICITATION_MODE_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19MCP_ELICITATION_MODE_FORM\x10\x01\x12\x1c\n" +

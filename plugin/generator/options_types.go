@@ -131,7 +131,10 @@ type MCPElicitationOpts struct {
 	// Required aborts the tool call when the user declines or the client cannot
 	// elicit. When false the call proceeds with the LLM-provided arguments.
 	Required bool
-	Fields   []MCPElicitFieldOpts
+	// AskMissingOnly asks only the fields the arguments do not carry, and
+	// skips the elicitation when they carry them all.
+	AskMissingOnly bool
+	Fields         []MCPElicitFieldOpts
 }
 
 // IsURLMode reports whether this elicitation directs the user to an external URL
