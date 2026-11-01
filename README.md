@@ -62,7 +62,7 @@ Open-sourced by **The Protobuf Project**.
 - **Prompts** — Attach prompt templates to RPCs with schema-validated arguments via `(mcp.v1.prompt)`
 - **Field descriptions** — Add `(mcp.v1.field) = { description: "..." }` to message fields for schema descriptions
 - **Enum descriptions** — Add `(mcp.v1.enum)` and `(mcp.v1.enum_value)` for enum-level and per-value descriptions in the schema
-- **Progress** — Use gRPC server streaming with `mcp.v1.MCPProgress` for MCP progress notifications on long-running tools
+- **Progress** — Use gRPC server streaming with `mcp.v1.McpProgress` for MCP progress notifications on long-running tools
 - **Resources** — Auto-detect MCP resources from `google.api.resource` annotations
 - **Elicitation** — Generate confirmation dialogs before tool execution via `(mcp.v1.elicitation)`
 - **Transports** — stdio, SSE, and streamable-http — run multiple concurrently in a single process
@@ -373,14 +373,14 @@ For enum fields, enum descriptions take precedence over `(mcp.v1.field)` descrip
 
 ### Progress (server streaming)
 
-For long-running operations, use gRPC server streaming with `mcp.v1.MCPProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
+For long-running operations, use gRPC server streaming with `mcp.v1.McpProgress` to send progress notifications to MCP clients. Define a stream response with a oneof:
 
 ```protobuf
 import "mcp/v1/progress.proto";
 
 message CreateTodoStreamChunk {
   oneof payload {
-    mcp.v1.MCPProgress progress = 1;
+    mcp.v1.McpProgress progress = 1;
     Todo result = 2;
   }
 }

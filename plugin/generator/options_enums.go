@@ -52,7 +52,7 @@ func fieldTypeKeyword(t mcppb.MCPFieldType) string { return fieldTypeKeywords[t]
 func iconTheme(t mcppb.MCPIconTheme) string { return iconThemeNames[t] }
 
 // roleName maps MCPRole to the MCP message role. MCP_ROLE_UNSPECIFIED defaults
-// to "user", matching the field documentation on MCPPrompt.role.
+// to "user", matching the field documentation on McpPrompt.role.
 func roleName(r mcppb.MCPRole) string {
 	if r == mcppb.MCPRole_MCP_ROLE_ASSISTANT {
 		return "assistant"
@@ -62,7 +62,7 @@ func roleName(r mcppb.MCPRole) string {
 
 // elicitationMode resolves MCPElicitationMode to "form" or "url". When the mode
 // is unspecified it is inferred: URL if a url is set, otherwise form. This
-// mirrors the inference documented on MCPElicitation.mode so that every
+// mirrors the inference documented on McpElicitation.mode so that every
 // downstream template sees a concrete mode.
 func elicitationMode(m mcppb.MCPElicitationMode, url string) string {
 	switch m {
@@ -91,7 +91,7 @@ var cacheScopeNames = map[mcppb.MCPCacheScope]string{
 // puts milliseconds on the wire, so the conversion happens here. Rounding is
 // toward zero, so a sub-millisecond TTL becomes 0 — immediately stale — rather
 // than being rounded up into a cache window the author did not ask for.
-func cacheHint(h *mcppb.MCPCacheHint) *MCPCacheOpts {
+func cacheHint(h *mcppb.McpCacheHint) *MCPCacheOpts {
 	if h == nil {
 		return nil
 	}

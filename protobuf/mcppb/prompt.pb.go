@@ -74,7 +74,7 @@ func (MCPRole) EnumDescriptor() ([]byte, []int) {
 	return file_mcp_v1_prompt_proto_rawDescGZIP(), []int{0}
 }
 
-// MCPPrompt defines a reusable prompt template exposed at the service level.
+// McpPrompt defines a reusable prompt template exposed at the service level.
 //
 // The arguments are defined as a proper proto message referenced by schema.
 // Field types, descriptions, required-ness, and enum values are all
@@ -89,7 +89,7 @@ func (MCPRole) EnumDescriptor() ([]byte, []int) {
 //	    schema: "todo.v1.SummarizeTodosArgs"
 //	  }
 //	]
-type MCPPrompt struct {
+type McpPrompt struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique prompt identifier (e.g. "summarize_todos"). Only set when overriding.
 	Id *string `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
@@ -102,25 +102,25 @@ type MCPPrompt struct {
 	// Display name preferred over id in UI and end-user contexts.
 	Title *string `protobuf:"bytes,5,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	// Icons representing the prompt in client UIs.
-	Icons         []*MCPIcon `protobuf:"bytes,6,rep,name=icons,proto3" json:"icons,omitempty"`
+	Icons         []*McpIcon `protobuf:"bytes,6,rep,name=icons,proto3" json:"icons,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPPrompt) Reset() {
-	*x = MCPPrompt{}
+func (x *McpPrompt) Reset() {
+	*x = McpPrompt{}
 	mi := &file_mcp_v1_prompt_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPPrompt) String() string {
+func (x *McpPrompt) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPPrompt) ProtoMessage() {}
+func (*McpPrompt) ProtoMessage() {}
 
-func (x *MCPPrompt) ProtoReflect() protoreflect.Message {
+func (x *McpPrompt) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_prompt_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -132,56 +132,56 @@ func (x *MCPPrompt) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPPrompt.ProtoReflect.Descriptor instead.
-func (*MCPPrompt) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpPrompt.ProtoReflect.Descriptor instead.
+func (*McpPrompt) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_prompt_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPPrompt) GetId() string {
+func (x *McpPrompt) GetId() string {
 	if x != nil && x.Id != nil {
 		return *x.Id
 	}
 	return ""
 }
 
-func (x *MCPPrompt) GetDescription() string {
+func (x *McpPrompt) GetDescription() string {
 	if x != nil && x.Description != nil {
 		return *x.Description
 	}
 	return ""
 }
 
-func (x *MCPPrompt) GetSchema() string {
+func (x *McpPrompt) GetSchema() string {
 	if x != nil {
 		return x.Schema
 	}
 	return ""
 }
 
-func (x *MCPPrompt) GetRole() MCPRole {
+func (x *McpPrompt) GetRole() MCPRole {
 	if x != nil {
 		return x.Role
 	}
 	return MCPRole_MCP_ROLE_UNSPECIFIED
 }
 
-func (x *MCPPrompt) GetTitle() string {
+func (x *McpPrompt) GetTitle() string {
 	if x != nil && x.Title != nil {
 		return *x.Title
 	}
 	return ""
 }
 
-func (x *MCPPrompt) GetIcons() []*MCPIcon {
+func (x *McpPrompt) GetIcons() []*McpIcon {
 	if x != nil {
 		return x.Icons
 	}
 	return nil
 }
 
-// MCPToolOptions configures an individual RPC method as an MCP tool.
+// McpToolOptions configures an individual RPC method as an MCP tool.
 // Used as: option (mcp.v1.tool) = { ... };
-type MCPToolOptions struct {
+type McpToolOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Override the auto-generated MCP tool identifier. Only set when overriding.
 	Id *string `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
@@ -190,7 +190,7 @@ type MCPToolOptions struct {
 	// When true, this RPC supports MCP progress notifications. Clients may include
 	// progressToken in params._meta; the server will send progress updates during
 	// execution. Requires a server-streaming RPC whose response has a oneof with
-	// mcp.v1.MCPProgress and the result type.
+	// mcp.v1.McpProgress and the result type.
 	Progress *bool `protobuf:"varint,3,opt,name=progress,proto3,oneof" json:"progress,omitempty"`
 	// Behavioural hints, surfaced to clients as the tool's `annotations`. They
 	// drive whether a client may invoke the tool without asking the user first.
@@ -213,25 +213,25 @@ type MCPToolOptions struct {
 	// Display name preferred over id in UI and end-user contexts.
 	Title *string `protobuf:"bytes,8,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	// Icons representing the tool in client UIs.
-	Icons         []*MCPIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
+	Icons         []*McpIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPToolOptions) Reset() {
-	*x = MCPToolOptions{}
+func (x *McpToolOptions) Reset() {
+	*x = McpToolOptions{}
 	mi := &file_mcp_v1_prompt_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPToolOptions) String() string {
+func (x *McpToolOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPToolOptions) ProtoMessage() {}
+func (*McpToolOptions) ProtoMessage() {}
 
-func (x *MCPToolOptions) ProtoReflect() protoreflect.Message {
+func (x *McpToolOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_prompt_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -243,68 +243,68 @@ func (x *MCPToolOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPToolOptions.ProtoReflect.Descriptor instead.
-func (*MCPToolOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpToolOptions.ProtoReflect.Descriptor instead.
+func (*McpToolOptions) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_prompt_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MCPToolOptions) GetId() string {
+func (x *McpToolOptions) GetId() string {
 	if x != nil && x.Id != nil {
 		return *x.Id
 	}
 	return ""
 }
 
-func (x *MCPToolOptions) GetDescription() string {
+func (x *McpToolOptions) GetDescription() string {
 	if x != nil && x.Description != nil {
 		return *x.Description
 	}
 	return ""
 }
 
-func (x *MCPToolOptions) GetProgress() bool {
+func (x *McpToolOptions) GetProgress() bool {
 	if x != nil && x.Progress != nil {
 		return *x.Progress
 	}
 	return false
 }
 
-func (x *MCPToolOptions) GetReadOnly() bool {
+func (x *McpToolOptions) GetReadOnly() bool {
 	if x != nil && x.ReadOnly != nil {
 		return *x.ReadOnly
 	}
 	return false
 }
 
-func (x *MCPToolOptions) GetDestructive() bool {
+func (x *McpToolOptions) GetDestructive() bool {
 	if x != nil && x.Destructive != nil {
 		return *x.Destructive
 	}
 	return false
 }
 
-func (x *MCPToolOptions) GetIdempotent() bool {
+func (x *McpToolOptions) GetIdempotent() bool {
 	if x != nil && x.Idempotent != nil {
 		return *x.Idempotent
 	}
 	return false
 }
 
-func (x *MCPToolOptions) GetOpenWorld() bool {
+func (x *McpToolOptions) GetOpenWorld() bool {
 	if x != nil && x.OpenWorld != nil {
 		return *x.OpenWorld
 	}
 	return false
 }
 
-func (x *MCPToolOptions) GetTitle() string {
+func (x *McpToolOptions) GetTitle() string {
 	if x != nil && x.Title != nil {
 		return *x.Title
 	}
 	return ""
 }
 
-func (x *MCPToolOptions) GetIcons() []*MCPIcon {
+func (x *McpToolOptions) GetIcons() []*McpIcon {
 	if x != nil {
 		return x.Icons
 	}
@@ -316,17 +316,17 @@ var File_mcp_v1_prompt_proto protoreflect.FileDescriptor
 const file_mcp_v1_prompt_proto_rawDesc = "" +
 	"\n" +
 	"\x13mcp/v1/prompt.proto\x12\x06mcp.v1\x1a\x11mcp/v1/icon.proto\"\xe7\x01\n" +
-	"\tMCPPrompt\x12\x13\n" +
+	"\tMcpPrompt\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x16\n" +
 	"\x06schema\x18\x03 \x01(\tR\x06schema\x12#\n" +
 	"\x04role\x18\x04 \x01(\x0e2\x0f.mcp.v1.MCPRoleR\x04role\x12\x19\n" +
 	"\x05title\x18\x05 \x01(\tH\x02R\x05title\x88\x01\x01\x12%\n" +
-	"\x05icons\x18\x06 \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\x05\n" +
+	"\x05icons\x18\x06 \x03(\v2\x0f.mcp.v1.McpIconR\x05iconsB\x05\n" +
 	"\x03_idB\x0e\n" +
 	"\f_descriptionB\b\n" +
 	"\x06_title\"\xab\x03\n" +
-	"\x0eMCPToolOptions\x12\x13\n" +
+	"\x0eMcpToolOptions\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x1f\n" +
 	"\bprogress\x18\x03 \x01(\bH\x02R\bprogress\x88\x01\x01\x12 \n" +
@@ -338,7 +338,7 @@ const file_mcp_v1_prompt_proto_rawDesc = "" +
 	"\n" +
 	"open_world\x18\a \x01(\bH\x06R\topenWorld\x88\x01\x01\x12\x19\n" +
 	"\x05title\x18\b \x01(\tH\aR\x05title\x88\x01\x01\x12%\n" +
-	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\x05\n" +
+	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.McpIconR\x05iconsB\x05\n" +
 	"\x03_idB\x0e\n" +
 	"\f_descriptionB\v\n" +
 	"\t_progressB\f\n" +
@@ -371,14 +371,14 @@ var file_mcp_v1_prompt_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mcp_v1_prompt_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_mcp_v1_prompt_proto_goTypes = []any{
 	(MCPRole)(0),           // 0: mcp.v1.MCPRole
-	(*MCPPrompt)(nil),      // 1: mcp.v1.MCPPrompt
-	(*MCPToolOptions)(nil), // 2: mcp.v1.MCPToolOptions
-	(*MCPIcon)(nil),        // 3: mcp.v1.MCPIcon
+	(*McpPrompt)(nil),      // 1: mcp.v1.McpPrompt
+	(*McpToolOptions)(nil), // 2: mcp.v1.McpToolOptions
+	(*McpIcon)(nil),        // 3: mcp.v1.McpIcon
 }
 var file_mcp_v1_prompt_proto_depIdxs = []int32{
-	0, // 0: mcp.v1.MCPPrompt.role:type_name -> mcp.v1.MCPRole
-	3, // 1: mcp.v1.MCPPrompt.icons:type_name -> mcp.v1.MCPIcon
-	3, // 2: mcp.v1.MCPToolOptions.icons:type_name -> mcp.v1.MCPIcon
+	0, // 0: mcp.v1.McpPrompt.role:type_name -> mcp.v1.MCPRole
+	3, // 1: mcp.v1.McpPrompt.icons:type_name -> mcp.v1.McpIcon
+	3, // 2: mcp.v1.McpToolOptions.icons:type_name -> mcp.v1.McpIcon
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

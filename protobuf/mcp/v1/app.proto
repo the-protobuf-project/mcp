@@ -9,8 +9,8 @@ option java_multiple_files = true;
 option java_outer_classname = "AppProto";
 option java_package = "com.mcp.v1";
 
-// MCPApp describes application-level metadata for an MCP server.
-message MCPApp {
+// McpApp describes application-level metadata for an MCP server.
+message McpApp {
   // The display name of the MCP application.
   string display_name = 1;
   // The version of the MCP application (e.g. "1.0.0").
@@ -25,5 +25,5 @@ message MCPApp {
   optional string website_url = 5;
 
   // Icons representing the server in client UIs.
-  repeated MCPIcon icons = 6;
+  repeated McpIcon icons = 6;
 }

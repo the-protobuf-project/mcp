@@ -8,18 +8,18 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// mcpProgressFQNs lists the fully-qualified names under which MCPProgress may
-// appear. The annotations declare package "mcp.v1"; "mcp" and "mcp.protobuf"
-// are earlier package names, still accepted so protos generated against
-// published versions of buf.build/the-protobuf-project/mcp keep working.
+// mcpProgressFQNs lists the current McpProgress name and its earlier spellings
+// and packages. Keep the old names so protos generated against published
+// versions of buf.build/the-protobuf-project/mcp keep working.
 var mcpProgressFQNs = map[string]bool{
+	"mcp.v1.McpProgress":       true,
 	"mcp.v1.MCPProgress":       true,
 	"mcp.MCPProgress":          true,
 	"mcp.protobuf.MCPProgress": true,
 }
 
-// StreamProgressInfo describes a server-streaming RPC that uses MCPProgress for progress updates.
-// When non-nil, the streamed message has a oneof with MCPProgress and a result field.
+// StreamProgressInfo describes a server-streaming RPC that uses McpProgress for progress updates.
+// When non-nil, the streamed message has a oneof with McpProgress and a result field.
 type StreamProgressInfo struct {
 	StreamChunkType  string            // Go type for the streamed message
 	StreamClientType string            // Go type for gRPC client stream (e.g. "TodoService_CreateTodoClient")
@@ -34,7 +34,7 @@ type StreamProgressInfo struct {
 
 // DetectProgressStream returns StreamProgressInfo if the method is server-streaming
 // and the streamed message follows the progress convention: a oneof with
-// mcp.MCPProgress and the result type.
+// mcp.v1.McpProgress and the result type.
 func DetectProgressStream(meth *protogen.Method, resolveType func(protogen.GoIdent) string) *StreamProgressInfo {
 	if !meth.Desc.IsStreamingServer() || meth.Desc.IsStreamingClient() {
 		return nil
@@ -43,7 +43,7 @@ func DetectProgressStream(meth *protogen.Method, resolveType func(protogen.GoIde
 	if msg == nil {
 		return nil
 	}
-	// Find the oneof that contains both MCPProgress and a result (same oneof).
+	// Find the oneof that contains both McpProgress and a result (same oneof).
 	var progressField, resultField *protogen.Field
 	var resultIdent protogen.GoIdent
 	for _, oo := range msg.Oneofs {

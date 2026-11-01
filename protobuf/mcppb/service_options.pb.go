@@ -21,35 +21,35 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// MCPServiceOptions configures MCP behaviour for an entire gRPC service.
-type MCPServiceOptions struct {
+// McpServiceOptions configures MCP behaviour for an entire gRPC service.
+type McpServiceOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// App-level metadata surfaced to MCP clients.
-	App *MCPApp `protobuf:"bytes,1,opt,name=app,proto3" json:"app,omitempty"`
+	App *McpApp `protobuf:"bytes,1,opt,name=app,proto3" json:"app,omitempty"`
 	// Resources exposed by this service.
-	Resources []*MCPResource `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
+	Resources []*McpResource `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
 	// Default cache hint for this service's list results — tools, prompts,
 	// resources and resource templates. A resource may override it for its own
-	// read via MCPResource.cache.
-	Cache         *MCPCacheHint `protobuf:"bytes,3,opt,name=cache,proto3,oneof" json:"cache,omitempty"`
+	// read via McpResource.cache.
+	Cache         *McpCacheHint `protobuf:"bytes,3,opt,name=cache,proto3,oneof" json:"cache,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPServiceOptions) Reset() {
-	*x = MCPServiceOptions{}
+func (x *McpServiceOptions) Reset() {
+	*x = McpServiceOptions{}
 	mi := &file_mcp_v1_service_options_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPServiceOptions) String() string {
+func (x *McpServiceOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPServiceOptions) ProtoMessage() {}
+func (*McpServiceOptions) ProtoMessage() {}
 
-func (x *MCPServiceOptions) ProtoReflect() protoreflect.Message {
+func (x *McpServiceOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_service_options_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -61,26 +61,26 @@ func (x *MCPServiceOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPServiceOptions.ProtoReflect.Descriptor instead.
-func (*MCPServiceOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpServiceOptions.ProtoReflect.Descriptor instead.
+func (*McpServiceOptions) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_service_options_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPServiceOptions) GetApp() *MCPApp {
+func (x *McpServiceOptions) GetApp() *McpApp {
 	if x != nil {
 		return x.App
 	}
 	return nil
 }
 
-func (x *MCPServiceOptions) GetResources() []*MCPResource {
+func (x *McpServiceOptions) GetResources() []*McpResource {
 	if x != nil {
 		return x.Resources
 	}
 	return nil
 }
 
-func (x *MCPServiceOptions) GetCache() *MCPCacheHint {
+func (x *McpServiceOptions) GetCache() *McpCacheHint {
 	if x != nil {
 		return x.Cache
 	}
@@ -92,10 +92,10 @@ var File_mcp_v1_service_options_proto protoreflect.FileDescriptor
 const file_mcp_v1_service_options_proto_rawDesc = "" +
 	"\n" +
 	"\x1cmcp/v1/service_options.proto\x12\x06mcp.v1\x1a\x10mcp/v1/app.proto\x1a\x12mcp/v1/cache.proto\x1a\x15mcp/v1/resource.proto\"\xa3\x01\n" +
-	"\x11MCPServiceOptions\x12 \n" +
-	"\x03app\x18\x01 \x01(\v2\x0e.mcp.v1.MCPAppR\x03app\x121\n" +
-	"\tresources\x18\x02 \x03(\v2\x13.mcp.v1.MCPResourceR\tresources\x12/\n" +
-	"\x05cache\x18\x03 \x01(\v2\x14.mcp.v1.MCPCacheHintH\x00R\x05cache\x88\x01\x01B\b\n" +
+	"\x11McpServiceOptions\x12 \n" +
+	"\x03app\x18\x01 \x01(\v2\x0e.mcp.v1.McpAppR\x03app\x121\n" +
+	"\tresources\x18\x02 \x03(\v2\x13.mcp.v1.McpResourceR\tresources\x12/\n" +
+	"\x05cache\x18\x03 \x01(\v2\x14.mcp.v1.McpCacheHintH\x00R\x05cache\x88\x01\x01B\b\n" +
 	"\x06_cacheBW\n" +
 	"\n" +
 	"com.mcp.v1B\x13ServiceOptionsProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
@@ -114,15 +114,15 @@ func file_mcp_v1_service_options_proto_rawDescGZIP() []byte {
 
 var file_mcp_v1_service_options_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_service_options_proto_goTypes = []any{
-	(*MCPServiceOptions)(nil), // 0: mcp.v1.MCPServiceOptions
-	(*MCPApp)(nil),            // 1: mcp.v1.MCPApp
-	(*MCPResource)(nil),       // 2: mcp.v1.MCPResource
-	(*MCPCacheHint)(nil),      // 3: mcp.v1.MCPCacheHint
+	(*McpServiceOptions)(nil), // 0: mcp.v1.McpServiceOptions
+	(*McpApp)(nil),            // 1: mcp.v1.McpApp
+	(*McpResource)(nil),       // 2: mcp.v1.McpResource
+	(*McpCacheHint)(nil),      // 3: mcp.v1.McpCacheHint
 }
 var file_mcp_v1_service_options_proto_depIdxs = []int32{
-	1, // 0: mcp.v1.MCPServiceOptions.app:type_name -> mcp.v1.MCPApp
-	2, // 1: mcp.v1.MCPServiceOptions.resources:type_name -> mcp.v1.MCPResource
-	3, // 2: mcp.v1.MCPServiceOptions.cache:type_name -> mcp.v1.MCPCacheHint
+	1, // 0: mcp.v1.McpServiceOptions.app:type_name -> mcp.v1.McpApp
+	2, // 1: mcp.v1.McpServiceOptions.resources:type_name -> mcp.v1.McpResource
+	3, // 2: mcp.v1.McpServiceOptions.cache:type_name -> mcp.v1.McpCacheHint
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

@@ -7,18 +7,18 @@ option java_multiple_files = true;
 option java_outer_classname = "EnumProto";
 option java_package = "com.mcp.v1";
 
-// MCPEnumOptions attaches a description to an enum type.
+// McpEnumOptions attaches a description to an enum type.
 // Used as: option (mcp.v1.enum) = { description: "..." };
 // The description appears in the MCP tool inputSchema for enum fields.
-message MCPEnumOptions {
+message McpEnumOptions {
   // Human-readable description of the enum (e.g. for JSON Schema).
   string description = 1;
 }
 
-// MCPEnumValueOptions attaches a description to an enum value.
+// McpEnumValueOptions attaches a description to an enum value.
 // Used as: ENUM_VALUE = 0 [(mcp.v1.enum_value) = { description: "..." }];
 // Value descriptions are combined into the schema description for the enum field.
-message MCPEnumValueOptions {
+message McpEnumValueOptions {
   // Human-readable description of this enum value.
   string description = 1;
 }

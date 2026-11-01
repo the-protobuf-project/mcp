@@ -9,7 +9,7 @@ option java_multiple_files = true;
 option java_outer_classname = "PromptProto";
 option java_package = "com.mcp.v1";
 
-// MCPPrompt defines a reusable prompt template exposed at the service level.
+// McpPrompt defines a reusable prompt template exposed at the service level.
 //
 // The arguments are defined as a proper proto message referenced by schema.
 // Field types, descriptions, required-ness, and enum values are all
@@ -23,7 +23,7 @@ option java_package = "com.mcp.v1";
 //       schema: "todo.v1.SummarizeTodosArgs"
 //     }
 //   ]
-message MCPPrompt {
+message McpPrompt {
   // Unique prompt identifier (e.g. "summarize_todos"). Only set when overriding.
   optional string id = 1;
   // Human-readable description of what this prompt does. Only set when overriding.
@@ -37,12 +37,12 @@ message MCPPrompt {
   optional string title = 5;
 
   // Icons representing the prompt in client UIs.
-  repeated MCPIcon icons = 6;
+  repeated McpIcon icons = 6;
 }
 
-// MCPToolOptions configures an individual RPC method as an MCP tool.
+// McpToolOptions configures an individual RPC method as an MCP tool.
 // Used as: option (mcp.v1.tool) = { ... };
-message MCPToolOptions {
+message McpToolOptions {
   // Override the auto-generated MCP tool identifier. Only set when overriding.
   optional string id = 1;
   // Override the tool description (defaults to the RPC's leading comment). Only set when overriding.
@@ -50,7 +50,7 @@ message MCPToolOptions {
   // When true, this RPC supports MCP progress notifications. Clients may include
   // progressToken in params._meta; the server will send progress updates during
   // execution. Requires a server-streaming RPC whose response has a oneof with
-  // mcp.v1.MCPProgress and the result type.
+  // mcp.v1.McpProgress and the result type.
   optional bool progress = 3;
 
   // Behavioural hints, surfaced to clients as the tool's `annotations`. They
@@ -79,7 +79,7 @@ message MCPToolOptions {
   optional string title = 8;
 
   // Icons representing the tool in client UIs.
-  repeated MCPIcon icons = 9;
+  repeated McpIcon icons = 9;
 }
 
 // MCPRole specifies the intended recipient of a prompt message.

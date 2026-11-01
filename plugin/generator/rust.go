@@ -20,7 +20,7 @@ type RsMethodInfo struct {
 	ToolName        string // MCP tool name, e.g. todo_v1_TodoService_CreateTodo
 	Description     string // method description
 	MethodOpts      *MCPMethodOpts
-	StreamProgress  *StreamProgressInfo // Non-nil when server-streaming with MCPProgress
+	StreamProgress  *StreamProgressInfo // Non-nil when server-streaming with McpProgress
 	RequestType     string              // e.g. CountRequest
 	ResponseType    string              // e.g. CountResponse or result type for streaming
 	StreamChunkType string              // for streaming: e.g. CountStreamChunk
@@ -94,7 +94,7 @@ func (g *RustFileGenerator) buildRsParams() RsTplParams {
 			}
 			streamProgress := DetectProgressStream(meth, resolveType)
 			if meth.Desc.IsStreamingServer() && streamProgress == nil {
-				continue // Server-streaming without MCPProgress convention is not supported
+				continue // Server-streaming without McpProgress convention is not supported
 			}
 
 			key := string(svc.Desc.Name()) + "_" + meth.GoName

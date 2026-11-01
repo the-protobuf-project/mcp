@@ -91,11 +91,11 @@ func TestElicitationModeInference(t *testing.T) {
 	}
 }
 
-// MCPFieldOptions.format was a string before it became an enum. Protos built
+// McpFieldOptions.format was a string before it became an enum. Protos built
 // against the older published schema still carry the string, and protobuf-go
 // parks it in unknown fields because the wire type no longer matches.
 func TestLegacyFieldFormatReadsPreEnumString(t *testing.T) {
-	opts := &mcppb.MCPFieldOptions{Description: "a field"}
+	opts := &mcppb.McpFieldOptions{Description: "a field"}
 	// Field 4, wire type 2 (bytes), value "uri" — how the pre-enum schema encoded it.
 	opts.ProtoReflect().SetUnknown(protoreflect.RawFields{0x22, 0x03, 'u', 'r', 'i'})
 
@@ -108,7 +108,7 @@ func TestLegacyFieldFormatReadsPreEnumString(t *testing.T) {
 }
 
 func TestLegacyFieldFormatAbsentWhenNoUnknownFields(t *testing.T) {
-	opts := &mcppb.MCPFieldOptions{Format: mcppb.MCPFieldFormat_MCP_FIELD_FORMAT_URI}
+	opts := &mcppb.McpFieldOptions{Format: mcppb.MCPFieldFormat_MCP_FIELD_FORMAT_URI}
 	if got := legacyFieldFormat(opts); got != "" {
 		t.Errorf("legacyFieldFormat() = %q, want \"\" for a proto with no legacy bytes", got)
 	}

@@ -35,7 +35,7 @@ type MethodInfo struct {
 	RequestType    string
 	ResponseType   string
 	MethodOpts     *MCPMethodOpts
-	StreamProgress *StreamProgressInfo // Non-nil when server-streaming with MCPProgress
+	StreamProgress *StreamProgressInfo // Non-nil when server-streaming with McpProgress
 	// FullMethod is the gRPC full method name ("/pkg.Service/Method", proto
 	// names) passed to the unary interceptor chain so MCP-dispatched calls are
 	// indistinguishable from wire RPCs to middleware.
@@ -178,7 +178,7 @@ func (g *FileGenerator) buildParams() TplParams {
 			}
 			streamProgress := DetectProgressStream(meth, resolveType)
 			if meth.Desc.IsStreamingServer() && streamProgress == nil {
-				continue // Server-streaming without MCPProgress convention is not supported
+				continue // Server-streaming without McpProgress convention is not supported
 			}
 
 			key := string(svc.Desc.Name()) + "_" + meth.GoName

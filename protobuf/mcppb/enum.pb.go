@@ -21,10 +21,10 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// MCPEnumOptions attaches a description to an enum type.
+// McpEnumOptions attaches a description to an enum type.
 // Used as: option (mcp.v1.enum) = { description: "..." };
 // The description appears in the MCP tool inputSchema for enum fields.
-type MCPEnumOptions struct {
+type McpEnumOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Human-readable description of the enum (e.g. for JSON Schema).
 	Description   string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
@@ -32,20 +32,20 @@ type MCPEnumOptions struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPEnumOptions) Reset() {
-	*x = MCPEnumOptions{}
+func (x *McpEnumOptions) Reset() {
+	*x = McpEnumOptions{}
 	mi := &file_mcp_v1_enum_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPEnumOptions) String() string {
+func (x *McpEnumOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPEnumOptions) ProtoMessage() {}
+func (*McpEnumOptions) ProtoMessage() {}
 
-func (x *MCPEnumOptions) ProtoReflect() protoreflect.Message {
+func (x *McpEnumOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_enum_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,22 +57,22 @@ func (x *MCPEnumOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPEnumOptions.ProtoReflect.Descriptor instead.
-func (*MCPEnumOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpEnumOptions.ProtoReflect.Descriptor instead.
+func (*McpEnumOptions) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_enum_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPEnumOptions) GetDescription() string {
+func (x *McpEnumOptions) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-// MCPEnumValueOptions attaches a description to an enum value.
+// McpEnumValueOptions attaches a description to an enum value.
 // Used as: ENUM_VALUE = 0 [(mcp.v1.enum_value) = { description: "..." }];
 // Value descriptions are combined into the schema description for the enum field.
-type MCPEnumValueOptions struct {
+type McpEnumValueOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Human-readable description of this enum value.
 	Description   string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
@@ -80,20 +80,20 @@ type MCPEnumValueOptions struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPEnumValueOptions) Reset() {
-	*x = MCPEnumValueOptions{}
+func (x *McpEnumValueOptions) Reset() {
+	*x = McpEnumValueOptions{}
 	mi := &file_mcp_v1_enum_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPEnumValueOptions) String() string {
+func (x *McpEnumValueOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPEnumValueOptions) ProtoMessage() {}
+func (*McpEnumValueOptions) ProtoMessage() {}
 
-func (x *MCPEnumValueOptions) ProtoReflect() protoreflect.Message {
+func (x *McpEnumValueOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_enum_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -105,12 +105,12 @@ func (x *MCPEnumValueOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPEnumValueOptions.ProtoReflect.Descriptor instead.
-func (*MCPEnumValueOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpEnumValueOptions.ProtoReflect.Descriptor instead.
+func (*McpEnumValueOptions) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_enum_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MCPEnumValueOptions) GetDescription() string {
+func (x *McpEnumValueOptions) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
@@ -122,9 +122,9 @@ var File_mcp_v1_enum_proto protoreflect.FileDescriptor
 const file_mcp_v1_enum_proto_rawDesc = "" +
 	"\n" +
 	"\x11mcp/v1/enum.proto\x12\x06mcp.v1\"2\n" +
-	"\x0eMCPEnumOptions\x12 \n" +
+	"\x0eMcpEnumOptions\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\"7\n" +
-	"\x13MCPEnumValueOptions\x12 \n" +
+	"\x13McpEnumValueOptions\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescriptionBM\n" +
 	"\n" +
 	"com.mcp.v1B\tEnumProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
@@ -143,8 +143,8 @@ func file_mcp_v1_enum_proto_rawDescGZIP() []byte {
 
 var file_mcp_v1_enum_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_mcp_v1_enum_proto_goTypes = []any{
-	(*MCPEnumOptions)(nil),      // 0: mcp.v1.MCPEnumOptions
-	(*MCPEnumValueOptions)(nil), // 1: mcp.v1.MCPEnumValueOptions
+	(*McpEnumOptions)(nil),      // 0: mcp.v1.McpEnumOptions
+	(*McpEnumValueOptions)(nil), // 1: mcp.v1.McpEnumValueOptions
 }
 var file_mcp_v1_enum_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

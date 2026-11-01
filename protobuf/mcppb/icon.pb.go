@@ -74,13 +74,13 @@ func (MCPIconTheme) EnumDescriptor() ([]byte, []int) {
 	return file_mcp_v1_icon_proto_rawDescGZIP(), []int{0}
 }
 
-// MCPIcon describes a single icon image associated with an MCP primitive.
+// McpIcon describes a single icon image associated with an MCP primitive.
 // It corresponds to the Icon struct in the MCP SDKs.
 //
 // Icons live in their own file because tools, prompts, resources and the app
 // all carry them, and resource.proto already imports prompt.proto — keeping
 // them beside resources would make that import cycle.
-type MCPIcon struct {
+type McpIcon struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// URI pointing to the icon resource. This can be an HTTP/HTTPS URL pointing
 	// to an image file, or an inline `data:` URI carrying the image bytes.
@@ -102,20 +102,20 @@ type MCPIcon struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPIcon) Reset() {
-	*x = MCPIcon{}
+func (x *McpIcon) Reset() {
+	*x = McpIcon{}
 	mi := &file_mcp_v1_icon_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPIcon) String() string {
+func (x *McpIcon) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPIcon) ProtoMessage() {}
+func (*McpIcon) ProtoMessage() {}
 
-func (x *MCPIcon) ProtoReflect() protoreflect.Message {
+func (x *McpIcon) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_icon_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -127,33 +127,33 @@ func (x *MCPIcon) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPIcon.ProtoReflect.Descriptor instead.
-func (*MCPIcon) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpIcon.ProtoReflect.Descriptor instead.
+func (*McpIcon) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_icon_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPIcon) GetSrc() string {
+func (x *McpIcon) GetSrc() string {
 	if x != nil {
 		return x.Src
 	}
 	return ""
 }
 
-func (x *MCPIcon) GetMimeType() string {
+func (x *McpIcon) GetMimeType() string {
 	if x != nil && x.MimeType != nil {
 		return *x.MimeType
 	}
 	return ""
 }
 
-func (x *MCPIcon) GetSizes() []string {
+func (x *McpIcon) GetSizes() []string {
 	if x != nil {
 		return x.Sizes
 	}
 	return nil
 }
 
-func (x *MCPIcon) GetTheme() MCPIconTheme {
+func (x *McpIcon) GetTheme() MCPIconTheme {
 	if x != nil {
 		return x.Theme
 	}
@@ -165,7 +165,7 @@ var File_mcp_v1_icon_proto protoreflect.FileDescriptor
 const file_mcp_v1_icon_proto_rawDesc = "" +
 	"\n" +
 	"\x11mcp/v1/icon.proto\x12\x06mcp.v1\"\x8d\x01\n" +
-	"\aMCPIcon\x12\x10\n" +
+	"\aMcpIcon\x12\x10\n" +
 	"\x03src\x18\x01 \x01(\tR\x03src\x12 \n" +
 	"\tmime_type\x18\x02 \x01(\tH\x00R\bmimeType\x88\x01\x01\x12\x14\n" +
 	"\x05sizes\x18\x03 \x03(\tR\x05sizes\x12*\n" +
@@ -195,10 +195,10 @@ var file_mcp_v1_icon_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mcp_v1_icon_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_icon_proto_goTypes = []any{
 	(MCPIconTheme)(0), // 0: mcp.v1.MCPIconTheme
-	(*MCPIcon)(nil),   // 1: mcp.v1.MCPIcon
+	(*McpIcon)(nil),   // 1: mcp.v1.McpIcon
 }
 var file_mcp_v1_icon_proto_depIdxs = []int32{
-	0, // 0: mcp.v1.MCPIcon.theme:type_name -> mcp.v1.MCPIconTheme
+	0, // 0: mcp.v1.McpIcon.theme:type_name -> mcp.v1.MCPIconTheme
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

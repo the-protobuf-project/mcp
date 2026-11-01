@@ -11,16 +11,16 @@ option java_multiple_files = true;
 option java_outer_classname = "ServiceOptionsProto";
 option java_package = "com.mcp.v1";
 
-// MCPServiceOptions configures MCP behaviour for an entire gRPC service.
-message MCPServiceOptions {
+// McpServiceOptions configures MCP behaviour for an entire gRPC service.
+message McpServiceOptions {
   // App-level metadata surfaced to MCP clients.
-  MCPApp app = 1;
+  McpApp app = 1;
 
   // Resources exposed by this service.
-  repeated MCPResource resources = 2;
+  repeated McpResource resources = 2;
 
   // Default cache hint for this service's list results — tools, prompts,
   // resources and resource templates. A resource may override it for its own
-  // read via MCPResource.cache.
-  optional MCPCacheHint cache = 3;
+  // read via McpResource.cache.
+  optional McpCacheHint cache = 3;
 }

@@ -9,11 +9,11 @@ option java_multiple_files = true;
 option java_outer_classname = "CacheProto";
 option java_package = "com.mcp.v1";
 
-// MCPCacheHint tells clients how long they may cache a list or read result,
+// McpCacheHint tells clients how long they may cache a list or read result,
 // and who may share it. Introduced by MCP protocol revision 2026-07-28, which
 // made tools/list, prompts/list, resources/list, resources/templates/list and
 // resources/read cacheable.
-message MCPCacheHint {
+message McpCacheHint {
   // How long a client may treat the response as fresh. Semantics match HTTP
   // Cache-Control max-age. Unset or zero means the response is immediately
   // stale, which is also the behavior when no hint is given.
