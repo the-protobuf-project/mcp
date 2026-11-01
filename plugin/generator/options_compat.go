@@ -8,14 +8,14 @@ import (
 	"google.golang.org/protobuf/encoding/protowire"
 )
 
-// legacyFormatFieldNumber is MCPFieldOptions.format. The field held a free-form
+// legacyFormatFieldNumber is McpFieldOptions.format. The field held a free-form
 // string before it became the MCPFieldFormat enum.
 const legacyFormatFieldNumber = 4
 
 // legacyFieldFormat recovers a format keyword written against the pre-enum
 // schema.
 //
-// Changing MCPFieldOptions.format from string to enum changed its wire type
+// Changing McpFieldOptions.format from string to enum changed its wire type
 // from bytes to varint, so protobuf-go cannot decode the old value into the new
 // field and parks it in unknown fields instead. Protos annotated against a
 // published schema older than that change are still common — the plugin ships
@@ -23,7 +23,7 @@ const legacyFormatFieldNumber = 4
 // regression, so read it back out.
 //
 // Returns "" when no legacy value is present.
-func legacyFieldFormat(opts *mcppb.MCPFieldOptions) string {
+func legacyFieldFormat(opts *mcppb.McpFieldOptions) string {
 	if opts == nil {
 		return ""
 	}

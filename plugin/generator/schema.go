@@ -216,7 +216,7 @@ func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDes
 // otherwise the fallback (e.g. from the leading comment).
 func getFieldDescription(fd protoreflect.FieldDescriptor, fallback string) string {
 	if proto.HasExtension(fd.Options(), mcppb.E_Field) {
-		opts := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.MCPFieldOptions)
+		opts := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.McpFieldOptions)
 		if opts != nil && opts.Description != "" {
 			return opts.Description
 		}
@@ -225,7 +225,7 @@ func getFieldDescription(fd protoreflect.FieldDescriptor, fallback string) strin
 }
 
 // applyMCPFieldOptions applies (mcp.field) options to the schema.
-// Format from MCPFieldOptions overrides any from buf.validate.
+// Format from McpFieldOptions overrides any from buf.validate.
 // For enum fields with (mcp.enum) or (mcp.enum_value), enum descriptions take precedence over field description.
 func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any, descFallback string) {
 	if !proto.HasExtension(fd.Options(), mcppb.E_Field) {
@@ -234,7 +234,7 @@ func applyMCPFieldOptions(fd protoreflect.FieldDescriptor, schema map[string]any
 		}
 		return
 	}
-	opts := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.MCPFieldOptions)
+	opts := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.McpFieldOptions)
 	if opts == nil {
 		return
 	}
@@ -365,7 +365,7 @@ type enumDescriptions struct {
 func getEnumDescriptions(ed protoreflect.EnumDescriptor) enumDescriptions {
 	out := enumDescriptions{values: make(map[string]string)}
 	if proto.HasExtension(ed.Options(), mcppb.E_Enum) {
-		opts := proto.GetExtension(ed.Options(), mcppb.E_Enum).(*mcppb.MCPEnumOptions)
+		opts := proto.GetExtension(ed.Options(), mcppb.E_Enum).(*mcppb.McpEnumOptions)
 		if opts != nil && opts.Description != "" {
 			out.enumDesc = opts.Description
 		}
@@ -374,7 +374,7 @@ func getEnumDescriptions(ed protoreflect.EnumDescriptor) enumDescriptions {
 	for i := 0; i < vals.Len(); i++ {
 		vd := vals.Get(i)
 		if proto.HasExtension(vd.Options(), mcppb.E_EnumValue) {
-			opts := proto.GetExtension(vd.Options(), mcppb.E_EnumValue).(*mcppb.MCPEnumValueOptions)
+			opts := proto.GetExtension(vd.Options(), mcppb.E_EnumValue).(*mcppb.McpEnumValueOptions)
 			if opts != nil && opts.Description != "" {
 				out.values[string(vd.Name())] = opts.Description
 			}

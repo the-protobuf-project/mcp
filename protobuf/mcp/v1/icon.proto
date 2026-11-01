@@ -7,13 +7,13 @@ option java_multiple_files = true;
 option java_outer_classname = "IconProto";
 option java_package = "com.mcp.v1";
 
-// MCPIcon describes a single icon image associated with an MCP primitive.
+// McpIcon describes a single icon image associated with an MCP primitive.
 // It corresponds to the Icon struct in the MCP SDKs.
 //
 // Icons live in their own file because tools, prompts, resources and the app
 // all carry them, and resource.proto already imports prompt.proto — keeping
 // them beside resources would make that import cycle.
-message MCPIcon {
+message McpIcon {
   // URI pointing to the icon resource. This can be an HTTP/HTTPS URL pointing
   // to an image file, or an inline `data:` URI carrying the image bytes.
   // Required.

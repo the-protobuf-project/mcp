@@ -21,8 +21,8 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// MCPApp describes application-level metadata for an MCP server.
-type MCPApp struct {
+// McpApp describes application-level metadata for an MCP server.
+type McpApp struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The display name of the MCP application.
 	DisplayName string `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
@@ -35,25 +35,25 @@ type MCPApp struct {
 	// Website for the server, shown by clients that surface one.
 	WebsiteUrl *string `protobuf:"bytes,5,opt,name=website_url,json=websiteUrl,proto3,oneof" json:"website_url,omitempty"`
 	// Icons representing the server in client UIs.
-	Icons         []*MCPIcon `protobuf:"bytes,6,rep,name=icons,proto3" json:"icons,omitempty"`
+	Icons         []*McpIcon `protobuf:"bytes,6,rep,name=icons,proto3" json:"icons,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPApp) Reset() {
-	*x = MCPApp{}
+func (x *McpApp) Reset() {
+	*x = McpApp{}
 	mi := &file_mcp_v1_app_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPApp) String() string {
+func (x *McpApp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPApp) ProtoMessage() {}
+func (*McpApp) ProtoMessage() {}
 
-func (x *MCPApp) ProtoReflect() protoreflect.Message {
+func (x *McpApp) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_app_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -65,47 +65,47 @@ func (x *MCPApp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPApp.ProtoReflect.Descriptor instead.
-func (*MCPApp) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpApp.ProtoReflect.Descriptor instead.
+func (*McpApp) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_app_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPApp) GetDisplayName() string {
+func (x *McpApp) GetDisplayName() string {
 	if x != nil {
 		return x.DisplayName
 	}
 	return ""
 }
 
-func (x *MCPApp) GetVersion() string {
+func (x *McpApp) GetVersion() string {
 	if x != nil {
 		return x.Version
 	}
 	return ""
 }
 
-func (x *MCPApp) GetDescription() string {
+func (x *McpApp) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *MCPApp) GetTitle() string {
+func (x *McpApp) GetTitle() string {
 	if x != nil && x.Title != nil {
 		return *x.Title
 	}
 	return ""
 }
 
-func (x *MCPApp) GetWebsiteUrl() string {
+func (x *McpApp) GetWebsiteUrl() string {
 	if x != nil && x.WebsiteUrl != nil {
 		return *x.WebsiteUrl
 	}
 	return ""
 }
 
-func (x *MCPApp) GetIcons() []*MCPIcon {
+func (x *McpApp) GetIcons() []*McpIcon {
 	if x != nil {
 		return x.Icons
 	}
@@ -117,14 +117,14 @@ var File_mcp_v1_app_proto protoreflect.FileDescriptor
 const file_mcp_v1_app_proto_rawDesc = "" +
 	"\n" +
 	"\x10mcp/v1/app.proto\x12\x06mcp.v1\x1a\x11mcp/v1/icon.proto\"\xe9\x01\n" +
-	"\x06MCPApp\x12!\n" +
+	"\x06McpApp\x12!\n" +
 	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x19\n" +
 	"\x05title\x18\x04 \x01(\tH\x00R\x05title\x88\x01\x01\x12$\n" +
 	"\vwebsite_url\x18\x05 \x01(\tH\x01R\n" +
 	"websiteUrl\x88\x01\x01\x12%\n" +
-	"\x05icons\x18\x06 \x03(\v2\x0f.mcp.v1.MCPIconR\x05iconsB\b\n" +
+	"\x05icons\x18\x06 \x03(\v2\x0f.mcp.v1.McpIconR\x05iconsB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_website_urlBL\n" +
 	"\n" +
@@ -144,11 +144,11 @@ func file_mcp_v1_app_proto_rawDescGZIP() []byte {
 
 var file_mcp_v1_app_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_app_proto_goTypes = []any{
-	(*MCPApp)(nil),  // 0: mcp.v1.MCPApp
-	(*MCPIcon)(nil), // 1: mcp.v1.MCPIcon
+	(*McpApp)(nil),  // 0: mcp.v1.McpApp
+	(*McpIcon)(nil), // 1: mcp.v1.McpIcon
 }
 var file_mcp_v1_app_proto_depIdxs = []int32{
-	1, // 0: mcp.v1.MCPApp.icons:type_name -> mcp.v1.MCPIcon
+	1, // 0: mcp.v1.McpApp.icons:type_name -> mcp.v1.McpIcon
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

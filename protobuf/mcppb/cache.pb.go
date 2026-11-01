@@ -79,11 +79,11 @@ func (MCPCacheScope) EnumDescriptor() ([]byte, []int) {
 	return file_mcp_v1_cache_proto_rawDescGZIP(), []int{0}
 }
 
-// MCPCacheHint tells clients how long they may cache a list or read result,
+// McpCacheHint tells clients how long they may cache a list or read result,
 // and who may share it. Introduced by MCP protocol revision 2026-07-28, which
 // made tools/list, prompts/list, resources/list, resources/templates/list and
 // resources/read cacheable.
-type MCPCacheHint struct {
+type McpCacheHint struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// How long a client may treat the response as fresh. Semantics match HTTP
 	// Cache-Control max-age. Unset or zero means the response is immediately
@@ -99,20 +99,20 @@ type MCPCacheHint struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPCacheHint) Reset() {
-	*x = MCPCacheHint{}
+func (x *McpCacheHint) Reset() {
+	*x = McpCacheHint{}
 	mi := &file_mcp_v1_cache_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPCacheHint) String() string {
+func (x *McpCacheHint) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPCacheHint) ProtoMessage() {}
+func (*McpCacheHint) ProtoMessage() {}
 
-func (x *MCPCacheHint) ProtoReflect() protoreflect.Message {
+func (x *McpCacheHint) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_cache_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -124,19 +124,19 @@ func (x *MCPCacheHint) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPCacheHint.ProtoReflect.Descriptor instead.
-func (*MCPCacheHint) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpCacheHint.ProtoReflect.Descriptor instead.
+func (*McpCacheHint) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_cache_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPCacheHint) GetTtl() *durationpb.Duration {
+func (x *McpCacheHint) GetTtl() *durationpb.Duration {
 	if x != nil {
 		return x.Ttl
 	}
 	return nil
 }
 
-func (x *MCPCacheHint) GetScope() MCPCacheScope {
+func (x *McpCacheHint) GetScope() MCPCacheScope {
 	if x != nil {
 		return x.Scope
 	}
@@ -148,7 +148,7 @@ var File_mcp_v1_cache_proto protoreflect.FileDescriptor
 const file_mcp_v1_cache_proto_rawDesc = "" +
 	"\n" +
 	"\x12mcp/v1/cache.proto\x12\x06mcp.v1\x1a\x1egoogle/protobuf/duration.proto\"u\n" +
-	"\fMCPCacheHint\x120\n" +
+	"\fMcpCacheHint\x120\n" +
 	"\x03ttl\x18\x01 \x01(\v2\x19.google.protobuf.DurationH\x00R\x03ttl\x88\x01\x01\x12+\n" +
 	"\x05scope\x18\x02 \x01(\x0e2\x15.mcp.v1.MCPCacheScopeR\x05scopeB\x06\n" +
 	"\x04_ttl*i\n" +
@@ -176,12 +176,12 @@ var file_mcp_v1_cache_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mcp_v1_cache_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_cache_proto_goTypes = []any{
 	(MCPCacheScope)(0),          // 0: mcp.v1.MCPCacheScope
-	(*MCPCacheHint)(nil),        // 1: mcp.v1.MCPCacheHint
+	(*McpCacheHint)(nil),        // 1: mcp.v1.McpCacheHint
 	(*durationpb.Duration)(nil), // 2: google.protobuf.Duration
 }
 var file_mcp_v1_cache_proto_depIdxs = []int32{
-	2, // 0: mcp.v1.MCPCacheHint.ttl:type_name -> google.protobuf.Duration
-	0, // 1: mcp.v1.MCPCacheHint.scope:type_name -> mcp.v1.MCPCacheScope
+	2, // 0: mcp.v1.McpCacheHint.ttl:type_name -> google.protobuf.Duration
+	0, // 1: mcp.v1.McpCacheHint.scope:type_name -> mcp.v1.MCPCacheScope
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

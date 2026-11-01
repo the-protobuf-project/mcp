@@ -67,8 +67,8 @@ impl Clone for {{ $svcName }}McpHandler {
 }
 
 impl ServerHandler for {{ $svcName }}McpHandler {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("{{ $svcName }}", "0.1.0"))
     }
 

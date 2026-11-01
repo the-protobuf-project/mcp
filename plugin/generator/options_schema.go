@@ -139,6 +139,6 @@ func getFieldTitle(fd protoreflect.FieldDescriptor) string {
 	if !proto.HasExtension(fd.Options(), mcppb.E_Field) {
 		return ""
 	}
-	opts, _ := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.MCPFieldOptions)
+	opts, _ := proto.GetExtension(fd.Options(), mcppb.E_Field).(*mcppb.McpFieldOptions)
 	return opts.GetTitle()
 }

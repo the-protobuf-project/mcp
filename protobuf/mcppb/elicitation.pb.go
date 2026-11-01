@@ -75,7 +75,7 @@ func (MCPElicitationMode) EnumDescriptor() ([]byte, []int) {
 	return file_mcp_v1_elicitation_proto_rawDescGZIP(), []int{0}
 }
 
-// MCPElicitation defines a user-input step shown before a tool executes.
+// McpElicitation defines a user-input step shown before a tool executes.
 //
 // Supports two modes:
 //   - Form mode (default): a structured form whose fields come from a proto
@@ -97,7 +97,7 @@ func (MCPElicitationMode) EnumDescriptor() ([]byte, []int) {
 //	  url: "https://example.com/auth"
 //	  elicitation_id: "auth-session-abc"
 //	};
-type MCPElicitation struct {
+type McpElicitation struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Message shown to the user (prompt text, e.g. "Are you sure?").
 	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
@@ -130,20 +130,20 @@ type MCPElicitation struct {
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *MCPElicitation) Reset() {
-	*x = MCPElicitation{}
+func (x *McpElicitation) Reset() {
+	*x = McpElicitation{}
 	mi := &file_mcp_v1_elicitation_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPElicitation) String() string {
+func (x *McpElicitation) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPElicitation) ProtoMessage() {}
+func (*McpElicitation) ProtoMessage() {}
 
-func (x *MCPElicitation) ProtoReflect() protoreflect.Message {
+func (x *McpElicitation) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_elicitation_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -155,54 +155,54 @@ func (x *MCPElicitation) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPElicitation.ProtoReflect.Descriptor instead.
-func (*MCPElicitation) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpElicitation.ProtoReflect.Descriptor instead.
+func (*McpElicitation) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_elicitation_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPElicitation) GetMessage() string {
+func (x *McpElicitation) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *MCPElicitation) GetSchema() string {
+func (x *McpElicitation) GetSchema() string {
 	if x != nil {
 		return x.Schema
 	}
 	return ""
 }
 
-func (x *MCPElicitation) GetMode() MCPElicitationMode {
+func (x *McpElicitation) GetMode() MCPElicitationMode {
 	if x != nil {
 		return x.Mode
 	}
 	return MCPElicitationMode_MCP_ELICITATION_MODE_UNSPECIFIED
 }
 
-func (x *MCPElicitation) GetUrl() string {
+func (x *McpElicitation) GetUrl() string {
 	if x != nil {
 		return x.Url
 	}
 	return ""
 }
 
-func (x *MCPElicitation) GetElicitationId() string {
+func (x *McpElicitation) GetElicitationId() string {
 	if x != nil {
 		return x.ElicitationId
 	}
 	return ""
 }
 
-func (x *MCPElicitation) GetRequired() bool {
+func (x *McpElicitation) GetRequired() bool {
 	if x != nil {
 		return x.Required
 	}
 	return false
 }
 
-func (x *MCPElicitation) GetAskMissingOnly() bool {
+func (x *McpElicitation) GetAskMissingOnly() bool {
 	if x != nil {
 		return x.AskMissingOnly
 	}
@@ -214,7 +214,7 @@ var File_mcp_v1_elicitation_proto protoreflect.FileDescriptor
 const file_mcp_v1_elicitation_proto_rawDesc = "" +
 	"\n" +
 	"\x18mcp/v1/elicitation.proto\x12\x06mcp.v1\"\xf1\x01\n" +
-	"\x0eMCPElicitation\x12\x18\n" +
+	"\x0eMcpElicitation\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x16\n" +
 	"\x06schema\x18\x02 \x01(\tR\x06schema\x12.\n" +
 	"\x04mode\x18\x03 \x01(\x0e2\x1a.mcp.v1.MCPElicitationModeR\x04mode\x12\x10\n" +
@@ -245,10 +245,10 @@ var file_mcp_v1_elicitation_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mcp_v1_elicitation_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_elicitation_proto_goTypes = []any{
 	(MCPElicitationMode)(0), // 0: mcp.v1.MCPElicitationMode
-	(*MCPElicitation)(nil),  // 1: mcp.v1.MCPElicitation
+	(*McpElicitation)(nil),  // 1: mcp.v1.McpElicitation
 }
 var file_mcp_v1_elicitation_proto_depIdxs = []int32{
-	0, // 0: mcp.v1.MCPElicitation.mode:type_name -> mcp.v1.MCPElicitationMode
+	0, // 0: mcp.v1.McpElicitation.mode:type_name -> mcp.v1.MCPElicitationMode
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

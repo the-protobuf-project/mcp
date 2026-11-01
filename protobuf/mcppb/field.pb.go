@@ -96,9 +96,9 @@ func (MCPFieldFormat) EnumDescriptor() ([]byte, []int) {
 	return file_mcp_v1_field_proto_rawDescGZIP(), []int{0}
 }
 
-// MCPFieldOptions annotates a proto field with MCP-specific metadata used
+// McpFieldOptions annotates a proto field with MCP-specific metadata used
 // during JSON Schema generation and MCP tool registration.
-type MCPFieldOptions struct {
+type McpFieldOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Human-readable description of the field shown in the MCP tool's input schema.
 	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
@@ -123,20 +123,20 @@ type MCPFieldOptions struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPFieldOptions) Reset() {
-	*x = MCPFieldOptions{}
+func (x *McpFieldOptions) Reset() {
+	*x = McpFieldOptions{}
 	mi := &file_mcp_v1_field_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPFieldOptions) String() string {
+func (x *McpFieldOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPFieldOptions) ProtoMessage() {}
+func (*McpFieldOptions) ProtoMessage() {}
 
-func (x *MCPFieldOptions) ProtoReflect() protoreflect.Message {
+func (x *McpFieldOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_field_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -148,47 +148,47 @@ func (x *MCPFieldOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPFieldOptions.ProtoReflect.Descriptor instead.
-func (*MCPFieldOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpFieldOptions.ProtoReflect.Descriptor instead.
+func (*McpFieldOptions) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_field_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPFieldOptions) GetDescription() string {
+func (x *McpFieldOptions) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *MCPFieldOptions) GetExamples() []string {
+func (x *McpFieldOptions) GetExamples() []string {
 	if x != nil {
 		return x.Examples
 	}
 	return nil
 }
 
-func (x *MCPFieldOptions) GetDeprecated() bool {
+func (x *McpFieldOptions) GetDeprecated() bool {
 	if x != nil {
 		return x.Deprecated
 	}
 	return false
 }
 
-func (x *MCPFieldOptions) GetFormat() MCPFieldFormat {
+func (x *McpFieldOptions) GetFormat() MCPFieldFormat {
 	if x != nil {
 		return x.Format
 	}
 	return MCPFieldFormat_MCP_FIELD_FORMAT_UNSPECIFIED
 }
 
-func (x *MCPFieldOptions) GetType() MCPFieldType {
+func (x *McpFieldOptions) GetType() MCPFieldType {
 	if x != nil {
 		return x.Type
 	}
 	return MCPFieldType_MCP_FIELD_TYPE_UNSPECIFIED
 }
 
-func (x *MCPFieldOptions) GetTitle() string {
+func (x *McpFieldOptions) GetTitle() string {
 	if x != nil && x.Title != nil {
 		return *x.Title
 	}
@@ -200,7 +200,7 @@ var File_mcp_v1_field_proto protoreflect.FileDescriptor
 const file_mcp_v1_field_proto_rawDesc = "" +
 	"\n" +
 	"\x12mcp/v1/field.proto\x12\x06mcp.v1\x1a\x17mcp/v1/field_type.proto\"\xee\x01\n" +
-	"\x0fMCPFieldOptions\x12 \n" +
+	"\x0fMcpFieldOptions\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x1a\n" +
 	"\bexamples\x18\x02 \x03(\tR\bexamples\x12\x1e\n" +
 	"\n" +
@@ -239,12 +239,12 @@ var file_mcp_v1_field_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mcp_v1_field_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_mcp_v1_field_proto_goTypes = []any{
 	(MCPFieldFormat)(0),     // 0: mcp.v1.MCPFieldFormat
-	(*MCPFieldOptions)(nil), // 1: mcp.v1.MCPFieldOptions
+	(*McpFieldOptions)(nil), // 1: mcp.v1.McpFieldOptions
 	(MCPFieldType)(0),       // 2: mcp.v1.MCPFieldType
 }
 var file_mcp_v1_field_proto_depIdxs = []int32{
-	0, // 0: mcp.v1.MCPFieldOptions.format:type_name -> mcp.v1.MCPFieldFormat
-	2, // 1: mcp.v1.MCPFieldOptions.type:type_name -> mcp.v1.MCPFieldType
+	0, // 0: mcp.v1.McpFieldOptions.format:type_name -> mcp.v1.MCPFieldFormat
+	2, // 1: mcp.v1.McpFieldOptions.type:type_name -> mcp.v1.MCPFieldType
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

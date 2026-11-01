@@ -11,9 +11,9 @@ option java_multiple_files = true;
 option java_outer_classname = "ResourceProto";
 option java_package = "com.mcp.v1";
 
-// MCPAnnotations carries audience and priority metadata attached to a resource.
+// McpAnnotations carries audience and priority metadata attached to a resource.
 // It corresponds to the Annotations struct in the MCP Go SDK.
-message MCPAnnotations {
+message McpAnnotations {
   // Who the resource is intended for. May contain multiple values to indicate
   // content useful for more than one audience (e.g. both user and assistant).
   repeated MCPRole audience = 1;
@@ -28,13 +28,13 @@ message MCPAnnotations {
   optional double priority = 3;
 }
 
-// MCPResource describes an MCP resource exposed by a gRPC service.
+// McpResource describes an MCP resource exposed by a gRPC service.
 // It corresponds to the Resource struct in the MCP Go SDK.
 //
 // Either uri or pattern must be set (enforced by the oneof).
 // Use uri for a concrete resource at a fixed location.
 // Use pattern for a URI template that matches a family of resources.
-message MCPResource {
+message McpResource {
   // Identifies whether this is a concrete resource (uri) or a URI-template
   // resource (pattern). Exactly one must be set.
   oneof uri_or_pattern {
@@ -67,12 +67,12 @@ message MCPResource {
   optional int64 size = 7;
 
   // Optional annotations describing intended audience and priority.
-  optional MCPAnnotations annotations = 8;
+  optional McpAnnotations annotations = 8;
 
   // Icons representing the resource in client UIs.
-  repeated MCPIcon icons = 9;
+  repeated McpIcon icons = 9;
 
   // Cache hint for reading this resource, overriding the service default.
   // A volatile resource can opt out of caching that its siblings allow.
-  optional MCPCacheHint cache = 10;
+  optional McpCacheHint cache = 10;
 }

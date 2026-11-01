@@ -15,7 +15,7 @@ func ExtractServiceOptions(svc *protogen.Service) *MCPServiceOpts {
 	if opts == nil {
 		return nil
 	}
-	ext, ok := proto.GetExtension(opts, mcppb.E_Service).(*mcppb.MCPServiceOptions)
+	ext, ok := proto.GetExtension(opts, mcppb.E_Service).(*mcppb.McpServiceOptions)
 	if !ok || ext == nil {
 		return nil
 	}
@@ -37,10 +37,10 @@ func ExtractServiceOptions(svc *protogen.Service) *MCPServiceOpts {
 	return result
 }
 
-// convertResource maps a declared MCPResource onto the template view. The
+// convertResource maps a declared McpResource onto the template view. The
 // uri/pattern oneof decides whether this registers a concrete resource or a
 // resource template.
-func convertResource(res *mcppb.MCPResource) MCPResourceOpts {
+func convertResource(res *mcppb.McpResource) MCPResourceOpts {
 	out := MCPResourceOpts{
 		URI:         res.GetUri(),
 		URITemplate: res.GetPattern(),
@@ -83,7 +83,7 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	hasAnything := false
 
 	// mcp.v1.tool — name/description overrides and the progress declaration
-	toolExt, ok := proto.GetExtension(opts, mcppb.E_Tool).(*mcppb.MCPToolOptions)
+	toolExt, ok := proto.GetExtension(opts, mcppb.E_Tool).(*mcppb.McpToolOptions)
 	if ok && toolExt != nil {
 		result.ToolName = toolExt.GetId()
 		result.ToolTitle = toolExt.GetTitle()
@@ -95,7 +95,7 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	}
 
 	// mcp.v1.prompt — per-RPC prompt template with schema reference
-	promptExt, ok := proto.GetExtension(opts, mcppb.E_Prompt).(*mcppb.MCPPrompt)
+	promptExt, ok := proto.GetExtension(opts, mcppb.E_Prompt).(*mcppb.McpPrompt)
 	if ok && promptExt != nil {
 		result.Prompt = &MCPPromptOpts{
 			Name:        promptExt.GetId(),
@@ -109,7 +109,7 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 	}
 
 	// mcp.v1.elicitation — form- or URL-mode user input before the tool runs
-	elicitExt, ok := proto.GetExtension(opts, mcppb.E_Elicitation).(*mcppb.MCPElicitation)
+	elicitExt, ok := proto.GetExtension(opts, mcppb.E_Elicitation).(*mcppb.McpElicitation)
 	if ok && elicitExt != nil {
 		result.Elicitation = &MCPElicitationOpts{
 			Message:        elicitExt.GetMessage(),
@@ -132,7 +132,7 @@ func ExtractMethodOptions(meth *protogen.Method) *MCPMethodOpts {
 // toolHints collects the behavioural hints an RPC declares, or nil when it
 // declares none — an all-absent Hints and no Hints mean the same thing, and nil
 // lets templates skip the annotations block entirely.
-func toolHints(ext *mcppb.MCPToolOptions) *MCPToolHints {
+func toolHints(ext *mcppb.McpToolOptions) *MCPToolHints {
 	hints := &MCPToolHints{
 		ReadOnly:    ext.ReadOnly,
 		Destructive: ext.Destructive,
@@ -148,7 +148,7 @@ func toolHints(ext *mcppb.MCPToolOptions) *MCPToolHints {
 
 // convertIcons maps declared icons onto the template view. Tools, prompts,
 // resources and the app all carry the same shape.
-func convertIcons(icons []*mcppb.MCPIcon) []MCPIconOpts {
+func convertIcons(icons []*mcppb.McpIcon) []MCPIconOpts {
 	if len(icons) == 0 {
 		return nil
 	}

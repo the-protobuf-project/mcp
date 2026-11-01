@@ -20,6 +20,21 @@ Then run:
 buf dep update
 ```
 
+## Message naming migration
+
+Messages in `mcp.v1` use the `Mcp` prefix to follow AIP-190 UpperCamelCase
+naming, for example `McpApp`, `McpToolOptions`, and `McpProgress`. When updating
+from a schema with `MCP`-prefixed messages, update explicit message references
+(such as `mcp.v1.MCPProgress` to `mcp.v1.McpProgress`) and regenerate bindings.
+Generated Go types also use `Mcp`, including oneof wrappers such as
+`McpProgress_TokenString`.
+
+This changes protobuf type names and source APIs; users of reflection or
+`google.protobuf.Any` must also update the corresponding full names and type
+URLs. Field numbers, extension numbers, and binary message layouts are
+unchanged. Annotation syntax such as `(mcp.v1.tool)` is unchanged. The generator
+continues to recognize progress streams built against earlier published schemas.
+
 ## Usage
 
 Import the annotations in your `.proto` files:
@@ -218,7 +233,7 @@ you need MCP-specific metadata such as `title`, `annotations`, or `icons`.
 
 ### Media types
 
-`MCPResource.mime_type` is the single field that tells an MCP client how to
+`McpResource.mime_type` is the single field that tells an MCP client how to
 present a resource. The same bytes are prose, markup, a table, an image, or a
 download depending only on what this field says:
 
@@ -254,7 +269,7 @@ wire:
 | `image/png` | base64 bytes | an inline image |
 | `application/pdf` | base64 bytes | a download |
 
-`MCPIcon.mime_type` is the same kind of value, narrowed by convention to image
+`McpIcon.mime_type` is the same kind of value, narrowed by convention to image
 types — `image/svg+xml`, `image/png`, `image/webp`.
 
 A runnable example that serves one asset under each of these types, together
@@ -267,14 +282,14 @@ with the MCP App UI resource, lives in [`examples/mime`](../examples/mime).
 
 ### Progress (server streaming)
 
-For long-running RPCs, use server streaming with `MCPProgress` to report progress:
+For long-running RPCs, use server streaming with `McpProgress` to report progress:
 
 ```protobuf
 import "mcp/v1/progress.proto";
 
 message CreateItemStreamChunk {
   oneof payload {
-    mcp.v1.MCPProgress progress = 1;
+    mcp.v1.McpProgress progress = 1;
     Item result = 2;
   }
 }
@@ -287,18 +302,18 @@ rpc CreateItem(CreateItemRequest) returns (stream CreateItemStreamChunk);
 | File                            | Description                                                |
 | ------------------------------- | ---------------------------------------------------------- |
 | `mcp/v1/annotations.proto`      | Service, tool, prompt, elicitation, field, enum extensions |
-| `mcp/v1/app.proto`              | `MCPApp` message (name, version, description)              |
-| `mcp/v1/prompt.proto`           | `MCPPrompt`, `MCPToolOptions`, `MCPRole`                   |
-| `mcp/v1/elicitation.proto`      | `MCPElicitation`, `MCPElicitationMode`                     |
-| `mcp/v1/service_options.proto`  | `MCPServiceOptions` (app + resources)                      |
-| `mcp/v1/resource.proto`         | `MCPResource`, `MCPAnnotations`, `MCPIcon`, `MCPIconTheme` |
-| `mcp/v1/field.proto`            | `MCPFieldOptions`, `MCPFieldFormat`                        |
-| `mcp/v1/enum.proto`             | `MCPEnumOptions`, `MCPEnumValueOptions`                    |
-| `mcp/v1/progress.proto`         | `MCPProgress` for server-streaming progress                |
+| `mcp/v1/app.proto`              | `McpApp` message (name, version, description)              |
+| `mcp/v1/prompt.proto`           | `McpPrompt`, `McpToolOptions`, `MCPRole`                   |
+| `mcp/v1/elicitation.proto`      | `McpElicitation`, `MCPElicitationMode`                     |
+| `mcp/v1/service_options.proto`  | `McpServiceOptions` (app + resources)                      |
+| `mcp/v1/resource.proto`         | `McpResource`, `McpAnnotations`, `McpIcon`, `MCPIconTheme` |
+| `mcp/v1/field.proto`            | `McpFieldOptions`, `MCPFieldFormat`                        |
+| `mcp/v1/enum.proto`             | `McpEnumOptions`, `McpEnumValueOptions`                    |
+| `mcp/v1/progress.proto`         | `McpProgress` for server-streaming progress                |
 | `mcp/v1/field_type.proto`       | `MCPFieldType` enum                                        |
 | `mcp/v1/mime_type.proto`        | `MCPMimeType` enum (unreferenced — see note below)          |
 
-> **Note:** `MCPMimeType` is no longer referenced by any message. `MCPResource.mime_type`
+> **Note:** `MCPMimeType` is no longer referenced by any message. `McpResource.mime_type`
 > is a plain `string` so that resources can carry any IANA media type, per
 > [AIP-143](https://google.aip.dev/143). The enum is retained for now because removing
 > it from the published module is a separate breaking change.

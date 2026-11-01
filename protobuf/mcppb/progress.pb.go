@@ -22,12 +22,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// MCPProgress is sent in server-streaming RPC chunks to report progress to MCP clients.
+// McpProgress is sent in server-streaming RPC chunks to report progress to MCP clients.
 // Use in a oneof with your result type:
 //
 //	message CreateTodoStreamChunk {
 //	  oneof payload {
-//	    mcp.v1.MCPProgress progress = 1;
+//	    mcp.v1.McpProgress progress = 1;
 //	    Todo result = 2;
 //	  }
 //	}
@@ -50,11 +50,11 @@ const (
 //	}
 //
 // The gateway forwards progressToken via gRPC metadata (key: mcp-progress-token).
-// gRPC servers can check metadata to only send MCPProgress chunks when requested.
+// gRPC servers can check metadata to only send McpProgress chunks when requested.
 //
 // The plugin auto-generates MCP tool handlers that send progress notifications
 // and return the final result.
-type MCPProgress struct {
+type McpProgress struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Extra metadata associated with the progress update.
 	Meta map[string]*structpb.Struct `protobuf:"bytes,1,rep,name=meta,proto3" json:"meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
@@ -64,9 +64,9 @@ type MCPProgress struct {
 	//
 	// Types that are valid to be assigned to ProgressToken:
 	//
-	//	*MCPProgress_TokenString
-	//	*MCPProgress_TokenInt
-	ProgressToken isMCPProgress_ProgressToken `protobuf_oneof:"progress_token"`
+	//	*McpProgress_TokenString
+	//	*McpProgress_TokenInt
+	ProgressToken isMcpProgress_ProgressToken `protobuf_oneof:"progress_token"`
 	// Human-readable status text.
 	Message string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	// Current progress amount.
@@ -77,20 +77,20 @@ type MCPProgress struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPProgress) Reset() {
-	*x = MCPProgress{}
+func (x *McpProgress) Reset() {
+	*x = McpProgress{}
 	mi := &file_mcp_v1_progress_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPProgress) String() string {
+func (x *McpProgress) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPProgress) ProtoMessage() {}
+func (*McpProgress) ProtoMessage() {}
 
-func (x *MCPProgress) ProtoReflect() protoreflect.Message {
+func (x *McpProgress) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_progress_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -102,89 +102,89 @@ func (x *MCPProgress) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPProgress.ProtoReflect.Descriptor instead.
-func (*MCPProgress) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpProgress.ProtoReflect.Descriptor instead.
+func (*McpProgress) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_progress_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPProgress) GetMeta() map[string]*structpb.Struct {
+func (x *McpProgress) GetMeta() map[string]*structpb.Struct {
 	if x != nil {
 		return x.Meta
 	}
 	return nil
 }
 
-func (x *MCPProgress) GetProgressToken() isMCPProgress_ProgressToken {
+func (x *McpProgress) GetProgressToken() isMcpProgress_ProgressToken {
 	if x != nil {
 		return x.ProgressToken
 	}
 	return nil
 }
 
-func (x *MCPProgress) GetTokenString() string {
+func (x *McpProgress) GetTokenString() string {
 	if x != nil {
-		if x, ok := x.ProgressToken.(*MCPProgress_TokenString); ok {
+		if x, ok := x.ProgressToken.(*McpProgress_TokenString); ok {
 			return x.TokenString
 		}
 	}
 	return ""
 }
 
-func (x *MCPProgress) GetTokenInt() int64 {
+func (x *McpProgress) GetTokenInt() int64 {
 	if x != nil {
-		if x, ok := x.ProgressToken.(*MCPProgress_TokenInt); ok {
+		if x, ok := x.ProgressToken.(*McpProgress_TokenInt); ok {
 			return x.TokenInt
 		}
 	}
 	return 0
 }
 
-func (x *MCPProgress) GetMessage() string {
+func (x *McpProgress) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *MCPProgress) GetProgress() float64 {
+func (x *McpProgress) GetProgress() float64 {
 	if x != nil {
 		return x.Progress
 	}
 	return 0
 }
 
-func (x *MCPProgress) GetTotal() float64 {
+func (x *McpProgress) GetTotal() float64 {
 	if x != nil && x.Total != nil {
 		return *x.Total
 	}
 	return 0
 }
 
-type isMCPProgress_ProgressToken interface {
-	isMCPProgress_ProgressToken()
+type isMcpProgress_ProgressToken interface {
+	isMcpProgress_ProgressToken()
 }
 
-type MCPProgress_TokenString struct {
+type McpProgress_TokenString struct {
 	// Token the client sent as a JSON string, e.g. "abc123".
 	TokenString string `protobuf:"bytes,2,opt,name=token_string,json=tokenString,proto3,oneof"`
 }
 
-type MCPProgress_TokenInt struct {
+type McpProgress_TokenInt struct {
 	// Token the client sent as a JSON integer, e.g. 42.
 	TokenInt int64 `protobuf:"varint,6,opt,name=token_int,json=tokenInt,proto3,oneof"`
 }
 
-func (*MCPProgress_TokenString) isMCPProgress_ProgressToken() {}
+func (*McpProgress_TokenString) isMcpProgress_ProgressToken() {}
 
-func (*MCPProgress_TokenInt) isMCPProgress_ProgressToken() {}
+func (*McpProgress_TokenInt) isMcpProgress_ProgressToken() {}
 
 var File_mcp_v1_progress_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_progress_proto_rawDesc = "" +
 	"\n" +
 	"\x15mcp/v1/progress.proto\x12\x06mcp.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xc3\x02\n" +
-	"\vMCPProgress\x121\n" +
-	"\x04meta\x18\x01 \x03(\v2\x1d.mcp.v1.MCPProgress.MetaEntryR\x04meta\x12#\n" +
+	"\vMcpProgress\x121\n" +
+	"\x04meta\x18\x01 \x03(\v2\x1d.mcp.v1.McpProgress.MetaEntryR\x04meta\x12#\n" +
 	"\ftoken_string\x18\x02 \x01(\tH\x00R\vtokenString\x12\x1d\n" +
 	"\ttoken_int\x18\x06 \x01(\x03H\x00R\btokenInt\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x1a\n" +
@@ -212,13 +212,13 @@ func file_mcp_v1_progress_proto_rawDescGZIP() []byte {
 
 var file_mcp_v1_progress_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_mcp_v1_progress_proto_goTypes = []any{
-	(*MCPProgress)(nil),     // 0: mcp.v1.MCPProgress
-	nil,                     // 1: mcp.v1.MCPProgress.MetaEntry
+	(*McpProgress)(nil),     // 0: mcp.v1.McpProgress
+	nil,                     // 1: mcp.v1.McpProgress.MetaEntry
 	(*structpb.Struct)(nil), // 2: google.protobuf.Struct
 }
 var file_mcp_v1_progress_proto_depIdxs = []int32{
-	1, // 0: mcp.v1.MCPProgress.meta:type_name -> mcp.v1.MCPProgress.MetaEntry
-	2, // 1: mcp.v1.MCPProgress.MetaEntry.value:type_name -> google.protobuf.Struct
+	1, // 0: mcp.v1.McpProgress.meta:type_name -> mcp.v1.McpProgress.MetaEntry
+	2, // 1: mcp.v1.McpProgress.MetaEntry.value:type_name -> google.protobuf.Struct
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -232,8 +232,8 @@ func file_mcp_v1_progress_proto_init() {
 		return
 	}
 	file_mcp_v1_progress_proto_msgTypes[0].OneofWrappers = []any{
-		(*MCPProgress_TokenString)(nil),
-		(*MCPProgress_TokenInt)(nil),
+		(*McpProgress_TokenString)(nil),
+		(*McpProgress_TokenInt)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

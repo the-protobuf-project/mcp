@@ -24,7 +24,7 @@ const (
 var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
 		ExtendedType:  (*descriptorpb.ServiceOptions)(nil),
-		ExtensionType: (*MCPServiceOptions)(nil),
+		ExtensionType: (*McpServiceOptions)(nil),
 		Field:         51000,
 		Name:          "mcp.v1.service",
 		Tag:           "bytes,51000,opt,name=service",
@@ -32,7 +32,7 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.MethodOptions)(nil),
-		ExtensionType: (*MCPToolOptions)(nil),
+		ExtensionType: (*McpToolOptions)(nil),
 		Field:         51001,
 		Name:          "mcp.v1.tool",
 		Tag:           "bytes,51001,opt,name=tool",
@@ -40,7 +40,7 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.MethodOptions)(nil),
-		ExtensionType: (*MCPPrompt)(nil),
+		ExtensionType: (*McpPrompt)(nil),
 		Field:         51002,
 		Name:          "mcp.v1.prompt",
 		Tag:           "bytes,51002,opt,name=prompt",
@@ -48,7 +48,7 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.MethodOptions)(nil),
-		ExtensionType: (*MCPElicitation)(nil),
+		ExtensionType: (*McpElicitation)(nil),
 		Field:         51003,
 		Name:          "mcp.v1.elicitation",
 		Tag:           "bytes,51003,opt,name=elicitation",
@@ -56,7 +56,7 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
-		ExtensionType: (*MCPFieldOptions)(nil),
+		ExtensionType: (*McpFieldOptions)(nil),
 		Field:         51004,
 		Name:          "mcp.v1.field",
 		Tag:           "bytes,51004,opt,name=field",
@@ -64,7 +64,7 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.EnumOptions)(nil),
-		ExtensionType: (*MCPEnumOptions)(nil),
+		ExtensionType: (*McpEnumOptions)(nil),
 		Field:         51005,
 		Name:          "mcp.v1.enum",
 		Tag:           "bytes,51005,opt,name=enum",
@@ -72,7 +72,7 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
-		ExtensionType: (*MCPEnumValueOptions)(nil),
+		ExtensionType: (*McpEnumValueOptions)(nil),
 		Field:         51006,
 		Name:          "mcp.v1.enum_value",
 		Tag:           "bytes,51006,opt,name=enum_value",
@@ -82,35 +82,35 @@ var file_mcp_v1_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 
 // Extension fields to descriptorpb.ServiceOptions.
 var (
-	// optional mcp.v1.MCPServiceOptions service = 51000;
+	// optional mcp.v1.McpServiceOptions service = 51000;
 	E_Service = &file_mcp_v1_annotations_proto_extTypes[0]
 )
 
 // Extension fields to descriptorpb.MethodOptions.
 var (
-	// optional mcp.v1.MCPToolOptions tool = 51001;
+	// optional mcp.v1.McpToolOptions tool = 51001;
 	E_Tool = &file_mcp_v1_annotations_proto_extTypes[1]
-	// optional mcp.v1.MCPPrompt prompt = 51002;
+	// optional mcp.v1.McpPrompt prompt = 51002;
 	E_Prompt = &file_mcp_v1_annotations_proto_extTypes[2]
-	// optional mcp.v1.MCPElicitation elicitation = 51003;
+	// optional mcp.v1.McpElicitation elicitation = 51003;
 	E_Elicitation = &file_mcp_v1_annotations_proto_extTypes[3]
 )
 
 // Extension fields to descriptorpb.FieldOptions.
 var (
-	// optional mcp.v1.MCPFieldOptions field = 51004;
+	// optional mcp.v1.McpFieldOptions field = 51004;
 	E_Field = &file_mcp_v1_annotations_proto_extTypes[4]
 )
 
 // Extension fields to descriptorpb.EnumOptions.
 var (
-	// optional mcp.v1.MCPEnumOptions enum = 51005;
+	// optional mcp.v1.McpEnumOptions enum = 51005;
 	E_Enum = &file_mcp_v1_annotations_proto_extTypes[5]
 )
 
 // Extension fields to descriptorpb.EnumValueOptions.
 var (
-	// optional mcp.v1.MCPEnumValueOptions enum_value = 51006;
+	// optional mcp.v1.McpEnumValueOptions enum_value = 51006;
 	E_EnumValue = &file_mcp_v1_annotations_proto_extTypes[6]
 )
 
@@ -119,14 +119,14 @@ var File_mcp_v1_annotations_proto protoreflect.FileDescriptor
 const file_mcp_v1_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x18mcp/v1/annotations.proto\x12\x06mcp.v1\x1a google/protobuf/descriptor.proto\x1a\x18mcp/v1/elicitation.proto\x1a\x11mcp/v1/enum.proto\x1a\x12mcp/v1/field.proto\x1a\x13mcp/v1/prompt.proto\x1a\x1cmcp/v1/service_options.proto:Y\n" +
-	"\aservice\x12\x1f.google.protobuf.ServiceOptions\x18\xb8\x8e\x03 \x01(\v2\x19.mcp.v1.MCPServiceOptionsR\aservice\x88\x01\x01:O\n" +
-	"\x04tool\x12\x1e.google.protobuf.MethodOptions\x18\xb9\x8e\x03 \x01(\v2\x16.mcp.v1.MCPToolOptionsR\x04tool\x88\x01\x01:N\n" +
-	"\x06prompt\x12\x1e.google.protobuf.MethodOptions\x18\xba\x8e\x03 \x01(\v2\x11.mcp.v1.MCPPromptR\x06prompt\x88\x01\x01:]\n" +
-	"\velicitation\x12\x1e.google.protobuf.MethodOptions\x18\xbb\x8e\x03 \x01(\v2\x16.mcp.v1.MCPElicitationR\velicitation\x88\x01\x01:Q\n" +
-	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xbc\x8e\x03 \x01(\v2\x17.mcp.v1.MCPFieldOptionsR\x05field\x88\x01\x01:M\n" +
-	"\x04enum\x12\x1c.google.protobuf.EnumOptions\x18\xbd\x8e\x03 \x01(\v2\x16.mcp.v1.MCPEnumOptionsR\x04enum\x88\x01\x01:b\n" +
+	"\aservice\x12\x1f.google.protobuf.ServiceOptions\x18\xb8\x8e\x03 \x01(\v2\x19.mcp.v1.McpServiceOptionsR\aservice\x88\x01\x01:O\n" +
+	"\x04tool\x12\x1e.google.protobuf.MethodOptions\x18\xb9\x8e\x03 \x01(\v2\x16.mcp.v1.McpToolOptionsR\x04tool\x88\x01\x01:N\n" +
+	"\x06prompt\x12\x1e.google.protobuf.MethodOptions\x18\xba\x8e\x03 \x01(\v2\x11.mcp.v1.McpPromptR\x06prompt\x88\x01\x01:]\n" +
+	"\velicitation\x12\x1e.google.protobuf.MethodOptions\x18\xbb\x8e\x03 \x01(\v2\x16.mcp.v1.McpElicitationR\velicitation\x88\x01\x01:Q\n" +
+	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xbc\x8e\x03 \x01(\v2\x17.mcp.v1.McpFieldOptionsR\x05field\x88\x01\x01:M\n" +
+	"\x04enum\x12\x1c.google.protobuf.EnumOptions\x18\xbd\x8e\x03 \x01(\v2\x16.mcp.v1.McpEnumOptionsR\x04enum\x88\x01\x01:b\n" +
 	"\n" +
-	"enum_value\x12!.google.protobuf.EnumValueOptions\x18\xbe\x8e\x03 \x01(\v2\x1b.mcp.v1.MCPEnumValueOptionsR\tenumValue\x88\x01\x01BT\n" +
+	"enum_value\x12!.google.protobuf.EnumValueOptions\x18\xbe\x8e\x03 \x01(\v2\x1b.mcp.v1.McpEnumValueOptionsR\tenumValue\x88\x01\x01BT\n" +
 	"\n" +
 	"com.mcp.v1B\x10AnnotationsProtoP\x01Z2github.com/the-protobuf-project/mcp/protobuf/mcppbb\x06proto3"
 
@@ -136,13 +136,13 @@ var file_mcp_v1_annotations_proto_goTypes = []any{
 	(*descriptorpb.FieldOptions)(nil),     // 2: google.protobuf.FieldOptions
 	(*descriptorpb.EnumOptions)(nil),      // 3: google.protobuf.EnumOptions
 	(*descriptorpb.EnumValueOptions)(nil), // 4: google.protobuf.EnumValueOptions
-	(*MCPServiceOptions)(nil),             // 5: mcp.v1.MCPServiceOptions
-	(*MCPToolOptions)(nil),                // 6: mcp.v1.MCPToolOptions
-	(*MCPPrompt)(nil),                     // 7: mcp.v1.MCPPrompt
-	(*MCPElicitation)(nil),                // 8: mcp.v1.MCPElicitation
-	(*MCPFieldOptions)(nil),               // 9: mcp.v1.MCPFieldOptions
-	(*MCPEnumOptions)(nil),                // 10: mcp.v1.MCPEnumOptions
-	(*MCPEnumValueOptions)(nil),           // 11: mcp.v1.MCPEnumValueOptions
+	(*McpServiceOptions)(nil),             // 5: mcp.v1.McpServiceOptions
+	(*McpToolOptions)(nil),                // 6: mcp.v1.McpToolOptions
+	(*McpPrompt)(nil),                     // 7: mcp.v1.McpPrompt
+	(*McpElicitation)(nil),                // 8: mcp.v1.McpElicitation
+	(*McpFieldOptions)(nil),               // 9: mcp.v1.McpFieldOptions
+	(*McpEnumOptions)(nil),                // 10: mcp.v1.McpEnumOptions
+	(*McpEnumValueOptions)(nil),           // 11: mcp.v1.McpEnumValueOptions
 }
 var file_mcp_v1_annotations_proto_depIdxs = []int32{
 	0,  // 0: mcp.v1.service:extendee -> google.protobuf.ServiceOptions
@@ -152,13 +152,13 @@ var file_mcp_v1_annotations_proto_depIdxs = []int32{
 	2,  // 4: mcp.v1.field:extendee -> google.protobuf.FieldOptions
 	3,  // 5: mcp.v1.enum:extendee -> google.protobuf.EnumOptions
 	4,  // 6: mcp.v1.enum_value:extendee -> google.protobuf.EnumValueOptions
-	5,  // 7: mcp.v1.service:type_name -> mcp.v1.MCPServiceOptions
-	6,  // 8: mcp.v1.tool:type_name -> mcp.v1.MCPToolOptions
-	7,  // 9: mcp.v1.prompt:type_name -> mcp.v1.MCPPrompt
-	8,  // 10: mcp.v1.elicitation:type_name -> mcp.v1.MCPElicitation
-	9,  // 11: mcp.v1.field:type_name -> mcp.v1.MCPFieldOptions
-	10, // 12: mcp.v1.enum:type_name -> mcp.v1.MCPEnumOptions
-	11, // 13: mcp.v1.enum_value:type_name -> mcp.v1.MCPEnumValueOptions
+	5,  // 7: mcp.v1.service:type_name -> mcp.v1.McpServiceOptions
+	6,  // 8: mcp.v1.tool:type_name -> mcp.v1.McpToolOptions
+	7,  // 9: mcp.v1.prompt:type_name -> mcp.v1.McpPrompt
+	8,  // 10: mcp.v1.elicitation:type_name -> mcp.v1.McpElicitation
+	9,  // 11: mcp.v1.field:type_name -> mcp.v1.McpFieldOptions
+	10, // 12: mcp.v1.enum:type_name -> mcp.v1.McpEnumOptions
+	11, // 13: mcp.v1.enum_value:type_name -> mcp.v1.McpEnumValueOptions
 	14, // [14:14] is the sub-list for method output_type
 	14, // [14:14] is the sub-list for method input_type
 	7,  // [7:14] is the sub-list for extension type_name

@@ -7,7 +7,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ElicitationProto";
 option java_package = "com.mcp.v1";
 
-// MCPElicitation defines a user-input step shown before a tool executes.
+// McpElicitation defines a user-input step shown before a tool executes.
 //
 // Supports two modes:
 //   - Form mode (default): a structured form whose fields come from a proto
@@ -27,7 +27,7 @@ option java_package = "com.mcp.v1";
 //     url: "https://example.com/auth"
 //     elicitation_id: "auth-session-abc"
 //   };
-message MCPElicitation {
+message McpElicitation {
   // Message shown to the user (prompt text, e.g. "Are you sure?").
   string message = 1;
 

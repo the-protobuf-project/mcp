@@ -50,6 +50,7 @@ go_test(
         "factory_test.go",
         "go_shared_test.go",
         "options_enums_test.go",
+        "progress_stream_test.go",
         "schema_defs_test.go",
         "schema_input_test.go",
         "schema_recursion_test.go",

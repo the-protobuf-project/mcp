@@ -21,9 +21,9 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// MCPAnnotations carries audience and priority metadata attached to a resource.
+// McpAnnotations carries audience and priority metadata attached to a resource.
 // It corresponds to the Annotations struct in the MCP Go SDK.
-type MCPAnnotations struct {
+type McpAnnotations struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Who the resource is intended for. May contain multiple values to indicate
 	// content useful for more than one audience (e.g. both user and assistant).
@@ -39,20 +39,20 @@ type MCPAnnotations struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPAnnotations) Reset() {
-	*x = MCPAnnotations{}
+func (x *McpAnnotations) Reset() {
+	*x = McpAnnotations{}
 	mi := &file_mcp_v1_resource_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPAnnotations) String() string {
+func (x *McpAnnotations) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPAnnotations) ProtoMessage() {}
+func (*McpAnnotations) ProtoMessage() {}
 
-func (x *MCPAnnotations) ProtoReflect() protoreflect.Message {
+func (x *McpAnnotations) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_resource_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -64,48 +64,48 @@ func (x *MCPAnnotations) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPAnnotations.ProtoReflect.Descriptor instead.
-func (*MCPAnnotations) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpAnnotations.ProtoReflect.Descriptor instead.
+func (*McpAnnotations) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_resource_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MCPAnnotations) GetAudience() []MCPRole {
+func (x *McpAnnotations) GetAudience() []MCPRole {
 	if x != nil {
 		return x.Audience
 	}
 	return nil
 }
 
-func (x *MCPAnnotations) GetLastModified() string {
+func (x *McpAnnotations) GetLastModified() string {
 	if x != nil && x.LastModified != nil {
 		return *x.LastModified
 	}
 	return ""
 }
 
-func (x *MCPAnnotations) GetPriority() float64 {
+func (x *McpAnnotations) GetPriority() float64 {
 	if x != nil && x.Priority != nil {
 		return *x.Priority
 	}
 	return 0
 }
 
-// MCPResource describes an MCP resource exposed by a gRPC service.
+// McpResource describes an MCP resource exposed by a gRPC service.
 // It corresponds to the Resource struct in the MCP Go SDK.
 //
 // Either uri or pattern must be set (enforced by the oneof).
 // Use uri for a concrete resource at a fixed location.
 // Use pattern for a URI template that matches a family of resources.
-type MCPResource struct {
+type McpResource struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Identifies whether this is a concrete resource (uri) or a URI-template
 	// resource (pattern). Exactly one must be set.
 	//
 	// Types that are valid to be assigned to UriOrPattern:
 	//
-	//	*MCPResource_Uri
-	//	*MCPResource_Pattern
-	UriOrPattern isMCPResource_UriOrPattern `protobuf_oneof:"uri_or_pattern"`
+	//	*McpResource_Uri
+	//	*McpResource_Pattern
+	UriOrPattern isMcpResource_UriOrPattern `protobuf_oneof:"uri_or_pattern"`
 	// Programmatic identifier for the resource. Used as the display name when
 	// title is absent.
 	Id string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
@@ -122,30 +122,30 @@ type MCPResource struct {
 	// or tokenisation), if known. Clients may use this to estimate context usage.
 	Size *int64 `protobuf:"varint,7,opt,name=size,proto3,oneof" json:"size,omitempty"`
 	// Optional annotations describing intended audience and priority.
-	Annotations *MCPAnnotations `protobuf:"bytes,8,opt,name=annotations,proto3,oneof" json:"annotations,omitempty"`
+	Annotations *McpAnnotations `protobuf:"bytes,8,opt,name=annotations,proto3,oneof" json:"annotations,omitempty"`
 	// Icons representing the resource in client UIs.
-	Icons []*MCPIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
+	Icons []*McpIcon `protobuf:"bytes,9,rep,name=icons,proto3" json:"icons,omitempty"`
 	// Cache hint for reading this resource, overriding the service default.
 	// A volatile resource can opt out of caching that its siblings allow.
-	Cache         *MCPCacheHint `protobuf:"bytes,10,opt,name=cache,proto3,oneof" json:"cache,omitempty"`
+	Cache         *McpCacheHint `protobuf:"bytes,10,opt,name=cache,proto3,oneof" json:"cache,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MCPResource) Reset() {
-	*x = MCPResource{}
+func (x *McpResource) Reset() {
+	*x = McpResource{}
 	mi := &file_mcp_v1_resource_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MCPResource) String() string {
+func (x *McpResource) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MCPResource) ProtoMessage() {}
+func (*McpResource) ProtoMessage() {}
 
-func (x *MCPResource) ProtoReflect() protoreflect.Message {
+func (x *McpResource) ProtoReflect() protoreflect.Message {
 	mi := &file_mcp_v1_resource_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -157,123 +157,123 @@ func (x *MCPResource) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MCPResource.ProtoReflect.Descriptor instead.
-func (*MCPResource) Descriptor() ([]byte, []int) {
+// Deprecated: Use McpResource.ProtoReflect.Descriptor instead.
+func (*McpResource) Descriptor() ([]byte, []int) {
 	return file_mcp_v1_resource_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MCPResource) GetUriOrPattern() isMCPResource_UriOrPattern {
+func (x *McpResource) GetUriOrPattern() isMcpResource_UriOrPattern {
 	if x != nil {
 		return x.UriOrPattern
 	}
 	return nil
 }
 
-func (x *MCPResource) GetUri() string {
+func (x *McpResource) GetUri() string {
 	if x != nil {
-		if x, ok := x.UriOrPattern.(*MCPResource_Uri); ok {
+		if x, ok := x.UriOrPattern.(*McpResource_Uri); ok {
 			return x.Uri
 		}
 	}
 	return ""
 }
 
-func (x *MCPResource) GetPattern() string {
+func (x *McpResource) GetPattern() string {
 	if x != nil {
-		if x, ok := x.UriOrPattern.(*MCPResource_Pattern); ok {
+		if x, ok := x.UriOrPattern.(*McpResource_Pattern); ok {
 			return x.Pattern
 		}
 	}
 	return ""
 }
 
-func (x *MCPResource) GetId() string {
+func (x *McpResource) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *MCPResource) GetTitle() string {
+func (x *McpResource) GetTitle() string {
 	if x != nil && x.Title != nil {
 		return *x.Title
 	}
 	return ""
 }
 
-func (x *MCPResource) GetDescription() string {
+func (x *McpResource) GetDescription() string {
 	if x != nil && x.Description != nil {
 		return *x.Description
 	}
 	return ""
 }
 
-func (x *MCPResource) GetMimeType() string {
+func (x *McpResource) GetMimeType() string {
 	if x != nil {
 		return x.MimeType
 	}
 	return ""
 }
 
-func (x *MCPResource) GetSize() int64 {
+func (x *McpResource) GetSize() int64 {
 	if x != nil && x.Size != nil {
 		return *x.Size
 	}
 	return 0
 }
 
-func (x *MCPResource) GetAnnotations() *MCPAnnotations {
+func (x *McpResource) GetAnnotations() *McpAnnotations {
 	if x != nil {
 		return x.Annotations
 	}
 	return nil
 }
 
-func (x *MCPResource) GetIcons() []*MCPIcon {
+func (x *McpResource) GetIcons() []*McpIcon {
 	if x != nil {
 		return x.Icons
 	}
 	return nil
 }
 
-func (x *MCPResource) GetCache() *MCPCacheHint {
+func (x *McpResource) GetCache() *McpCacheHint {
 	if x != nil {
 		return x.Cache
 	}
 	return nil
 }
 
-type isMCPResource_UriOrPattern interface {
-	isMCPResource_UriOrPattern()
+type isMcpResource_UriOrPattern interface {
+	isMcpResource_UriOrPattern()
 }
 
-type MCPResource_Uri struct {
+type McpResource_Uri struct {
 	// The URI of a specific resource, e.g. "file:///home/user/report.pdf".
 	Uri string `protobuf:"bytes,1,opt,name=uri,proto3,oneof"`
 }
 
-type MCPResource_Pattern struct {
+type McpResource_Pattern struct {
 	// A URI template pattern for a family of resources,
 	// e.g. "file:///home/user/{filename}".
 	Pattern string `protobuf:"bytes,2,opt,name=pattern,proto3,oneof"`
 }
 
-func (*MCPResource_Uri) isMCPResource_UriOrPattern() {}
+func (*McpResource_Uri) isMcpResource_UriOrPattern() {}
 
-func (*MCPResource_Pattern) isMCPResource_UriOrPattern() {}
+func (*McpResource_Pattern) isMcpResource_UriOrPattern() {}
 
 var File_mcp_v1_resource_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_resource_proto_rawDesc = "" +
 	"\n" +
 	"\x15mcp/v1/resource.proto\x12\x06mcp.v1\x1a\x12mcp/v1/cache.proto\x1a\x11mcp/v1/icon.proto\x1a\x13mcp/v1/prompt.proto\"\xa7\x01\n" +
-	"\x0eMCPAnnotations\x12+\n" +
+	"\x0eMcpAnnotations\x12+\n" +
 	"\baudience\x18\x01 \x03(\x0e2\x0f.mcp.v1.MCPRoleR\baudience\x12(\n" +
 	"\rlast_modified\x18\x02 \x01(\tH\x00R\flastModified\x88\x01\x01\x12\x1f\n" +
 	"\bpriority\x18\x03 \x01(\x01H\x01R\bpriority\x88\x01\x01B\x10\n" +
 	"\x0e_last_modifiedB\v\n" +
 	"\t_priority\"\xab\x03\n" +
-	"\vMCPResource\x12\x12\n" +
+	"\vMcpResource\x12\x12\n" +
 	"\x03uri\x18\x01 \x01(\tH\x00R\x03uri\x12\x1a\n" +
 	"\apattern\x18\x02 \x01(\tH\x00R\apattern\x12\x0e\n" +
 	"\x02id\x18\x03 \x01(\tR\x02id\x12\x19\n" +
@@ -281,10 +281,10 @@ const file_mcp_v1_resource_proto_rawDesc = "" +
 	"\vdescription\x18\x05 \x01(\tH\x02R\vdescription\x88\x01\x01\x12\x1b\n" +
 	"\tmime_type\x18\x06 \x01(\tR\bmimeType\x12\x17\n" +
 	"\x04size\x18\a \x01(\x03H\x03R\x04size\x88\x01\x01\x12=\n" +
-	"\vannotations\x18\b \x01(\v2\x16.mcp.v1.MCPAnnotationsH\x04R\vannotations\x88\x01\x01\x12%\n" +
-	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.MCPIconR\x05icons\x12/\n" +
+	"\vannotations\x18\b \x01(\v2\x16.mcp.v1.McpAnnotationsH\x04R\vannotations\x88\x01\x01\x12%\n" +
+	"\x05icons\x18\t \x03(\v2\x0f.mcp.v1.McpIconR\x05icons\x12/\n" +
 	"\x05cache\x18\n" +
-	" \x01(\v2\x14.mcp.v1.MCPCacheHintH\x05R\x05cache\x88\x01\x01B\x10\n" +
+	" \x01(\v2\x14.mcp.v1.McpCacheHintH\x05R\x05cache\x88\x01\x01B\x10\n" +
 	"\x0euri_or_patternB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\a\n" +
@@ -308,17 +308,17 @@ func file_mcp_v1_resource_proto_rawDescGZIP() []byte {
 
 var file_mcp_v1_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_mcp_v1_resource_proto_goTypes = []any{
-	(*MCPAnnotations)(nil), // 0: mcp.v1.MCPAnnotations
-	(*MCPResource)(nil),    // 1: mcp.v1.MCPResource
+	(*McpAnnotations)(nil), // 0: mcp.v1.McpAnnotations
+	(*McpResource)(nil),    // 1: mcp.v1.McpResource
 	(MCPRole)(0),           // 2: mcp.v1.MCPRole
-	(*MCPIcon)(nil),        // 3: mcp.v1.MCPIcon
-	(*MCPCacheHint)(nil),   // 4: mcp.v1.MCPCacheHint
+	(*McpIcon)(nil),        // 3: mcp.v1.McpIcon
+	(*McpCacheHint)(nil),   // 4: mcp.v1.McpCacheHint
 }
 var file_mcp_v1_resource_proto_depIdxs = []int32{
-	2, // 0: mcp.v1.MCPAnnotations.audience:type_name -> mcp.v1.MCPRole
-	0, // 1: mcp.v1.MCPResource.annotations:type_name -> mcp.v1.MCPAnnotations
-	3, // 2: mcp.v1.MCPResource.icons:type_name -> mcp.v1.MCPIcon
-	4, // 3: mcp.v1.MCPResource.cache:type_name -> mcp.v1.MCPCacheHint
+	2, // 0: mcp.v1.McpAnnotations.audience:type_name -> mcp.v1.MCPRole
+	0, // 1: mcp.v1.McpResource.annotations:type_name -> mcp.v1.McpAnnotations
+	3, // 2: mcp.v1.McpResource.icons:type_name -> mcp.v1.McpIcon
+	4, // 3: mcp.v1.McpResource.cache:type_name -> mcp.v1.McpCacheHint
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -336,8 +336,8 @@ func file_mcp_v1_resource_proto_init() {
 	file_mcp_v1_prompt_proto_init()
 	file_mcp_v1_resource_proto_msgTypes[0].OneofWrappers = []any{}
 	file_mcp_v1_resource_proto_msgTypes[1].OneofWrappers = []any{
-		(*MCPResource_Uri)(nil),
-		(*MCPResource_Pattern)(nil),
+		(*McpResource_Uri)(nil),
+		(*McpResource_Pattern)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

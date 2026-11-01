@@ -9,9 +9,9 @@ option java_multiple_files = true;
 option java_outer_classname = "FieldProto";
 option java_package = "com.mcp.v1";
 
-// MCPFieldOptions annotates a proto field with MCP-specific metadata used
+// McpFieldOptions annotates a proto field with MCP-specific metadata used
 // during JSON Schema generation and MCP tool registration.
-message MCPFieldOptions {
+message McpFieldOptions {
   // Human-readable description of the field shown in the MCP tool's input schema.
   string description = 1;
 

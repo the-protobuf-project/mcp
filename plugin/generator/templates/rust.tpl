@@ -250,8 +250,8 @@ impl<T: {{ $svcName }}McpServer> {{ $svcName }}McpHandler<T> {
 }
 
 impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(
             ServerCapabilities::builder()
                 .enable_tools()
 {{- if $hasPrompts }}

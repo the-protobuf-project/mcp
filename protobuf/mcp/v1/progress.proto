@@ -9,12 +9,12 @@ option java_multiple_files = true;
 option java_outer_classname = "ProgressProto";
 option java_package = "com.mcp.v1";
 
-// MCPProgress is sent in server-streaming RPC chunks to report progress to MCP clients.
+// McpProgress is sent in server-streaming RPC chunks to report progress to MCP clients.
 // Use in a oneof with your result type:
 //
 //	message CreateTodoStreamChunk {
 //	  oneof payload {
-//	    mcp.v1.MCPProgress progress = 1;
+//	    mcp.v1.McpProgress progress = 1;
 //	    Todo result = 2;
 //	  }
 //	}
@@ -37,11 +37,11 @@ option java_package = "com.mcp.v1";
 //	}
 //
 // The gateway forwards progressToken via gRPC metadata (key: mcp-progress-token).
-// gRPC servers can check metadata to only send MCPProgress chunks when requested.
+// gRPC servers can check metadata to only send McpProgress chunks when requested.
 //
 // The plugin auto-generates MCP tool handlers that send progress notifications
 // and return the final result.
-message MCPProgress {
+message McpProgress {
   // Extra metadata associated with the progress update.
   map<string, google.protobuf.Struct> meta = 1;
 

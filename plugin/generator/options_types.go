@@ -3,7 +3,7 @@
 
 package generator
 
-// MCPServiceOpts is the language-neutral view of MCPServiceOptions for templates.
+// MCPServiceOpts is the language-neutral view of McpServiceOptions for templates.
 type MCPServiceOpts struct {
 	App       *MCPAppOpts
 	Resources []MCPResourceOpts
@@ -11,7 +11,7 @@ type MCPServiceOpts struct {
 	Cache *MCPCacheOpts
 }
 
-// MCPCacheOpts mirrors MCPCacheHint for templates.
+// MCPCacheOpts mirrors McpCacheHint for templates.
 type MCPCacheOpts struct {
 	TTLMs int64
 	// Scope is "public", "private", or "" when unstated.
@@ -45,7 +45,7 @@ type MCPToolHints struct {
 	OpenWorld   *bool
 }
 
-// MCPAppOpts mirrors MCPApp for templates.
+// MCPAppOpts mirrors McpApp for templates.
 type MCPAppOpts struct {
 	Name        string
 	Title       string
@@ -55,7 +55,7 @@ type MCPAppOpts struct {
 	Icons       []MCPIconOpts
 }
 
-// MCPPromptOpts mirrors MCPPrompt for templates.
+// MCPPromptOpts mirrors McpPrompt for templates.
 // Arguments are derived from the proto message referenced by Schema.
 type MCPPromptOpts struct {
 	Name        string
@@ -80,7 +80,7 @@ type MCPPromptArgOpts struct {
 	EnumProtoNames []string // kept in sync with SchemaField to allow direct struct type conversion
 }
 
-// MCPResourceOpts mirrors MCPResource for templates.
+// MCPResourceOpts mirrors McpResource for templates.
 type MCPResourceOpts struct {
 	URI         string
 	URITemplate string
@@ -98,7 +98,7 @@ type MCPResourceOpts struct {
 	Cache *MCPCacheOpts
 }
 
-// MCPAnnotationsOpts mirrors MCPAnnotations for templates.
+// MCPAnnotationsOpts mirrors McpAnnotations for templates.
 type MCPAnnotationsOpts struct {
 	// Audience holds MCP roles ("user", "assistant") the resource is intended for.
 	Audience     []string
@@ -109,7 +109,7 @@ type MCPAnnotationsOpts struct {
 	HasPriority bool
 }
 
-// MCPIconOpts mirrors MCPIcon for templates.
+// MCPIconOpts mirrors McpIcon for templates.
 type MCPIconOpts struct {
 	Src      string
 	MimeType string
@@ -118,7 +118,7 @@ type MCPIconOpts struct {
 	Theme string
 }
 
-// MCPElicitationOpts mirrors MCPElicitation for templates.
+// MCPElicitationOpts mirrors McpElicitation for templates.
 // Fields are derived from the proto message referenced by Schema.
 type MCPElicitationOpts struct {
 	Message string

@@ -16,35 +16,35 @@ option java_package = "com.mcp.v1";
 
 // Attach MCP service options (app, prompts, resources) to a gRPC service.
 extend google.protobuf.ServiceOptions {
-  optional MCPServiceOptions service = 51000;
+  optional McpServiceOptions service = 51000;
 }
 
 // Attach MCP tool options (name/description override) to a single RPC method.
 extend google.protobuf.MethodOptions {
-  optional MCPToolOptions tool = 51001;
+  optional McpToolOptions tool = 51001;
 }
 
 // Attach a prompt template to a single RPC method.
 extend google.protobuf.MethodOptions {
-  optional MCPPrompt prompt = 51002;
+  optional McpPrompt prompt = 51002;
 }
 
 // Attach an elicitation (confirmation dialog) to a single RPC method.
 extend google.protobuf.MethodOptions {
-  optional MCPElicitation elicitation = 51003;
+  optional McpElicitation elicitation = 51003;
 }
 
 // Attach a description to a message field (for MCP tool schema).
 extend google.protobuf.FieldOptions {
-  optional MCPFieldOptions field = 51004;
+  optional McpFieldOptions field = 51004;
 }
 
 // Attach a description to an enum type (for MCP tool schema).
 extend google.protobuf.EnumOptions {
-  optional MCPEnumOptions enum = 51005;
+  optional McpEnumOptions enum = 51005;
 }
 
 // Attach a description to an enum value (for MCP tool schema).
 extend google.protobuf.EnumValueOptions {
-  optional MCPEnumValueOptions enum_value = 51006;
+  optional McpEnumValueOptions enum_value = 51006;
 }
