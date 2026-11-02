@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/the-protobuf-project/runtime-go/agents v0.0.0-20261026204609-216a2112f43e
-	google.golang.org/grpc v1.84.0
+	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 )
 
