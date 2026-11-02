@@ -15,7 +15,7 @@ on:
 
 jobs:
   publish:
-    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.5.1
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.6.0
     permissions:
       attestations: write
       contents: write
