@@ -48,21 +48,12 @@ const (
 	gapNoResources = "resources"
 	// completion/complete, backed by enum_values on prompt arguments.
 	gapNoCompletion = "completion"
-	// mcp.elicitation. Go implements it as SEP-2322 input-required results;
-	// rmcp issues elicitation/create requests. The C++ generator emits neither,
-	// so its destructive tools run without asking.
+	// mcp.elicitation. Go implements it as SEP-2322 input-required results, as
+	// Rust does on protocol 2026-07-28, which forbids server-to-client
+	// requests; older Rust sessions issue elicitation/create. The C++
+	// generator emits no elicitation, so its destructive tools run without
+	// asking.
 	gapNoElicitation = "elicitation"
-	// Elicitation never completes over rmcp's streamable-HTTP transport, so
-	// every tool that declares mcp.elicitation hangs until the client's
-	// deadline. The same server and the same client complete it over stdio.
-	//
-	// The server side looks right: it opens the POST response as an SSE stream
-	// and writes the elicitation/create request onto it, which is observable
-	// with curl. What does not happen is the round trip closing -- the call
-	// never returns. Whether the response is not sent or not correlated is an
-	// upstream question (rmcp, or the Go SDK's streamable client), so this is
-	// recorded rather than worked around here.
-	gapHTTPElicitationHangs = "http-elicitation-hangs"
 	// A tool error arrives over rmcp's streamable-HTTP as an HTTP 400, which
 	// the SDK client treats as a transport failure and closes the session on --
 	// taking every later call on that session with it. Over stdio the same
@@ -338,7 +329,6 @@ func targets() []target {
 			endpoint: httpEndpoint(todoBasePath),
 			gaps: []string{
 				gapNoStructuredContent,
-				gapHTTPElicitationHangs,
 				gapHTTPErrorClosesSession,
 			},
 		},

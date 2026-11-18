@@ -90,11 +90,10 @@ only by naming it.
 | `structured-content` | Rust, C++ | Tools advertise an `outputSchema` but return text content only, so the result does not keep the contract `tools/list` promised. Go returns both. |
 | `prompts`, `resources`, `completion` | C++ | The C++ generator emits tools only. |
 | `elicitation` | C++ | `mcp.elicitation` is not emitted, so the C++ server's destructive tools run without confirmation. |
-| `http-elicitation-hangs` | Rust (HTTP only) | Elicitation never completes over rmcp's streamable-HTTP, so every mutating todo tool hangs until the client's deadline. The same server completes it over stdio, and the server is observably writing the `elicitation/create` request onto the POST response's SSE stream — the round trip just never closes. Upstream (rmcp or the Go SDK's streamable client), not a generator bug. |
 | `http-error-closes-session` | Rust (HTTP only) | A tool error comes back over rmcp's streamable-HTTP as an HTTP 400, which the SDK client treats as a transport failure and closes the session on. Over stdio the same error is an ordinary JSON-RPC error and the session survives. |
 | `errors-reported-as-success` | C++ | A failed RPC returns as a *successful* result whose body is `{"error": "..."}` — no `isError`, no JSON-RPC error — so a client is told the call worked and handed an object that does not match the declared `outputSchema`. Structural: the generated adapter passes a JSON string across the cxx boundary with no channel for failure. |
 
-The two HTTP gaps are why the todo subtests run in the order they do: anything
+The HTTP gap is why the todo subtests run in the order they do: anything
 that can leave the session unusable runs last, so one finding does not bury
 itself under a cascade of unrelated red.
 
