@@ -208,11 +208,12 @@ func (g *CppFileGenerator) buildCppParams(dir, stem string) CppTplParams {
 	mcpCcPath := filepath.Join(dir, stem+".mcp.cc")
 	genRoot := ".."
 
+	// main.cc serves the first service in declaration order. Ranging the
+	// services map instead picked a random one per generate run.
 	var firstSvcName, firstSvcSnake string
-	for svcName := range services {
-		firstSvcName = svcName
-		firstSvcSnake = toSnakeCase(svcName)
-		break
+	if len(g.f.Services) > 0 {
+		firstSvcName = string(g.f.Services[0].Desc.Name())
+		firstSvcSnake = toSnakeCase(firstSvcName)
 	}
 
 	return CppTplParams{

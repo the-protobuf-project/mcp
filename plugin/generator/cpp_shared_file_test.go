@@ -101,3 +101,46 @@ func TestCppSharedFileIndexFallsBackWhenNothingIsEligible(t *testing.T) {
 		t.Errorf("cppSharedFileIndex = %d, want 0 (fallback)", got)
 	}
 }
+
+// main.cc starts a single service. With several services in one file it must
+// be the first one declared, on every run: ranging the services map picked a
+// different one from run to run. Zed is declared ahead of Alpha so a fix that
+// sorts by name instead fails too.
+func TestCppFirstServiceFollowsDeclarationOrder(t *testing.T) {
+	method := func() []*descriptorpb.MethodDescriptorProto {
+		return []*descriptorpb.MethodDescriptorProto{{
+			Name:       proto.String("Do"),
+			InputType:  proto.String(".multi.v1.Req"),
+			OutputType: proto.String(".multi.v1.Resp"),
+		}}
+	}
+	var services []*descriptorpb.ServiceDescriptorProto
+	for _, name := range []string{"ZedService", "MidService", "OtherService", "AlphaService"} {
+		services = append(services, &descriptorpb.ServiceDescriptorProto{Name: proto.String(name), Method: method()})
+	}
+	plugin, err := protogen.Options{}.New(&pluginpb.CodeGeneratorRequest{
+		FileToGenerate: []string{"multi/v1/multi.proto"},
+		ProtoFile: []*descriptorpb.FileDescriptorProto{{
+			Name:    proto.String("multi/v1/multi.proto"),
+			Package: proto.String("multi.v1"),
+			Syntax:  proto.String("proto3"),
+			MessageType: []*descriptorpb.DescriptorProto{
+				{Name: proto.String("Req")},
+				{Name: proto.String("Resp")},
+			},
+			Service: services,
+			Options: &descriptorpb.FileOptions{GoPackage: proto.String("example.com/gen/multi/v1;multipb")},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("build plugin: %v", err)
+	}
+
+	g := NewCppFileGenerator(plugin.Files[0], plugin)
+	for range 20 {
+		p := g.buildCppParams("multi/v1", "multi")
+		if p.FirstServiceName != "ZedService" || p.FirstServiceSnake != "zed_service" {
+			t.Fatalf("first service = %q (%q), want ZedService (zed_service)", p.FirstServiceName, p.FirstServiceSnake)
+		}
+	}
+}
