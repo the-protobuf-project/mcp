@@ -49,12 +49,7 @@ func runTodoSuite(t *testing.T, tg target, session *mcpsdk.ClientSession, elicit
 	// at all and would pass on tools/list alone.
 	t.Run("read_only_call", func(t *testing.T) { todoReadOnlyCall(t, callCtx(t), session) })
 
-	t.Run("crud", func(t *testing.T) {
-		if tg.hasGap(gapHTTPElicitationHangs) {
-			t.Skipf("target declares gap %q: every mutating todo tool declares mcp.elicitation", gapHTTPElicitationHangs)
-		}
-		todoCRUD(t, tg, session, elicits)
-	})
+	t.Run("crud", func(t *testing.T) { todoCRUD(t, tg, session, elicits) })
 	t.Run("prompts", func(t *testing.T) {
 		if tg.hasGap(gapNoPrompts) {
 			t.Skipf("target declares gap %q", gapNoPrompts)

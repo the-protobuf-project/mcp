@@ -302,11 +302,34 @@ impl<T: {{ $svcName }}McpServer> ServerHandler for {{ $svcName }}McpHandler<T> {
                         message: {{ $info.MethodOpts.Elicitation.Message | printf "%q" }}.to_string(),
                         requested_schema: schema,
                     };
-                    match context.peer.create_elicitation(params).await {
-                        Ok(result) if result.action != ElicitationAction::Accept => {
-                            return Ok(CallToolResult::success(vec![ContentBlock::text("Action cancelled by user.")]).into());
+                    if context.protocol_version().is_some_and(|v| v >= ProtocolVersion::V_2026_07_28) {
+                        // 2026-07-28 forbids server-to-client requests, so
+                        // elicitation is a multi round-trip request (SEP-2322):
+                        // the first pass asks for input, and the client retries
+                        // the call with the answer under the same key.
+                        match request.input_responses.as_ref().and_then(|r| r.get("elicitation")) {
+                            None => {
+                                return Ok(InputRequiredResult::from_input_requests(InputRequests::from([(
+                                    "elicitation".to_string(),
+                                    InputRequest::Elicitation(ElicitRequest::new(params)),
+                                )]))
+                                .into());
+                            }
+                            Some(answer) => {
+                                let accepted = serde_json::from_value::<ElicitResult>(answer.clone())
+                                    .is_ok_and(|r| r.action == ElicitationAction::Accept);
+                                if !accepted {
+                                    return Ok(CallToolResult::success(vec![ContentBlock::text("Action cancelled by user.")]).into());
+                                }
+                            }
                         }
-                        _ => {} // proceed (including errors — graceful degradation)
+                    } else {
+                        match context.peer.create_elicitation(params).await {
+                            Ok(result) if result.action != ElicitationAction::Accept => {
+                                return Ok(CallToolResult::success(vec![ContentBlock::text("Action cancelled by user.")]).into());
+                            }
+                            _ => {} // proceed (including errors — graceful degradation)
+                        }
                     }
                 }
 {{- end }}
