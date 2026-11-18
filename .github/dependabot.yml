@@ -7,6 +7,12 @@ updates:
       - "/examples/mime"
     schedule:
       interval: "weekly"
+    # One PR per ecosystem and directory for minor and patch updates;
+    # majors still arrive on their own so breaking bumps get a review.
+    groups:
+      go-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     assignees:
       - "ParthuReddy31"
   - package-ecosystem: "cargo"
@@ -15,11 +21,19 @@ updates:
       - "/examples/rust"
     schedule:
       interval: "weekly"
+    groups:
+      cargo-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     assignees:
       - "ParthuReddy31"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     assignees:
       - "ParthuReddy31"
