@@ -198,7 +198,16 @@ func messageSchemaPath(md protoreflect.MessageDescriptor, openAI bool, schemaDes
 	}
 	if len(oneOfGroups) > 0 {
 		var anyOf []map[string]any
-		for _, entries := range oneOfGroups {
+		oneofs := md.Oneofs()
+		for i := range oneofs.Len() {
+			oo := oneofs.Get(i)
+			if oo.IsSynthetic() {
+				continue
+			}
+			entries, ok := oneOfGroups[string(oo.Name())]
+			if !ok {
+				continue
+			}
 			anyOf = append(anyOf, map[string]any{"oneOf": entries, "$comment": "Protobuf oneOf group."})
 		}
 		result["anyOf"] = anyOf
