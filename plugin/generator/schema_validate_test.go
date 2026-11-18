@@ -83,6 +83,15 @@ func requiredJSON(t *testing.T, schema map[string]any) string {
 	return string(raw)
 }
 
+func anyOfJSON(t *testing.T, schema map[string]any) string {
+	t.Helper()
+	raw, err := json.Marshal(schema["anyOf"])
+	if err != nil {
+		t.Fatalf("marshal anyOf: %v", err)
+	}
+	return string(raw)
+}
+
 func TestValidateRequiredMarksFieldsRequired(t *testing.T) {
 	str := descriptorpb.FieldDescriptorProto_TYPE_STRING
 	schema := schemaJSON(t, false, &descriptorpb.DescriptorProto{
@@ -105,6 +114,34 @@ func TestValidateRequiredMarksFieldsRequired(t *testing.T) {
 
 	if got, want := requiredJSON(t, schema), `["id"]`; got != want {
 		t.Errorf("required = %s, want %s", got, want)
+	}
+}
+
+func TestMessageSchemaAnyOfFollowsOneofDeclarationOrder(t *testing.T) {
+	str := descriptorpb.FieldDescriptorProto_TYPE_STRING
+	member := func(name string, num, oneof int32) *descriptorpb.FieldDescriptorProto {
+		f := ruledField(name, num, str, nil)
+		f.OneofIndex = proto.Int32(oneof)
+		return f
+	}
+	schema := schemaJSON(t, false, &descriptorpb.DescriptorProto{
+		Name: proto.String("Echo"),
+		Field: []*descriptorpb.FieldDescriptorProto{
+			ruledField("id", 1, str, nil),
+			member("zed_a", 2, 0),
+			member("zed_b", 3, 0),
+			member("alpha_a", 4, 1),
+			member("alpha_b", 5, 1),
+		},
+		OneofDecl: []*descriptorpb.OneofDescriptorProto{
+			{Name: proto.String("zed")},
+			{Name: proto.String("alpha")},
+		},
+	})
+	got := anyOfJSON(t, schema)
+	want := `[{"$comment":"Protobuf oneOf group.","oneOf":[{"properties":{"zed_a":{"type":"string"}},"required":["zed_a"]},{"properties":{"zed_b":{"type":"string"}},"required":["zed_b"]}]},{"$comment":"Protobuf oneOf group.","oneOf":[{"properties":{"alpha_a":{"type":"string"}},"required":["alpha_a"]},{"properties":{"alpha_b":{"type":"string"}},"required":["alpha_b"]}]}]`
+	if got != want {
+		t.Errorf("anyOf = %s, want %s", got, want)
 	}
 }
 
