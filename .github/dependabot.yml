@@ -13,8 +13,6 @@ updates:
       go-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
-    assignees:
-      - "ParthuReddy31"
   - package-ecosystem: "cargo"
     directories:
       - "/examples/mime/rust"
@@ -25,8 +23,6 @@ updates:
       cargo-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
-    assignees:
-      - "ParthuReddy31"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -35,5 +31,3 @@ updates:
       github-actions-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
-    assignees:
-      - "ParthuReddy31"
