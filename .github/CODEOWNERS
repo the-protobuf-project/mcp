@@ -1,0 +1,26 @@
+# Dependency manifests and CI/CD are owned by Infra & Devops.
+#
+# Every Dependabot pull request touches one of these, so each one requests a
+# review from the team, and the team's code-review settings choose who —
+# adding someone to the team needs no change here.
+
+/.github/workflows/        @the-protobuf-project/infra-devops
+/.github/dependabot.yml    @the-protobuf-project/infra-devops
+/.github/CODEOWNERS        @the-protobuf-project/infra-devops
+
+go.mod                     @the-protobuf-project/infra-devops
+go.sum                     @the-protobuf-project/infra-devops
+go.work                    @the-protobuf-project/infra-devops
+package.json               @the-protobuf-project/infra-devops
+package-lock.json          @the-protobuf-project/infra-devops
+pnpm-lock.yaml             @the-protobuf-project/infra-devops
+yarn.lock                  @the-protobuf-project/infra-devops
+bun.lock                   @the-protobuf-project/infra-devops
+Cargo.toml                 @the-protobuf-project/infra-devops
+Cargo.lock                 @the-protobuf-project/infra-devops
+requirements*.txt          @the-protobuf-project/infra-devops
+pyproject.toml             @the-protobuf-project/infra-devops
+uv.lock                    @the-protobuf-project/infra-devops
+Dockerfile*                @the-protobuf-project/infra-devops
+Package.swift              @the-protobuf-project/infra-devops
+Package.resolved           @the-protobuf-project/infra-devops
