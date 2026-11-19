@@ -92,9 +92,7 @@ type {{ $svcName }}MCPClient interface {
 }
 {{- end }}
 
-{{- /* ================================================================== */}}
-{{- /* RegisterHandler                                                     */}}
-{{- /* ================================================================== */}}
+{{- /* RegisterHandler, one per service. */}}
 
 {{- range $svcName, $methods := .Services }}
 {{- $svcOpts := index $.ServiceOpts $svcName }}
