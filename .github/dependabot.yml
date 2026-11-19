@@ -13,6 +13,9 @@ updates:
       go-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+    # The BSR SDKs are generated from this repo's own releases.
+    ignore:
+      - dependency-name: "buf.build/gen/go/the-protobuf-project/*"
   - package-ecosystem: "cargo"
     directories:
       - "/examples/mime/rust"
