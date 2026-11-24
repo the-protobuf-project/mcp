@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-20260825204119-511051f7f437.2
-	github.com/the-protobuf-project/protokit v1.4.0
+	github.com/the-protobuf-project/protokit v1.4.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20261019180522-ce908d29299b
 	google.golang.org/protobuf v1.36.12
 )
